@@ -1,24 +1,11 @@
 package main
 
 import (
-	"fmt"
-
 	game "github.com/zac460/go-2048-battle"
 	"github.com/zac460/go-2048-battle/debug"
-	"github.com/zac460/go-2048-battle/screens"
+	"github.com/zac460/go-2048-battle/screen"
 	"github.com/zac460/turdgl"
 )
-
-type Screen int
-
-const (
-	TitleScreen Screen = iota
-	MultiplayerMenuScreen
-)
-
-type UpdateFunc func()
-
-var screen = TitleScreen
 
 func main() {
 	// Creat window
@@ -36,21 +23,20 @@ func main() {
 	win.RegisterKeybind(turdgl.KeyEscape, func() { win.Quit() })
 	win.RegisterKeybind(turdgl.KeyLCtrl, func() { win.Quit() })
 
-	// Creat screens
-	titleScreen := screens.NewTitleScreen(win)
+	// Create screens
+	screens := map[screen.Screen]screen.Updater{
+		screen.Title:           screen.NewTitleScreen(win),
+		screen.MultiplayerMenu: screen.NewMultiplayerMenuScreen(win),
+	}
 	debugWidget := debug.NewDebugWidget(win)
 
 	// Main game loop
 	for win.IsRunning() {
-		switch screen {
-		case TitleScreen:
-			titleScreen.Update()
-		case MultiplayerMenuScreen:
-			// TODO
-		default:
-			panic(fmt.Sprint("unsupported screen:", screen))
-		}
+		// Update screen
+		screens[screen.CurrentScreen()].Update()
+
 		if game.Debug {
+			// Add debug overlay
 			debugWidget.Update()
 		}
 

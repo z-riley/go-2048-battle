@@ -1,4 +1,4 @@
-package screens
+package screen
 
 import (
 	"image/color"
@@ -15,6 +15,7 @@ type TitleScreen struct {
 	buttons []*turdgl.Button
 }
 
+// NewTitle Screen constructs a new title screen for the given window.
 func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 	title := turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 120}, game.FontPath).
 		SetColour(common.ButtonFont).
@@ -28,7 +29,8 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 		SetLabelColour(common.ButtonFont).
 		SetLabelText("Singleplayer")
 
-	btnMultiplayer := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, win.Quit).
+	btnMultiplayer := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400},
+		func() { SetScreen(MultiplayerMenu) }).
 		SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
 		SetLabelSize(36).
