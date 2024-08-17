@@ -5,6 +5,7 @@ type Screen int
 const (
 	Title Screen = iota
 	MultiplayerMenu
+	MultiplayerJoin
 )
 
 // Updater represents screens that can update themselves, including drawing themselves.

@@ -22,7 +22,7 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 
-	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, win.Quit)
+	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, func() { SetScreen(MultiplayerJoin) })
 	join.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
 		SetLabelSize(36).
@@ -50,8 +50,7 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 	}
 }
 
-// Update draws the multiplayer menu screen and updates its components. A pointer to
-// the current screen state must be passed in so the screen can move to other screens.
+// Update updates and draws multiplayer menu screen.
 func (t *MultiplayerMenuScreen) Update() {
 	t.win.SetBackground(color.RGBA{46, 36, 27, 255})
 

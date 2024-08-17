@@ -27,6 +27,7 @@ func main() {
 	screens := map[screen.Screen]screen.Updater{
 		screen.Title:           screen.NewTitleScreen(win),
 		screen.MultiplayerMenu: screen.NewMultiplayerMenuScreen(win),
+		screen.MultiplayerJoin: screen.NewMultiplayerJoinScreen(win),
 	}
 	debugWidget := debug.NewDebugWidget(win)
 
