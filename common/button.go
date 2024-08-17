@@ -26,24 +26,23 @@ var buttonStylePressed = turdgl.Style{
 // MenuButton is a commonly used button for navigating menus.
 type MenuButton struct{ *turdgl.Button }
 
-// NewMenu button constructs a new button with defaults suitable for a menu button.
+// NewMenu button constructs a new button with suitable defaults for a menu button.
 func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *MenuButton {
 	r := turdgl.NewRect(width, height, pos, turdgl.WithStyle(buttonStyleUnpressed))
 	b := turdgl.NewButton(r, game.FontPath)
-	b.SetCallback(func(m turdgl.MouseState) {
-		// Callback executes after every update
-		switch {
-		case m == turdgl.LeftClick:
-			if b.IsHovering() {
-				r.SetStyle(buttonStylePressed)
-				cb()
-			}
-		case b.IsHovering():
-			r.SetStyle(buttonStyleHovering)
-		case m == turdgl.NoClick:
-			r.SetStyle(buttonStyleUnpressed)
-		}
-	})
+	b.Behaviour = turdgl.OnRelease
+	b.SetCallback(func(m turdgl.MouseState) { cb() })
 
 	return &MenuButton{b}
+}
+
+func (b *MenuButton) Update(win *turdgl.Window) {
+	// Adjust style if cursor hovering
+	if b.IsHovering() {
+		b.Shape.SetStyle(buttonStyleHovering)
+	} else {
+		b.Shape.SetStyle(buttonStyleUnpressed)
+	}
+	// Call underlying button update function
+	b.Button.Update(win)
 }
