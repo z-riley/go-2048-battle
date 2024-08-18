@@ -37,12 +37,17 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *MenuButton
 }
 
 func (b *MenuButton) Update(win *turdgl.Window) {
-	// Adjust style if cursor hovering
-	if b.IsHovering() {
-		b.Shape.SetStyle(buttonStyleHovering)
+	// Adjust style if cursor hovering or button is pressed
+	if b.Shape.IsWithin(win.MouseLocation()) {
+		if win.MouseButtonState() == turdgl.LeftClick {
+			b.Shape.SetStyle(buttonStylePressed)
+		} else {
+			b.Shape.SetStyle(buttonStyleHovering)
+		}
 	} else {
 		b.Shape.SetStyle(buttonStyleUnpressed)
 	}
+
 	// Call underlying button update function
 	b.Button.Update(win)
 }
