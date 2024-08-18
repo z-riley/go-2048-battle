@@ -1,8 +1,8 @@
-module github.com/zac460/go-2048-battle
+module github.com/z-riley/go-2048-battle
 
 go 1.22.2
 
-require github.com/zac460/turdgl v0.0.0-20240818165049-97357275e743
+require github.com/zac460/turdgl v0.0.0-20240818171901-87a3f7fea5ea
 
 require (
 	github.com/netgusto/poly2tri-go v0.0.0-20170716161910-d102ad91854f // indirect
