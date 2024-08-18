@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"time"
 
-	game "github.com/zac460/go-2048-battle"
-	"github.com/zac460/turdgl"
+	game "github.com/z-riley/go-2048-battle"
+	"github.com/z-riley/turdgl"
 )
 
 type DebugWidget struct {

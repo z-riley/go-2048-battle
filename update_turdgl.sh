@@ -5,4 +5,4 @@ cd ~/repo/turdgl
 latest_commit=$(git rev-parse HEAD)
 cd - 
 
-go get "github.com/zac460/turdgl"@$latest_commit
+go get "github.com/z-riley/turdgl"@$latest_commit

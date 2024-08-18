@@ -3,9 +3,9 @@ package screen
 import (
 	"image/color"
 
-	game "github.com/zac460/go-2048-battle"
-	"github.com/zac460/go-2048-battle/common"
-	"github.com/zac460/turdgl"
+	game "github.com/z-riley/go-2048-battle"
+	"github.com/z-riley/go-2048-battle/common"
+	"github.com/z-riley/turdgl"
 )
 
 type MultiplayerJoinScreen struct {
@@ -24,21 +24,21 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 		SetSize(40)
 
 	ipHeading := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 200}, func() {})
-	ipHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).SetLabelText("Host IP:")
+	ipHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host IP:")
 
 	ipEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
 
 	nameHeading := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}, func() {})
-	nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).SetLabelText("Your name:")
+	nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Your name:")
 
 	nameEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
 
 	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(Title) })
-	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).SetLabelText("Join")
+	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
 
 	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(MultiplayerMenu) })
 	back.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).SetLabelText("Back")
+		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
 	return &MultiplayerJoinScreen{
 		win,

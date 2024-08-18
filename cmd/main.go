@@ -1,10 +1,10 @@
 package main
 
 import (
-	game "github.com/zac460/go-2048-battle"
-	"github.com/zac460/go-2048-battle/debug"
-	"github.com/zac460/go-2048-battle/screen"
-	"github.com/zac460/turdgl"
+	game "github.com/z-riley/go-2048-battle"
+	"github.com/z-riley/go-2048-battle/debug"
+	"github.com/z-riley/go-2048-battle/screen"
+	"github.com/z-riley/turdgl"
 )
 
 func main() {

@@ -3,9 +3,9 @@ package screen
 import (
 	"image/color"
 
-	game "github.com/zac460/go-2048-battle"
-	"github.com/zac460/go-2048-battle/common"
-	"github.com/zac460/turdgl"
+	game "github.com/z-riley/go-2048-battle"
+	"github.com/z-riley/go-2048-battle/common"
+	"github.com/z-riley/turdgl"
 )
 
 type MultiplayerMenuScreen struct {
@@ -23,13 +23,13 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 		SetSize(40)
 
 	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, func() { SetScreen(MultiplayerJoin) })
-	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).SetLabelText("Join game")
+	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join game")
 
 	host := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(MultiplayerMenu) })
-	host.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).SetLabelText("Host game")
+	host.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host game")
 
 	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(Title) })
-	back.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).SetLabelText("Back")
+	back.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
 	return &MultiplayerMenuScreen{
 		win,

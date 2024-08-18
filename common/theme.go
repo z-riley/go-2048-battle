@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/zac460/turdgl"
+	"github.com/z-riley/turdgl"
 )
 
 var (

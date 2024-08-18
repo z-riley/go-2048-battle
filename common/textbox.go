@@ -3,8 +3,8 @@ package common
 import (
 	"image/color"
 
-	game "github.com/zac460/go-2048-battle"
-	"github.com/zac460/turdgl"
+	game "github.com/z-riley/go-2048-battle"
+	"github.com/z-riley/turdgl"
 )
 
 // EntryBox is a commonly used text box for the user to enter text.
@@ -20,7 +20,7 @@ func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
 	r.SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
 
 	t := turdgl.NewTextBox(r, game.FontPath).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 30}).
+		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
 		SetText("Click to edit").
 		SetTextSize(36).
 		SetTextColour(LightFontColour)
