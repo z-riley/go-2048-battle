@@ -31,8 +31,6 @@ func main() {
 	}
 	debugWidget := debug.NewDebugWidget(win)
 
-	screen.SetScreen(screen.MultiplayerJoin) // TEMP FOR TESTING
-
 	// Main game loop
 	for win.IsRunning() {
 		// Update screen

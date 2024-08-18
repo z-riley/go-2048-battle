@@ -29,7 +29,9 @@ type MenuButton struct{ *turdgl.Button }
 // NewMenuButton constructs a new button with suitable defaults for a menu button.
 func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *MenuButton {
 	r := turdgl.NewRect(width, height, pos, turdgl.WithStyle(buttonStyleUnpressed))
-	b := turdgl.NewButton(r, game.FontPath)
+	b := turdgl.NewButton(r, game.FontPath).
+		SetLabelSize(36).
+		SetLabelColour(LightFontColour)
 	b.Behaviour = turdgl.OnRelease
 	b.SetCallback(func(m turdgl.MouseState) { cb() })
 
