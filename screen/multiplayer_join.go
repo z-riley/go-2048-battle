@@ -13,47 +13,50 @@ type MultiplayerJoinScreen struct {
 
 	title   *turdgl.Text
 	buttons []*common.MenuButton
+	entries []*common.EntryBox
 }
 
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
 func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	title := turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, game.FontPath).
-		SetColour(common.ButtonFont).
+		SetColour(common.LightFontColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 
-	a := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, win.Quit)
-	a.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
+	ipHeading := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 200}, func() {})
+	ipHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
 		SetLabelSize(36).
-		SetLabelColour(common.ButtonFont).
-		SetLabelText("Host IP: (TODO textbox ->)")
+		SetLabelColour(common.LightFontColour).
+		SetLabelText("Host IP:")
 
-	b := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, win.Quit)
-	b.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
-		SetLabelSize(36).
-		SetLabelColour(common.ButtonFont).
-		SetLabelText("Your name: (TODO textbox ->)")
+	ipEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
 
-	c := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(Title) })
-	c.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
+	nameHeading := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}, func() {})
+	nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
 		SetLabelSize(36).
-		SetLabelColour(common.ButtonFont).
+		SetLabelColour(common.LightFontColour).
+		SetLabelText("Your name:")
+
+	nameEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
+
+	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(Title) })
+	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
+		SetLabelSize(36).
+		SetLabelColour(common.LightFontColour).
 		SetLabelText("Join")
 
-	d := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(MultiplayerMenu) })
-	d.SetLabelAlignment(turdgl.AlignCustom).
+	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(MultiplayerMenu) })
+	back.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
 		SetLabelSize(36).
-		SetLabelColour(common.ButtonFont).
+		SetLabelColour(common.LightFontColour).
 		SetLabelText("Back")
 
 	return &MultiplayerJoinScreen{
 		win,
 		title,
-		[]*common.MenuButton{a, b, c, d},
+		[]*common.MenuButton{ipHeading, nameHeading, join, back},
+		[]*common.EntryBox{ipEntry, nameEntry},
 	}
 }
 
@@ -64,7 +67,13 @@ func (t *MultiplayerJoinScreen) Update() {
 	t.win.Draw(t.title)
 
 	for _, b := range t.buttons {
-		t.win.Draw(b)
 		b.Update(t.win)
+		t.win.Draw(b)
 	}
+
+	for _, e := range t.entries {
+		e.Update(t.win)
+		t.win.Draw(e)
+	}
+
 }

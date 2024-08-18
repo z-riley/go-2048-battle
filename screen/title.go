@@ -19,7 +19,7 @@ type TitleScreen struct {
 func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 	// Main title
 	title := turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 120}, game.FontPath).
-		SetColour(common.ButtonFont).
+		SetColour(common.LightFontColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 
@@ -28,19 +28,19 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 	singleplayer.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
 		SetLabelSize(36).
-		SetLabelColour(common.ButtonFont).
+		SetLabelColour(common.LightFontColour).
 		SetLabelText("Singleplayer")
 	multiplayer := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(MultiplayerMenu) })
 	multiplayer.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
 		SetLabelSize(36).
-		SetLabelColour(common.ButtonFont).
+		SetLabelColour(common.LightFontColour).
 		SetLabelText("Multiplayer")
 	quit := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, win.Quit)
 	quit.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 30}).
 		SetLabelSize(36).
-		SetLabelColour(common.ButtonFont).
+		SetLabelColour(common.LightFontColour).
 		SetLabelText("Quit")
 
 	return &TitleScreen{

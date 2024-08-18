@@ -6,13 +6,13 @@ import (
 )
 
 var buttonStyleUnpressed = turdgl.Style{
-	Colour:    buttonThemeUnpressed,
+	Colour:    buttonColourUnpressed,
 	Thickness: 0,
 	Bloom:     0,
 }
 
 var buttonStyleHovering = turdgl.Style{
-	Colour:    buttonThemeUnpressed,
+	Colour:    buttonColourUnpressed,
 	Thickness: 0,
 	Bloom:     5,
 }
@@ -26,7 +26,7 @@ var buttonStylePressed = turdgl.Style{
 // MenuButton is a commonly used button for navigating menus.
 type MenuButton struct{ *turdgl.Button }
 
-// NewMenu button constructs a new button with suitable defaults for a menu button.
+// NewMenuButton constructs a new button with suitable defaults for a menu button.
 func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *MenuButton {
 	r := turdgl.NewRect(width, height, pos, turdgl.WithStyle(buttonStyleUnpressed))
 	b := turdgl.NewButton(r, game.FontPath)

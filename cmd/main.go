@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	// Creat window
+	// Create window
 	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "2048 Battle",
 		Width:  game.Width,
@@ -30,6 +30,8 @@ func main() {
 		screen.MultiplayerJoin: screen.NewMultiplayerJoinScreen(win),
 	}
 	debugWidget := debug.NewDebugWidget(win)
+
+	screen.SetScreen(screen.MultiplayerJoin) // TEMP FOR TESTING
 
 	// Main game loop
 	for win.IsRunning() {
