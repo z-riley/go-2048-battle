@@ -2,7 +2,7 @@ module github.com/z-riley/go-2048-battle
 
 go 1.22.2
 
-require github.com/z-riley/turdgl v0.0.0-20240818192309-25b8c479688d
+require github.com/z-riley/turdgl v0.0.0-20240819203931-7b037ea8af5d
 
 require (
 	github.com/netgusto/poly2tri-go v0.0.0-20170716161910-d102ad91854f // indirect
