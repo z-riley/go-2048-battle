@@ -1,8 +1,6 @@
 package screen
 
 import (
-	"image/color"
-
 	game "github.com/z-riley/go-2048-battle"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/turdgl"
@@ -31,6 +29,8 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(Title) })
 	back.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
+	// TODO: poke around 2048 app UI and copy that menu style
+
 	return &MultiplayerMenuScreen{
 		win,
 		title,
@@ -39,13 +39,13 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 }
 
 // Update updates and draws multiplayer menu screen.
-func (t *MultiplayerMenuScreen) Update() {
-	t.win.SetBackground(color.RGBA{46, 36, 27, 255})
+func (s *MultiplayerMenuScreen) Update() {
+	s.win.SetBackground(common.BackgroundColour)
 
-	t.win.Draw(t.title)
+	s.win.Draw(s.title)
 
-	for _, b := range t.buttons {
-		t.win.Draw(b)
-		b.Update(t.win)
+	for _, b := range s.buttons {
+		s.win.Draw(b)
+		b.Update(s.win)
 	}
 }

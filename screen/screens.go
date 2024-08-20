@@ -4,6 +4,7 @@ type Screen int
 
 const (
 	Title Screen = iota
+	Singleplayer
 	MultiplayerMenu
 	MultiplayerJoin
 )

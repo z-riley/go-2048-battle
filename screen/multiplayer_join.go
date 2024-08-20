@@ -1,8 +1,6 @@
 package screen
 
 import (
-	"image/color"
-
 	game "github.com/z-riley/go-2048-battle"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/turdgl"
@@ -49,19 +47,19 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 }
 
 // Update updates and draws multiplayer join screen.
-func (t *MultiplayerJoinScreen) Update() {
-	t.win.SetBackground(color.RGBA{46, 36, 27, 255})
+func (s *MultiplayerJoinScreen) Update() {
+	s.win.SetBackground(common.BackgroundColour)
 
-	t.win.Draw(t.title)
+	s.win.Draw(s.title)
 
-	for _, b := range t.buttons {
-		b.Update(t.win)
-		t.win.Draw(b)
+	for _, b := range s.buttons {
+		b.Update(s.win)
+		s.win.Draw(b)
 	}
 
-	for _, e := range t.entries {
-		t.win.Draw(e)
-		e.Update(t.win)
+	for _, e := range s.entries {
+		s.win.Draw(e)
+		e.Update(s.win)
 	}
 
 }

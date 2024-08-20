@@ -1,8 +1,6 @@
 package screen
 
 import (
-	"image/color"
-
 	game "github.com/z-riley/go-2048-battle"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/turdgl"
@@ -24,7 +22,7 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 		SetSize(40)
 
 	// Menu buttons
-	singleplayer := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, win.Quit)
+	singleplayer := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, func() { SetScreen(Singleplayer) })
 	singleplayer.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Singleplayer")
 	multiplayer := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(MultiplayerMenu) })
@@ -42,13 +40,13 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 }
 
 // Update draws the title screen and updates its components.
-func (t *TitleScreen) Update() {
-	t.win.SetBackground(color.RGBA{46, 36, 27, 255})
+func (s *TitleScreen) Update() {
+	s.win.SetBackground(common.BackgroundColour)
 
-	t.win.Draw(t.title)
+	s.win.Draw(s.title)
 
-	for _, b := range t.buttons {
-		t.win.Draw(b)
-		b.Update(t.win)
+	for _, b := range s.buttons {
+		s.win.Draw(b)
+		b.Update(s.win)
 	}
 }

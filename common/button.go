@@ -42,11 +42,14 @@ func (b *MenuButton) Update(win *turdgl.Window) {
 	// Adjust style if cursor hovering or button is pressed
 	if b.Shape.IsWithin(win.MouseLocation()) {
 		if win.MouseButtonState() == turdgl.LeftClick {
+			b.Label.SetColour(LighterFontColour)
 			b.Shape.SetStyle(buttonStylePressed)
 		} else {
+			b.Label.SetColour(LighterFontColour)
 			b.Shape.SetStyle(buttonStyleHovering)
 		}
 	} else {
+		b.Label.SetColour(LightFontColour)
 		b.Shape.SetStyle(buttonStyleUnpressed)
 	}
 
