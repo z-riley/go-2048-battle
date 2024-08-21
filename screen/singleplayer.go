@@ -16,6 +16,30 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 	}
 }
 
+// Init initialises the screen.
+func (s *SingleplayerScreen) Init() {
+	s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
+		// TODO
+	})
+	s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
+		// TODO
+	})
+	s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
+		// TODO
+	})
+	s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
+		// TODO
+	})
+}
+
+// Deinit deinitialises the screen.
+func (s *SingleplayerScreen) Deinit() {
+	s.win.UnregisterKeybind(turdgl.KeyUp, turdgl.KeyPress)
+	s.win.UnregisterKeybind(turdgl.KeyDown, turdgl.KeyPress)
+	s.win.UnregisterKeybind(turdgl.KeyLeft, turdgl.KeyPress)
+	s.win.UnregisterKeybind(turdgl.KeyRight, turdgl.KeyPress)
+}
+
 // Update updates and draws the singleplayer screen.
 func (s *SingleplayerScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)

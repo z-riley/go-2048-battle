@@ -46,6 +46,12 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	}
 }
 
+// Init initialises the screen.
+func (s *MultiplayerJoinScreen) Init() {}
+
+// Deinit deinitialises the screen.
+func (s *MultiplayerJoinScreen) Deinit() {}
+
 // Update updates and draws multiplayer join screen.
 func (s *MultiplayerJoinScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)

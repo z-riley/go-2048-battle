@@ -39,6 +39,12 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 	}
 }
 
+// Init initialises the screen.
+func (s *TitleScreen) Init() {}
+
+// Deinit deinitialises the screen.
+func (s *TitleScreen) Deinit() {}
+
 // Update draws the title screen and updates its components.
 func (s *TitleScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)

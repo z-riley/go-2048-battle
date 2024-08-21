@@ -1,26 +1,49 @@
 package screen
 
-type Screen int
+import "github.com/z-riley/turdgl"
+
+type ID int
+
+type Screen interface {
+	// Init initialises the screen.
+	Init()
+	// Update updates and draws the screen.
+	Update()
+	// Deinit deinitialises the screen.
+	Deinit()
+}
 
 const (
-	Title Screen = iota
+	Title ID = iota
 	Singleplayer
 	MultiplayerMenu
 	MultiplayerJoin
 )
 
-// Updater represents screens that can update themselves, including drawing themselves.
-type Updater interface {
-	Update()
-}
-
 // currentScreen holds the game's current screen.
 var currentScreen = Title
 
-func CurrentScreen() Screen {
-	return currentScreen
+// screens contains every screen.
+var screens map[ID]Screen
+
+// Init populates the internal screens variable.
+func Init(win *turdgl.Window) {
+	screens = map[ID]Screen{
+		Title:           NewTitleScreen(win),
+		Singleplayer:    NewSingleplayerScreen(win),
+		MultiplayerMenu: NewMultiplayerMenuScreen(win),
+		MultiplayerJoin: NewMultiplayerJoinScreen(win),
+	}
 }
 
-func SetScreen(s Screen) {
+// CurrentScreen returns the current screen.
+func CurrentScreen() Screen {
+	return screens[currentScreen]
+}
+
+// SetScreen changes the current screen to the given ID.
+func SetScreen(s ID) {
+	CurrentScreen().Deinit()
 	currentScreen = s
+	CurrentScreen().Init()
 }

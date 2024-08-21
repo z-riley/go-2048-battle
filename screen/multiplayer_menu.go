@@ -38,6 +38,12 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 	}
 }
 
+// Init initialises the screen.
+func (s *MultiplayerMenuScreen) Init() {}
+
+// Deinit deinitialises the screen.
+func (s *MultiplayerMenuScreen) Deinit() {}
+
 // Update updates and draws multiplayer menu screen.
 func (s *MultiplayerMenuScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)

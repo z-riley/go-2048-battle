@@ -20,22 +20,18 @@ func main() {
 	defer win.Destroy()
 
 	// Register window-level keybinds (for development only)
-	win.RegisterKeybind(turdgl.KeyEscape, func() { win.Quit() })
-	win.RegisterKeybind(turdgl.KeyLCtrl, func() { win.Quit() })
+	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
 
 	// Create screens
-	screens := map[screen.Screen]screen.Updater{
-		screen.Title:           screen.NewTitleScreen(win),
-		screen.Singleplayer:    screen.NewSingleplayerScreen(win),
-		screen.MultiplayerMenu: screen.NewMultiplayerMenuScreen(win),
-		screen.MultiplayerJoin: screen.NewMultiplayerJoinScreen(win),
-	}
+	screen.Init(win)
+
 	debugWidget := debug.NewDebugWidget(win)
 
 	// Main game loop
 	for win.IsRunning() {
 		// Update screen
-		screens[screen.CurrentScreen()].Update()
+		screen.CurrentScreen().Update()
 
 		if game.Debug {
 			// Add debug overlay
