@@ -25,6 +25,7 @@ func main() {
 
 	// Create screens
 	screen.Init(win)
+	screen.SetScreen(screen.Title)
 
 	debugWidget := debug.NewDebugWidget(win)
 

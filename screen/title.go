@@ -40,10 +40,22 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 }
 
 // Init initialises the screen.
-func (s *TitleScreen) Init() {}
+func (s *TitleScreen) Init() {
+	s.win.RegisterKeybind(turdgl.Key1, turdgl.KeyRelease, func() {
+		SetScreen(Singleplayer)
+	})
+	s.win.RegisterKeybind(turdgl.Key2, turdgl.KeyRelease, func() {
+		SetScreen(MultiplayerMenu)
+	})
+	s.win.RegisterKeybind(turdgl.Key3, turdgl.KeyRelease, s.win.Quit)
+}
 
 // Deinit deinitialises the screen.
-func (s *TitleScreen) Deinit() {}
+func (s *TitleScreen) Deinit() {
+	s.win.UnregisterKeybind(turdgl.Key1, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(turdgl.Key2, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(turdgl.Key3, turdgl.KeyRelease)
+}
 
 // Update draws the title screen and updates its components.
 func (s *TitleScreen) Update() {
