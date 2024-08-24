@@ -9,7 +9,7 @@ import (
 )
 
 type Game struct {
-	Arena   *grid.Grid   `json:"arena"`
+	Grid    *grid.Grid   `json:"grid"`
 	Outcome grid.Outcome `json:"outcome"`
 	Score   *Score       `json:"currentScore"`
 	Timer   *Timer       `json:"time"`
@@ -18,7 +18,7 @@ type Game struct {
 // NewGame returns the top-level struct for the game.
 func NewGame() *Game {
 	g := &Game{
-		Arena:   grid.NewGrid(),
+		Grid:    grid.NewGrid(),
 		Outcome: grid.None,
 		Score:   NewScore(),
 		Timer:   NewTimer(),
@@ -66,7 +66,7 @@ func (g *Game) Load() error {
 
 // ExecuteMove carries out a move (up, down, left, right).
 func (g *Game) ExecuteMove(dir grid.Direction) {
-	pointsGained := g.Arena.Move(dir)
+	pointsGained := g.Grid.Move(dir)
 	g.Score.AddToCurrent(pointsGained)
 
 	if g.Outcome == grid.Lose {
@@ -86,7 +86,7 @@ func (g *Game) ExecuteMove(dir grid.Direction) {
 // Reset resets the game.
 func (g *Game) Reset() {
 	// widget.SetCurrentScore(0)
-	g.Arena.Reset()
+	g.Grid.Reset()
 	g.Score.Reset()
 	g.Timer.Reset().Pause()
 }

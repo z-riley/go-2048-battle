@@ -33,25 +33,25 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 
 // Init initialises the screen.
 func (s *SingleplayerScreen) Init() {
-	s.debugGridText.SetText(s.backend.Arena.Debug())
+	s.debugGridText.SetText(s.backend.Grid.Debug())
 	s.debugTimeText.SetText(s.backend.Timer.Time.String())
 	s.debugScoreText.SetText(fmt.Sprint(s.backend.Score.Current))
 
 	s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
 		s.backend.ExecuteMove(grid.DirUp)
-		s.debugGridText.SetText(s.backend.Arena.Debug())
+		s.debugGridText.SetText(s.backend.Grid.Debug())
 	})
 	s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
 		s.backend.ExecuteMove(grid.DirDown)
-		s.debugGridText.SetText(s.backend.Arena.Debug())
+		s.debugGridText.SetText(s.backend.Grid.Debug())
 	})
 	s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
 		s.backend.ExecuteMove(grid.DirLeft)
-		s.debugGridText.SetText(s.backend.Arena.Debug())
+		s.debugGridText.SetText(s.backend.Grid.Debug())
 	})
 	s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
 		s.backend.ExecuteMove(grid.DirRight)
-		s.debugGridText.SetText(s.backend.Arena.Debug())
+		s.debugGridText.SetText(s.backend.Grid.Debug())
 	})
 	s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
 		s.backend.Reset()
@@ -77,7 +77,7 @@ func (s *SingleplayerScreen) Deinit() {
 func (s *SingleplayerScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)
 
-	s.debugGridText.SetText(s.backend.Arena.Debug())
+	s.debugGridText.SetText(s.backend.Grid.Debug())
 	s.debugTimeText.SetText(s.backend.Timer.Time.String())
 	s.debugScoreText.SetText(
 		fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
