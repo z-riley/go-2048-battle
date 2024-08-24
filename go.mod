@@ -1,6 +1,6 @@
 module github.com/z-riley/go-2048-battle
 
-go 1.22.2
+go 1.23
 
 require github.com/z-riley/turdgl v0.0.0-20240822142345-dc516e2be723
 

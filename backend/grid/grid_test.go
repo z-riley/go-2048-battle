@@ -6,39 +6,30 @@ import (
 )
 
 func TestMove(t *testing.T) {
-	type tc struct {
-		input    Grid
-		dir      Direction
-		expected Grid
+	input := Grid{
+		Tiles: [4][4]tile{
+			{{Val: 0}, {Val: 2}, {Val: 2}, {Val: 2}},
+			{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
+			{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
+			{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
+		},
+	}
+	dir := DirRight
+	expected := Grid{
+		Tiles: [4][4]tile{
+			{{Val: 0}, {Val: 0}, {Val: 2}, {Val: 4}},
+			{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
+			{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
+			{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
+		},
 	}
 
-	for n, tc := range []tc{
-		{
-			input: Grid{
-				Tiles: [4][4]tile{
-					{{Val: 0}, {Val: 2}, {Val: 2}, {Val: 2}},
-					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
-					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
-					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
-				},
-			},
-			dir: DirRight,
-			expected: Grid{
-				Tiles: [4][4]tile{
-					{{Val: 0}, {Val: 0}, {Val: 2}, {Val: 4}},
-					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
-					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
-					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
-				},
-			},
-		},
-	} {
-		got := tc.input.clone()
-		got.move(DirRight)
-		if !reflect.DeepEqual(tc.expected.Tiles, got.Tiles) {
-			t.Errorf("[%d] \nExpected:\n<%v>\nGot:\n<%v>", n, tc.expected.Debug(), got.Debug())
-		}
+	got := input.clone()
+	got.move(dir)
+	if !reflect.DeepEqual(expected.Tiles, got.Tiles) {
+		t.Errorf("Expected:\n<%v>\nGot:\n<%v>", expected.Debug(), got.Debug())
 	}
+
 }
 
 func TestMoveStep(t *testing.T) {
@@ -180,7 +171,7 @@ func TestIsLoss(t *testing.T) {
 		expected bool
 	}
 
-	for _, tc := range []tc{
+	tests := []tc{
 		{
 			input: Grid{
 				Tiles: [4][4]tile{
@@ -236,10 +227,11 @@ func TestIsLoss(t *testing.T) {
 			},
 			expected: false,
 		},
-	} {
-		actual := tc.input.isLoss()
-		if tc.expected != actual {
-			t.Errorf("Expected:\n<%v>\nGot:\n<%v>", tc.expected, actual)
+	}
+	for i, _ := range tests {
+		actual := tests[i].input.isLoss()
+		if tests[i].expected != actual {
+			t.Errorf("Expected:\n<%v>\nGot:\n<%v>", tests[i].expected, actual)
 		}
 	}
 }
