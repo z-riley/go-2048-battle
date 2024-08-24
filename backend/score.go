@@ -1,4 +1,4 @@
-package widget
+package backend
 
 // Score contains the current score and high score.
 type Score struct {

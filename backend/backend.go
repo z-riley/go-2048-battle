@@ -4,24 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/go-2048-battle/backend/store"
-	"github.com/z-riley/go-2048-battle/backend/widget"
 )
 
 type Game struct {
-	Arena   *widget.Arena  `json:"arena"`
-	Outcome widget.Outcome `json:"outcome"`
-	Score   *widget.Score  `json:"currentScore"`
-	Timer   *widget.Timer  `json:"time"`
+	Arena   *grid.Grid   `json:"arena"`
+	Outcome grid.Outcome `json:"outcome"`
+	Score   *Score       `json:"currentScore"`
+	Timer   *Timer       `json:"time"`
 }
 
 // NewGame returns the top-level struct for the game.
 func NewGame() *Game {
 	g := &Game{
-		Arena:   widget.NewArena(),
-		Outcome: widget.None,
-		Score:   widget.NewScore(),
-		Timer:   widget.NewTimer(),
+		Arena:   grid.NewGrid(),
+		Outcome: grid.None,
+		Score:   NewScore(),
+		Timer:   NewTimer(),
 	}
 
 	err := g.Load()
@@ -65,11 +65,11 @@ func (g *Game) Load() error {
 }
 
 // ExecuteMove carries out a move (up, down, left, right).
-func (g *Game) ExecuteMove(dir widget.Direction) {
+func (g *Game) ExecuteMove(dir grid.Direction) {
 	pointsGained := g.Arena.Move(dir)
 	g.Score.AddToCurrent(pointsGained)
 
-	if g.Outcome == widget.Lose {
+	if g.Outcome == grid.Lose {
 		g.Timer.Pause()
 	} else {
 		g.Timer.Resume()

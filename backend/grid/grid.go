@@ -1,12 +1,11 @@
-package widget
+package grid
 
 import (
 	"fmt"
 	"math/rand"
 	"reflect"
 	"strings"
-
-	"github.com/z-riley/go-2048-battle/backend/util"
+	"sync"
 )
 
 const (
@@ -14,21 +13,46 @@ const (
 	gridHeight = 4
 )
 
-// grid is the grid arena for the game. Position {0,0} is the top left square.
-type grid struct {
+// Grid contains the tiles for the game. Position {0,0} is the top left square.
+type Grid struct {
+	mu    sync.Mutex
 	Tiles [gridWidth][gridHeight]tile `json:"tiles"`
 }
 
-// newGrid constructs a new grid.
-func newGrid() *grid {
-	g := grid{Tiles: [4][4]tile{}}
-	g.resetGrid()
+// NewGrid constructs a new grid.
+func NewGrid() *Grid {
+	g := Grid{
+		mu:    sync.Mutex{},
+		Tiles: [4][4]tile{},
+	}
+	g.Reset()
 
 	return &g
 }
 
-// resetGrid resets the grid to a start-of-game state, spawning two '2' tiles in random locations.
-func (g *grid) resetGrid() {
+// Direction represents a direction that the player can move the tiles in.
+type Direction int
+
+const (
+	DirUp Direction = iota
+	DirDown
+	DirLeft
+	DirRight
+)
+
+// Move attempts to move in the specified direction, spawning a new tile if appropriate.
+func (a *Grid) Move(dir Direction) int {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	didMove, pointsGained := a.move(dir)
+	if didMove {
+		a.spawnTile()
+	}
+	return pointsGained
+}
+
+// Reset resets the grid to a start-of-game state, spawning two '2' tiles in random locations.
+func (g *Grid) Reset() {
 	g.Tiles = [gridWidth][gridHeight]tile{}
 	// Place two '2' tiles in random positions
 	type pos struct{ x, y int }
@@ -42,9 +66,30 @@ func (g *grid) resetGrid() {
 	g.Tiles[tile2.x][tile2.y].Val = 2
 }
 
+// Outcome represents the outcome of a game.
+type Outcome int
+
+const (
+	None Outcome = iota
+	Win
+	Lose
+)
+
+// Outcome returns the current outcome of the grid.
+func (a *Grid) Outcome() Outcome {
+	switch {
+	case a.isLoss():
+		return Lose
+	case a.highestTile() >= 2048:
+		return Win
+	default:
+		return None
+	}
+}
+
 // spawnTile spawns a single new tile in a random location on the grid. The value of the
 // tile is either 2 (90% chance) or 4 (10% chance).
-func (g *grid) spawnTile() {
+func (g *Grid) spawnTile() {
 	val := 2
 	if rand.Float64() >= 0.9 {
 		val = 4
@@ -61,7 +106,7 @@ func (g *grid) spawnTile() {
 
 // move attempts to move all tiles in the specified direction, combining them if appropriate.
 // Returns whether true if any tiles were moved from the attempt, and the added score from any combinations.
-func (g *grid) move(dir Direction) (bool, int) {
+func (g *Grid) move(dir Direction) (bool, int) {
 	moved := false
 	pointsGained := 0
 
@@ -113,7 +158,8 @@ func moveStep(g [gridWidth]tile, dir Direction) ([gridWidth]tile, bool, int) {
 	if dir == DirRight || dir == DirDown {
 		reverse = true
 	}
-	iter := util.NewIter(len(g), reverse)
+	// TODO: Use Go 1.23 iterators instead
+	iter := NewIter(len(g), reverse)
 
 	for iter.HasNext() {
 		// Calculate the hypothetical next position for the tile
@@ -161,7 +207,7 @@ func moveStep(g [gridWidth]tile, dir Direction) ([gridWidth]tile, bool, int) {
 }
 
 // isLoss returns true if the grid is in a losing state (gridlocked).
-func (g *grid) isLoss() bool {
+func (g *Grid) isLoss() bool {
 	// False if any empty spaces exist
 	for i := 0; i < gridHeight; i++ {
 		for j := 0; j < gridWidth; j++ {
@@ -192,7 +238,7 @@ func (g *grid) isLoss() bool {
 }
 
 // highestTile returns the value of the highest tile on the grid.
-func (g *grid) highestTile() int {
+func (g *Grid) highestTile() int {
 	highest := 0
 	for a := range gridHeight {
 		for b := range gridWidth {
@@ -205,7 +251,7 @@ func (g *grid) highestTile() int {
 }
 
 // Debug arranges the grid into a human readable Debug for debugging purposes.
-func (g *grid) Debug() string {
+func (g *Grid) Debug() string {
 	var out string
 	for row := 0; row < gridHeight; row++ {
 		for col := range gridWidth {
@@ -228,8 +274,8 @@ func transpose(matrix [gridWidth][gridHeight]tile) [gridHeight][gridWidth]tile {
 }
 
 // clone returns a deep copy for debugging purposes.
-func (g *grid) clone() *grid {
-	newGrid := &grid{}
+func (g *Grid) clone() *Grid {
+	newGrid := &Grid{}
 	for a := range gridHeight {
 		for b := range gridWidth {
 			newGrid.Tiles[a][b] = g.Tiles[a][b]

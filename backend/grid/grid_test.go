@@ -1,4 +1,4 @@
-package widget
+package grid
 
 import (
 	"reflect"
@@ -7,14 +7,14 @@ import (
 
 func TestMove(t *testing.T) {
 	type tc struct {
-		input    grid
+		input    Grid
 		dir      Direction
-		expected grid
+		expected Grid
 	}
 
 	for n, tc := range []tc{
 		{
-			input: grid{
+			input: Grid{
 				Tiles: [4][4]tile{
 					{{Val: 0}, {Val: 2}, {Val: 2}, {Val: 2}},
 					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
@@ -23,7 +23,7 @@ func TestMove(t *testing.T) {
 				},
 			},
 			dir: DirRight,
-			expected: grid{
+			expected: Grid{
 				Tiles: [4][4]tile{
 					{{Val: 0}, {Val: 0}, {Val: 2}, {Val: 4}},
 					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
@@ -176,13 +176,13 @@ func TestTranspose(t *testing.T) {
 
 func TestIsLoss(t *testing.T) {
 	type tc struct {
-		input    grid
+		input    Grid
 		expected bool
 	}
 
 	for _, tc := range []tc{
 		{
-			input: grid{
+			input: Grid{
 				Tiles: [4][4]tile{
 					{{Val: 2}, {Val: 0}, {Val: 8}, {Val: 0}},
 					{{Val: 0}, {Val: 0}, {Val: 0}, {Val: 0}},
@@ -193,7 +193,7 @@ func TestIsLoss(t *testing.T) {
 			expected: false,
 		},
 		{
-			input: grid{
+			input: Grid{
 				Tiles: [4][4]tile{
 					{{Val: 4}, {Val: 4}, {Val: 2}, {Val: 4}},
 					{{Val: 4}, {Val: 2}, {Val: 4}, {Val: 2}},
@@ -204,7 +204,7 @@ func TestIsLoss(t *testing.T) {
 			expected: false,
 		},
 		{
-			input: grid{
+			input: Grid{
 				Tiles: [4][4]tile{
 					{{Val: 2}, {Val: 4}, {Val: 2}, {Val: 4}},
 					{{Val: 4}, {Val: 2}, {Val: 4}, {Val: 2}},
@@ -215,7 +215,7 @@ func TestIsLoss(t *testing.T) {
 			expected: true,
 		},
 		{
-			input: grid{
+			input: Grid{
 				Tiles: [4][4]tile{
 					{{Val: 2}, {Val: 4}, {Val: 16}, {Val: 2}},
 					{{Val: 8}, {Val: 32}, {Val: 64}, {Val: 16}},
@@ -226,7 +226,7 @@ func TestIsLoss(t *testing.T) {
 			expected: true,
 		},
 		{
-			input: grid{
+			input: Grid{
 				Tiles: [4][4]tile{
 					{{Val: 4}, {Val: 16}, {Val: 4}, {Val: 2}},
 					{{Val: 2}, {Val: 32}, {Val: 4}, {Val: 2}},
