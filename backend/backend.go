@@ -64,7 +64,7 @@ func (g *Game) Load() error {
 	return g.Deserialise(b)
 }
 
-// ExecuteMove carries out a move (up, down, left, right).
+// ExecuteMove carries out a move in the given direction.
 func (g *Game) ExecuteMove(dir grid.Direction) {
 	pointsGained := g.Grid.Move(dir)
 	g.Score.AddToCurrent(pointsGained)
