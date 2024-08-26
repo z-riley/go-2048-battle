@@ -27,8 +27,8 @@ func NewArena() *Arena {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			tiles[j][i] = turdgl.NewTextBox(
-				turdgl.NewRect(
-					tileSizePx, tileSizePx,
+				turdgl.NewCurvedRect(
+					tileSizePx, tileSizePx, 3,
 					turdgl.Vec{
 						X: 700 + float64(j)*tileSizePx*1.2,
 						Y: 80 + float64(i)*tileSizePx*1.2,
