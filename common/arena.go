@@ -69,6 +69,7 @@ func (a *Arena) Load(data []byte) {
 			} else {
 				a.tiles[j][i].SetText(fmt.Sprint(val))
 			}
+			a.tiles[j][i].Shape.SetStyle(turdgl.Style{Colour: TileColour(val)})
 		}
 	}
 }
