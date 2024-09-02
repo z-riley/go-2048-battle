@@ -12,7 +12,6 @@ type EntryBox struct{ *turdgl.TextBox }
 
 // NewEntryBox constructs a new text box with suitable defaults.
 func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
-	// r := turdgl.NewRect(width, height, pos)
 	r := turdgl.NewRect(
 		width, height, pos,
 		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
