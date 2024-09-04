@@ -18,7 +18,7 @@ var (
 func TileColour(val int) color.Color {
 	switch val {
 	case 0:
-		return BackgroundColour
+		return turdgl.RGB(60, 60, 60)
 	case 2:
 		return turdgl.RGB(236, 229, 219)
 	case 4:
