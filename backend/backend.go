@@ -8,6 +8,7 @@ import (
 	"github.com/z-riley/go-2048-battle/backend/store"
 )
 
+// Game contains all reuquired data for a 2048 game.
 type Game struct {
 	Grid    *grid.Grid   `json:"grid"`
 	Outcome grid.Outcome `json:"outcome"`
@@ -26,7 +27,7 @@ func NewGame() *Game {
 
 	err := g.Load()
 	if err != nil {
-		fmt.Println("No save file found")
+		fmt.Println("No save file found. Creating new one")
 		if err := g.Save(); err != nil {
 			panic(err)
 		}
@@ -46,7 +47,7 @@ func (g *Game) Deserialise(j []byte) error {
 }
 
 // Save saves the game state to the save file.
-func (g *Game) Save() error {
+func (g Game) Save() error {
 	j, err := g.Serialise()
 	if err != nil {
 		return err
@@ -60,8 +61,13 @@ func (g *Game) Load() error {
 	if err != nil {
 		return err
 	}
-
-	return g.Deserialise(b)
+	err = g.Deserialise(b)
+	if err != nil {
+		return err
+	}
+	// Cmb flags are required to be unset for the animations to work correctly
+	g.Grid.ClearCmbFlags()
+	return nil
 }
 
 // ExecuteMove carries out a move in the given direction.

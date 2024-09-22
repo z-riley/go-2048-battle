@@ -4,26 +4,30 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
-	"strings"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 const (
-	gridWidth  = 4
-	gridHeight = 4
+	GridLen    = 4
+	gridWidth  = GridLen
+	gridHeight = GridLen
 )
 
 // Grid contains the tiles for the game. Position {0,0} is the top left square.
 type Grid struct {
 	mu    sync.Mutex
-	Tiles [gridWidth][gridHeight]tile `json:"tiles"`
+	Tiles [gridWidth][gridHeight]Tile `json:"tiles"`
+
+	LastMove Direction `json:"lastMove"`
 }
 
 // NewGrid constructs a new grid.
 func NewGrid() *Grid {
 	g := Grid{
 		mu:    sync.Mutex{},
-		Tiles: [4][4]tile{},
+		Tiles: NewTiles(),
 	}
 	g.Reset()
 
@@ -31,29 +35,30 @@ func NewGrid() *Grid {
 }
 
 // Direction represents a direction that the player can move the tiles in.
-type Direction int
+type Direction string
 
 const (
-	DirUp Direction = iota
-	DirDown
-	DirLeft
-	DirRight
+	DirUp    Direction = "up"
+	DirDown  Direction = "down"
+	DirLeft  Direction = "left"
+	DirRight Direction = "right"
 )
 
 // Move attempts to move in the specified direction, spawning a new tile if appropriate.
-func (a *Grid) Move(dir Direction) int {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	didMove, pointsGained := a.move(dir)
+func (g *Grid) Move(dir Direction) int {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	didMove, pointsGained := g.move(dir)
 	if didMove {
-		a.spawnTile()
+		g.spawnTile()
 	}
+	g.LastMove = dir
 	return pointsGained
 }
 
 // Reset resets the grid to a start-of-game state, spawning two '2' tiles in random locations.
 func (g *Grid) Reset() {
-	g.Tiles = [gridWidth][gridHeight]tile{}
+	g.Tiles = NewTiles()
 	// Place two '2' tiles in random positions
 	type pos struct{ x, y int }
 	tile1 := pos{rand.Intn(gridWidth), rand.Intn(gridHeight)}
@@ -62,8 +67,18 @@ func (g *Grid) Reset() {
 		// Try again until they're unique
 		tile2 = pos{rand.Intn(gridWidth), rand.Intn(gridHeight)}
 	}
+	// FIXME: starting values of 4 should also be possible
 	g.Tiles[tile1.x][tile1.y].Val = 2
 	g.Tiles[tile2.x][tile2.y].Val = 2
+}
+
+// ClearCmbFlags clears the Cmb flag of every tile.
+func (g *Grid) ClearCmbFlags() {
+	for i := range g.Tiles {
+		for j := range g.Tiles[i] {
+			g.Tiles[i][j].Cmb = false
+		}
+	}
 }
 
 // Outcome represents the outcome of a game.
@@ -76,11 +91,11 @@ const (
 )
 
 // Outcome returns the current outcome of the grid.
-func (a *Grid) Outcome() Outcome {
+func (g *Grid) Outcome() Outcome {
 	switch {
-	case a.isLoss():
+	case g.isLoss():
 		return Lose
-	case a.highestTile() >= 2048:
+	case g.highestTile() >= 2048:
 		return Win
 	default:
 		return None
@@ -102,11 +117,19 @@ func (g *Grid) spawnTile() {
 	}
 
 	g.Tiles[x][y].Val = val
+	g.Tiles[x][y].UUID = uuid.Must(uuid.NewV7())
 }
 
 // move attempts to move all tiles in the specified direction, combining them if appropriate.
-// Returns whether true if any tiles were moved from the attempt, and the added score from any combinations.
+// Returns true if any tiles were moved from the attempt, and the added score from any combinations.
 func (g *Grid) move(dir Direction) (bool, int) {
+	// Clear all of the "combined this turn" flags
+	for i := 0; i < gridWidth; i++ {
+		for j := 0; j < gridHeight; j++ {
+			g.Tiles[i][j].Cmb = false
+		}
+	}
+
 	moved := false
 	pointsGained := 0
 
@@ -120,14 +143,14 @@ func (g *Grid) move(dir Direction) (bool, int) {
 			// The moveStep function only operates on a row, so to move vertically
 			// we must transpose the grid before and after the move operation.
 			if dir == DirUp || dir == DirDown {
-				g.Tiles = transpose(g.Tiles)
+				g.Tiles = Transpose(g.Tiles)
 			}
 			g.Tiles[row], rowMoved, points = moveStep(g.Tiles[row], dir)
 			if points > 0 {
 				pointsGained = points
 			}
 			if dir == DirUp || dir == DirDown {
-				g.Tiles = transpose(g.Tiles)
+				g.Tiles = Transpose(g.Tiles)
 			}
 
 			if rowMoved {
@@ -140,34 +163,25 @@ func (g *Grid) move(dir Direction) (bool, int) {
 		}
 	}
 
-	// Clear all of the "combined this turn" flags
-	for i := 0; i < gridWidth; i++ {
-		for j := 0; j < gridHeight; j++ {
-			g.Tiles[i][j].cmb = false
-		}
-	}
-
 	return moved, pointsGained
 }
 
-// moveStep executes one part of the a move. Call multiple times until false is returned to
-// complete a full move. Optional: variable to place the number of points gained by the step.
-func moveStep(g [gridWidth]tile, dir Direction) ([gridWidth]tile, bool, int) {
+// moveStep executes one part of the a move on a grid row. Call multiple times until false
+// is returned to complete a full move. Returns the row after move, whether any tiles moved,
+// and the number of points gained by the move.
+func moveStep(g [gridWidth]Tile, dir Direction) ([gridWidth]Tile, bool, int) {
 	// Iterate in the same direction as the move
 	reverse := false
 	if dir == DirRight || dir == DirDown {
 		reverse = true
 	}
-	// TODO: Use Go 1.23 iterators instead
-	iter := NewIter(len(g), reverse)
 
+	iter := NewIter(len(g), reverse) // TODO: Use Go 1.23 iterators instead?
 	for iter.HasNext() {
-		// Calculate the hypothetical next position for the tile
 		i := iter.Next()
-		var newPos int
-		if !reverse {
-			newPos = i - 1
-		} else {
+		// Calculate the hypothetical next position for the tile
+		newPos := i - 1
+		if reverse {
 			newPos = i + 1
 		}
 
@@ -182,12 +196,14 @@ func moveStep(g [gridWidth]tile, dir Direction) ([gridWidth]tile, bool, int) {
 		}
 
 		// Combine if similar tile exists at destination and end turn
-		alreadyCombined := g[i].cmb || g[newPos].cmb
+		alreadyCombined := g[i].Cmb || g[newPos].Cmb
 		if g[newPos].Val == g[i].Val && !alreadyCombined {
 			g[newPos].Val += g[i].Val // update the new location
-			g[newPos].cmb = true
+			g[newPos].Cmb = true
+			g[newPos].UUID = uuid.Must(uuid.NewV7())
 			valAfterCombine := g[newPos].Val
 			g[i].Val = emptyTile // clear the old location
+			g[i].UUID = uuid.Must(uuid.NewV7())
 			return g, true, valAfterCombine
 
 		} else if g[newPos].Val != emptyTile {
@@ -198,7 +214,7 @@ func moveStep(g [gridWidth]tile, dir Direction) ([gridWidth]tile, bool, int) {
 		// Destination empty; move tile and end turn
 		if g[newPos].Val == emptyTile {
 			g[newPos] = g[i]
-			g[i] = tile{}
+			g[i] = Tile{UUID: uuid.Must(uuid.NewV7())}
 			return g, true, 0
 		}
 	}
@@ -225,7 +241,7 @@ func (g *Grid) isLoss() bool {
 			}
 		}
 	}
-	t := transpose(g.Tiles)
+	t := Transpose(g.Tiles)
 	for i := 0; i < gridHeight; i++ {
 		for j := 0; j < gridWidth-1; j++ {
 			if t[i][j].Val == t[i][j+1].Val {
@@ -262,9 +278,9 @@ func (g *Grid) Debug() string {
 	return out
 }
 
-// transpose returns a transposed version of the grid.
-func transpose(matrix [gridWidth][gridHeight]tile) [gridHeight][gridWidth]tile {
-	var transposed [gridHeight][gridWidth]tile
+// Transpose returns a transposed version of the grid.
+func Transpose(matrix [gridWidth][gridHeight]Tile) [gridHeight][gridWidth]Tile {
+	var transposed [gridHeight][gridWidth]Tile
 	for i := 0; i < gridWidth; i++ {
 		for j := 0; j < gridHeight; j++ {
 			transposed[j][i] = matrix[i][j]
@@ -286,18 +302,26 @@ func (g *Grid) clone() *Grid {
 
 const emptyTile = 0
 
-// tile represents a single tile on the grid.
-type tile struct {
-	Val int  `json:"val"` // the value of the number on the tile
-	cmb bool // flag for whether tile was combined in the current turn
+// Tile represents a single Tile on the grid.
+type Tile struct {
+	Val  int       `json:"val"`  // the value of the number on the tile
+	Cmb  bool      `json:"cmb"`  // flag for whether tile was combined in the current turn
+	UUID uuid.UUID `json:"uuid"` // unique ID for each tile
+}
+
+// NewTiles generates a fresh set of tiles.
+func NewTiles() [gridHeight][gridWidth]Tile {
+	t := [gridHeight][gridWidth]Tile{}
+	for i := range t {
+		for j := range t[i] {
+			t[i][j].UUID = uuid.Must(uuid.NewV7())
+		}
+	}
+	return t
 }
 
 // paddedString generates a padded version of the tile's value.
-func (t *tile) paddedString() string {
-	if t.Val == 0 {
-		return strings.Repeat(" ", 3)
-	}
-
+func (t *Tile) paddedString() string {
 	s := fmt.Sprintf("%d", t.Val)
 	switch len(s) {
 	case 1:
@@ -315,4 +339,23 @@ func (t *tile) paddedString() string {
 	default:
 		return s
 	}
+}
+
+// Equal returns whether tile t1 is equal to t2.
+func (t1 *Tile) Equal(t2 Tile) bool {
+	return t1.Val == t2.Val &&
+		t1.Cmb == t2.Cmb &&
+		t1.UUID == t2.UUID
+}
+
+// EqualGrid returns whether grid g1 is equal to g2.
+func EqualGrid(g1, g2 [gridWidth][gridHeight]Tile) bool {
+	for i := 0; i < gridWidth; i++ {
+		for j := 0; j < gridHeight; j++ {
+			if !g1[i][j].Equal(g2[i][j]) {
+				return false
+			}
+		}
+	}
+	return true
 }

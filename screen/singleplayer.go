@@ -1,6 +1,7 @@
 package screen
 
 import (
+	"encoding/json"
 	"fmt"
 
 	game "github.com/z-riley/go-2048-battle"
@@ -27,7 +28,7 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		win:     win,
 		backend: backend.NewGame(),
 
-		arena: common.NewArena(),
+		arena: common.NewArena(turdgl.Vec{X: 700, Y: 80}),
 
 		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 100, Y: 100}, game.FontPath),
 		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 500, Y: 100}, game.FontPath),
@@ -37,10 +38,23 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 
 // Init initialises the screen.
 func (s *SingleplayerScreen) Init() {
+	// Load initial UI
+	// Serialise and deserialise grid to simulate receiving JSON from server
+	b, err := s.backend.Serialise()
+	if err != nil {
+		panic(err)
+	}
+	var game backend.Game
+	if err := json.Unmarshal(b, &game); err != nil {
+		panic(err)
+	}
+
+	// Load debug UI
 	s.debugGridText.SetText(s.backend.Grid.Debug())
 	s.debugTimeText.SetText(s.backend.Timer.Time.String())
 	s.debugScoreText.SetText(fmt.Sprint(s.backend.Score.Current))
 
+	// Set keybinds
 	s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
 		s.backend.ExecuteMove(grid.DirUp)
 		s.debugGridText.SetText(s.backend.Grid.Debug())
@@ -59,6 +73,7 @@ func (s *SingleplayerScreen) Init() {
 	})
 	s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
 		s.backend.Reset()
+		s.arena.Reset()
 	})
 }
 
@@ -88,14 +103,18 @@ func (s *SingleplayerScreen) Update() {
 		fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
 	)
 
-	// TODO: backend must send current vector for each tile and what the grid looks like before and after
-	// For now, draw a static arena based on serialised game state
+	// Serialise and deserialise grid to simulate receiving JSON from server
 	b, err := s.backend.Serialise()
 	if err != nil {
 		panic(err)
 	}
-	s.arena.Load(b)
-	s.win.Draw(s.arena)
+	var game backend.Game
+	if err := json.Unmarshal(b, &game); err != nil {
+		panic(err)
+	}
+
+	s.arena.Animate(game)
+	s.arena.Draw(s.win) // TODO: ONLY DRAW NON-ZERO TILES
 
 	s.win.Draw(s.debugGridText)
 	s.win.Draw(s.debugTimeText)

@@ -17,11 +17,9 @@ var (
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
 )
 
-// TileColour returns the colour for a tile of a given value.
-func TileColour(val int) color.Color {
+// tileColour returns the colour for a tile of a given value.
+func tileColour(val int) color.Color {
 	switch val {
-	case 0:
-		return turdgl.RGB(60, 60, 60)
 	case 2:
 		return turdgl.RGB(236, 229, 219)
 	case 4:
