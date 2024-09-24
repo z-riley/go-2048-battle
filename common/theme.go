@@ -20,6 +20,11 @@ var (
 	arenaBackgroundColour = turdgl.RGB(167, 153, 140)
 )
 
+const (
+	FontPathMedium = "./assets/ClearSans/ClearSans-Medium.ttf"
+	FontPathBold   = "./assets/ClearSans/ClearSans-Medium.ttf"
+)
+
 // tileColour returns the colour for a tile of a given value.
 func tileColour(val int) color.Color {
 	switch val {

@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"time"
 
-	game "github.com/z-riley/go-2048-battle"
+	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/turdgl"
 )
 
@@ -19,12 +19,12 @@ type DebugWidget struct {
 }
 
 func NewDebugWidget(win *turdgl.Window) *DebugWidget {
-	location := turdgl.NewText("Loc: ", turdgl.Vec{X: 1090, Y: 25}, game.FontPath).
+	location := turdgl.NewText("Loc: ", turdgl.Vec{X: 1090, Y: 25}, common.FontPathMedium).
 		SetColour(color.RGBA{255, 255, 255, 255}).
 		SetAlignment(turdgl.AlignTopRight).
 		SetSize(12)
 
-	fps := turdgl.NewText("FPS: -", turdgl.Vec{X: 1150, Y: 25}, game.FontPath).
+	fps := turdgl.NewText("FPS: -", turdgl.Vec{X: 1150, Y: 25}, common.FontPathMedium).
 		SetColour(color.RGBA{255, 255, 255, 255}).
 		SetAlignment(turdgl.AlignTopRight).
 		SetSize(12)

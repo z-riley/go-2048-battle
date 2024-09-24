@@ -1,7 +1,6 @@
 package screen
 
 import (
-	game "github.com/z-riley/go-2048-battle"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/turdgl"
 )
@@ -16,7 +15,7 @@ type TitleScreen struct {
 // NewTitle Screen constructs a new title screen for the given window.
 func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 	// Main title
-	title := turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 120}, game.FontPath).
+	title := turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
 		SetColour(common.LightFontColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)

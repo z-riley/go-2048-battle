@@ -3,7 +3,6 @@ package common
 import (
 	"image/color"
 
-	game "github.com/z-riley/go-2048-battle"
 	"github.com/z-riley/turdgl"
 )
 
@@ -18,7 +17,7 @@ func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
 	)
 	r.SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
 
-	t := turdgl.NewTextBox(r, game.FontPath).
+	t := turdgl.NewTextBox(r, FontPathMedium).
 		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
 		SetText("Click to edit").
 		SetTextSize(36).

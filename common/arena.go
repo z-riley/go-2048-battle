@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	game "github.com/z-riley/go-2048-battle"
 	"github.com/z-riley/go-2048-battle/backend"
 	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/turdgl"
@@ -16,10 +15,10 @@ import (
 // Tile settings
 const (
 	tileSizePx        float64 = 72
-	tileBoundryFactor float64 = 0.2
+	tileBoundryFactor float64 = 0.15
 	tileSpacingPx     float64 = tileSizePx * (1 + tileBoundryFactor)
 	tileCornerRadius          = 3
-	tileFont                  = game.FontPath
+	tileFont                  = FontPathBold
 
 	arenaSize = grid.GridLen
 )
@@ -37,11 +36,13 @@ func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
 		tb: turdgl.NewTextBox(
 			turdgl.NewCurvedRect(sizePx, sizePx, tileCornerRadius, pos),
 			tileFont).
-			SetTextAlignment(turdgl.AlignTopCentre).
+			SetTextSize(tileFontSize(val)).
+			SetTextAlignment(turdgl.AlignCustom).
 			SetText(fmt.Sprint(val)).
 			SetTextColour(tileTextColour(val)),
 		pos: posIdx,
 	}
+	tile.tb.Body.SetOffset(turdgl.Vec{X: 0, Y: 28})
 	tile.tb.Shape.SetStyle(turdgl.Style{Colour: tileColour(val)})
 
 	return &tile
@@ -414,6 +415,19 @@ func (a *Arena) trimTiles() {
 		}
 	}
 	a.tiles = remainingTiles
+}
+
+// tileFontSize returns the font size for a tile of a given value.
+func tileFontSize(val int) float64 {
+	chars := len(fmt.Sprint(val))
+	switch {
+	case chars < 4:
+		return 36
+	case chars == 4:
+		return 26
+	default:
+		return 18
+	}
 }
 
 // coord contains Cartesian coordinates.

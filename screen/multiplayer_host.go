@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 
-	game "github.com/z-riley/go-2048-battle"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/turdgl"
 )
@@ -20,7 +19,7 @@ type MultiplayerHostScreen struct {
 
 // NewTitle Screen constructs a new multiplayer host screen for the given window.
 func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
-	title := turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, game.FontPath).
+	title := turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
 		SetColour(common.LightFontColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	game "github.com/z-riley/go-2048-battle"
 	"github.com/z-riley/go-2048-battle/backend"
 	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/go-2048-battle/common"
@@ -32,9 +31,9 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		arena:        common.NewArena(turdgl.Vec{X: 700, Y: 80}),
 		arenaInputCh: make(chan func(), 100),
 
-		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 100, Y: 100}, game.FontPath),
-		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 500, Y: 100}, game.FontPath),
-		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 400, Y: 100}, game.FontPath),
+		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 100, Y: 100}, common.FontPathMedium),
+		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 500, Y: 100}, common.FontPathMedium),
+		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 400, Y: 100}, common.FontPathMedium),
 	}
 }
 
