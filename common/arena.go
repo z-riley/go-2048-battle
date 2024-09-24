@@ -152,11 +152,11 @@ func (a *Arena) Animate(game backend.Game) {
 func (a *Arena) handleAnimations() {
 	for animationState := range a.animationCh {
 
-		fmt.Print("Animations:")
-		for _, a := range animationState.animations {
-			fmt.Printf(" %+v,", a.String())
-		}
-		fmt.Print("\n")
+		// fmt.Print("Animations:")
+		// for _, a := range animationState.animations {
+		// 	fmt.Printf(" %+v,", a.String())
+		// }
+		// fmt.Print("\n")
 
 		// Listen to errors being produced by animations
 		errCh := make(chan error, arenaSize*arenaSize)
@@ -236,7 +236,7 @@ func (a *Arena) animateMove(animation moveAnimation, errCh chan (error), wg *syn
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
 	for i := 0; i < steps; i++ {
 		tile.tb.Move(moveStep)
-		time.Sleep(6 * time.Millisecond)
+		time.Sleep(5 * time.Millisecond)
 	}
 
 	// Update local tile state with new position
@@ -261,7 +261,7 @@ func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh cha
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
 	for i := 0; i < steps; i++ {
 		originTile.tb.Move(moveStep)
-		time.Sleep(6 * time.Millisecond)
+		time.Sleep(5 * time.Millisecond)
 	}
 
 	// Mark tiles for destruction. The combined tile will be newly spawned seperately
@@ -307,7 +307,7 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan (error), wg *s
 	// Animate tile growing to normal size
 	const (
 		growPx   = (tileSizePx - originalSize) / 2
-		steps    = 10
+		steps    = 11
 		stepSize = growPx / steps
 	)
 	shape := newTile.tb.Shape
@@ -316,7 +316,7 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan (error), wg *s
 		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
 		shape.SetHeight(originalSize + i*2)
 		shape.SetWidth(originalSize + i*2)
-		time.Sleep(25 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
@@ -357,13 +357,14 @@ func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh c
 		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
 		shape.SetHeight(tileSizePx + i*2)
 		shape.SetWidth(tileSizePx + i*2)
-		time.Sleep(30 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
+	time.Sleep(30 * time.Millisecond)
 	for i := float64(expandPx) - 1; i > 0; i-- {
 		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
 		shape.SetHeight(tileSizePx + i*2)
 		shape.SetWidth(tileSizePx + i*2)
-		time.Sleep(30 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
