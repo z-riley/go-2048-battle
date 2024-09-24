@@ -50,3 +50,15 @@ func tileColour(val int) color.Color {
 		return turdgl.RGB(255, 0, 0)
 	}
 }
+
+// tileTextColour returns the colour of the text for tile of a given value.
+func tileTextColour(val int) color.Color {
+	switch val {
+	case 2:
+		return turdgl.RGB(120, 110, 100)
+	case 4:
+		return turdgl.RGB(120, 110, 100)
+	default:
+		return turdgl.RGB(252, 247, 244)
+	}
+}

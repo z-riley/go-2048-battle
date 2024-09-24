@@ -30,6 +30,21 @@ type tile struct {
 	destroy bool  // flag for self-destruction
 }
 
+// newTile constructs a new tile with the correct style.
+func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
+	tile := tile{
+		tb: turdgl.NewTextBox(
+			turdgl.NewCurvedRect(sizePx, sizePx, tileCornerRadius, pos), tileFont).
+			SetTextAlignment(turdgl.AlignTopCentre).
+			SetText(fmt.Sprint(val)).
+			SetTextColour(tileTextColour(val)),
+		pos: posIdx,
+	}
+	tile.tb.Shape.SetStyle(turdgl.Style{Colour: tileColour(val)})
+
+	return &tile
+}
+
 // animationData contains animations and the current game state.
 type animationState struct {
 	animations []animation
@@ -49,8 +64,8 @@ type Arena struct {
 func NewArena(pos turdgl.Vec) *Arena {
 	// Generate background tiles
 	bgTiles := [arenaSize][arenaSize]*turdgl.CurvedRect{}
-	for i := 0; i < arenaSize; i++ {
-		for j := 0; j < arenaSize; j++ {
+	for i := range arenaSize {
+		for j := range arenaSize {
 			bgTiles[j][i] = turdgl.NewCurvedRect(
 				tileSizePx, tileSizePx, tileCornerRadius,
 				turdgl.Vec{
@@ -83,8 +98,8 @@ func (a *Arena) Destroy() {
 
 // Draw draws the arena.
 func (a *Arena) Draw(win *turdgl.Window) {
-	for i := 0; i < arenaSize; i++ {
-		for j := 0; j < arenaSize; j++ {
+	for i := range arenaSize {
+		for j := range arenaSize {
 			win.DrawBackground(a.bgTiles[j][i])
 		}
 	}
@@ -96,25 +111,20 @@ func (a *Arena) Draw(win *turdgl.Window) {
 // Load updates the arena to match the backend game data.
 func (a *Arena) Load(g backend.Game) {
 	var newTiles []*tile
-	for i := 0; i < arenaSize; i++ {
-		for j := 0; j < arenaSize; j++ {
+	for i := range arenaSize {
+		for j := range arenaSize {
 			val := g.Grid.Tiles[i][j].Val
 			if val != 0 {
-				tb := turdgl.NewTextBox(
-					turdgl.NewCurvedRect(
-						tileSizePx, tileSizePx, tileCornerRadius,
+				newTiles = append(newTiles,
+					newTile(
+						tileSizePx,
 						turdgl.Vec{
 							X: a.pos.X + float64(j)*tileSpacingPx,
 							Y: a.pos.Y + float64(i)*tileSpacingPx,
 						},
-					), tileFont).
-					SetTextAlignment(turdgl.AlignTopCentre).
-					SetText(fmt.Sprint(val))
-				tb.Shape.SetStyle(turdgl.Style{Colour: tileColour(val)})
-				newTiles = append(newTiles, &tile{
-					tb:  tb,
-					pos: coord{j, i},
-				})
+						val,
+						coord{j, i},
+					))
 			}
 		}
 	}
@@ -288,26 +298,21 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan (error), wg *s
 
 	// Make a small new tile
 	const originalSize = tileSizePx / 6
-	newTile := &tile{
-		tb: turdgl.NewTextBox(
-			turdgl.NewCurvedRect(
-				originalSize, originalSize, tileCornerRadius,
-				turdgl.Vec{
-					X: a.pos.X + float64(dest.x)*tileSpacingPx + (tileSizePx-originalSize)/2,
-					Y: a.pos.Y + float64(dest.y)*tileSpacingPx + (tileSizePx-originalSize)/2,
-				},
-			), tileFont).
-			SetTextAlignment(turdgl.AlignTopCentre).
-			SetText(fmt.Sprint(newVal)),
-		pos: dest,
-	}
+	newTile := newTile(
+		originalSize,
+		turdgl.Vec{
+			X: a.pos.X + float64(dest.x)*tileSpacingPx + (tileSizePx-originalSize)/2,
+			Y: a.pos.Y + float64(dest.y)*tileSpacingPx + (tileSizePx-originalSize)/2,
+		},
+		newVal,
+		dest,
+	)
 	a.tiles = append(a.tiles, newTile)
-	newTile.tb.Shape.SetStyle(turdgl.Style{Colour: tileColour(newVal)})
 
 	// Animate tile growing to normal size
 	const (
 		growPx   = (tileSizePx - originalSize) / 2
-		steps    = 11
+		steps    = 10
 		stepSize = growPx / steps
 	)
 	shape := newTile.tb.Shape
@@ -333,21 +338,16 @@ func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh c
 	}
 
 	// Make a new tile
-	newTile := &tile{
-		tb: turdgl.NewTextBox(
-			turdgl.NewCurvedRect(
-				tileSizePx, tileSizePx, 3,
-				turdgl.Vec{
-					X: a.pos.X + float64(dest.x)*tileSpacingPx,
-					Y: a.pos.Y + float64(dest.y)*tileSpacingPx,
-				},
-			), tileFont).
-			SetTextAlignment(turdgl.AlignTopCentre).
-			SetText(fmt.Sprint(newVal)),
-		pos: dest,
-	}
+	newTile := newTile(
+		tileSizePx,
+		turdgl.Vec{
+			X: a.pos.X + float64(dest.x)*tileSpacingPx,
+			Y: a.pos.Y + float64(dest.y)*tileSpacingPx,
+		},
+		newVal,
+		dest,
+	)
 	a.tiles = append(a.tiles, newTile)
-	newTile.tb.Shape.SetStyle(turdgl.Style{Colour: tileColour(newVal)})
 
 	// Animate tile growing and shrinking back to normal size
 	const expandPx = 5
