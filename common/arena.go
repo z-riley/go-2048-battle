@@ -30,12 +30,19 @@ type tile struct {
 	destroy bool  // flag for self-destruction
 }
 
+// animationData contains animations and the current game state.
+type animationState struct {
+	animations []animation
+	gameState  backend.Game
+}
+
 // Arena displays the grid of a game.
 type Arena struct {
-	pos         turdgl.Vec
+	pos         turdgl.Vec                               // pixel position of the arena anchor
 	tiles       []*tile                                  // every non-zero tile
 	bgTiles     [arenaSize][arenaSize]*turdgl.CurvedRect // every grid space
 	latestState backend.Game                             // used to detect changes in game state (for animations etc...)
+	animationCh chan (animationState)                    // for sending animations to animator goroutine
 }
 
 // NewArena constructs a new arena widget.
@@ -55,12 +62,23 @@ func NewArena(pos turdgl.Vec) *Arena {
 		}
 	}
 
-	return &Arena{
+	a := Arena{
 		pos:         pos,
 		tiles:       make([]*tile, 0, arenaSize*arenaSize),
 		bgTiles:     bgTiles,
 		latestState: backend.Game{Grid: &grid.Grid{Tiles: [4][4]grid.Tile{}}},
+		animationCh: make(chan animationState, 50),
 	}
+
+	// Begin listening to animation channel
+	go a.handleAnimations()
+
+	return &a
+}
+
+// Destroy tears down the arena.
+func (a *Arena) Destroy() {
+	close(a.animationCh)
 }
 
 // Draw draws the arena.
@@ -125,54 +143,93 @@ func (a *Arena) Animate(game backend.Game) {
 	if len(tileAnimations) == 0 {
 		return
 	}
-	fmt.Print("Animations:")
-	for _, a := range tileAnimations {
-		fmt.Printf(" %+v,", a.String())
-	}
-	fmt.Print("\n")
 
-	// Animations are asynchronous so the screen can update itself simultaneously
-	go func() {
-		// Animate all of the moving and combining tiles first
+	// Send the animations for the turn down the animation channel
+	a.animationCh <- animationState{tileAnimations, game}
+}
+
+// handleAnimations executes animations from the animation channel.
+func (a *Arena) handleAnimations() {
+	for animationState := range a.animationCh {
+
+		fmt.Print("Animations:")
+		for _, a := range animationState.animations {
+			fmt.Printf(" %+v,", a.String())
+		}
+		fmt.Print("\n")
+
+		// Listen to errors being produced by animations
+		errCh := make(chan error, arenaSize*arenaSize)
+
+		// Animate stage 1: tiles moving and combining
 		var wg sync.WaitGroup
-		for _, animation := range tileAnimations {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-
-				switch animation := animation.(type) {
-				case moveAnimation:
-					a.animateMove(animation)
-				case moveToCombineAnimation:
-					a.animateMoveToCombine(animation)
-				}
-			}()
+		for _, animation := range animationState.animations {
+			switch animation := animation.(type) {
+			case moveAnimation:
+				wg.Add(1)
+				go a.animateMove(animation, errCh, &wg)
+			case moveToCombineAnimation:
+				wg.Add(1)
+				go a.animateMoveToCombine(animation, errCh, &wg)
+			}
 		}
 		wg.Wait()
+
+		// Handle errors from stage 1
+		select {
+		case err := <-errCh:
+			fmt.Printf("Error \"%v\". Resetting to latest game state\n", err)
+			a.Load(animationState.gameState)
+		default:
+		}
 
 		// Remove tiles that have been marked for destruction
 		a.trimTiles()
 
-		// Animate newly spawned tiles
-		for _, animation := range tileAnimations {
+		// Animate stage 2: spawn new tiles
+		for _, animation := range animationState.animations {
 			switch animation := animation.(type) {
 			case spawnAnimation:
-				go a.animateSpawn(animation)
+				wg.Add(1)
+				go a.animateSpawn(animation, errCh, &wg)
 			case newFromCombineAnimation:
-				go a.animateNewFromCombine(animation)
+				wg.Add(1)
+				go a.animateNewFromCombine(animation, errCh, &wg)
 			}
 		}
-	}()
+		wg.Wait()
+
+		// Handle errors from stage 2
+		select {
+		case err := <-errCh:
+			fmt.Printf("Error \"%v\". Resetting to latest game state\n", err)
+			a.Load(animationState.gameState)
+		default:
+		}
+		close(errCh)
+
+		// Check number of tiles
+		uiTiles := len(a.tiles)
+		backendTiles := animationState.gameState.Grid.NumTiles()
+		if uiTiles != backendTiles {
+			fmt.Println("Found tile count mismatch. Reloading grid")
+			a.Load(animationState.gameState)
+		}
+
+	}
 }
 
 // animateMove animates a tile moving.
-func (a *Arena) animateMove(animation moveAnimation) {
+func (a *Arena) animateMove(animation moveAnimation, errCh chan (error), wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	origin, dest := animation.origin, animation.dest
 
 	// Move origin tile to destination
 	tile, err := a.tileAtIdx(origin)
 	if err != nil {
-		panic(fmt.Sprint("could not find origin tile at", origin))
+		errCh <- fmt.Errorf("animateMove could not find origin tile at %v", origin)
+		return
 	}
 	moveVec := turdgl.Sub(a.tilePos(dest), a.tilePos(origin))
 	const steps = 20
@@ -186,14 +243,47 @@ func (a *Arena) animateMove(animation moveAnimation) {
 	tile.pos = dest
 }
 
+// animateMoveToCombine animates a tile moving into another like tile, resulting
+// in a combine.
+func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh chan (error), wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	origin, dest := animation.origin, animation.dest
+
+	// Move origin tile to destination
+	originTile, err := a.tileAtIdx(origin)
+	if err != nil {
+		errCh <- fmt.Errorf("animateMoveToCombine could not find origin tile at %v", origin)
+		return
+	}
+	moveVec := turdgl.Sub(a.tilePos(dest), a.tilePos(origin))
+	const steps = 20
+	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
+	for i := 0; i < steps; i++ {
+		originTile.tb.Move(moveStep)
+		time.Sleep(6 * time.Millisecond)
+	}
+
+	// Mark tiles for destruction. The combined tile will be newly spawned seperately
+	destTile, err := a.tileAtIdx(dest)
+	if err == nil {
+		// There may or may not already be a tile at the destination
+		destTile.destroy = true
+	}
+	originTile.destroy = true
+}
+
 // animateSpawn animates a tile spawn animation.
-func (a *Arena) animateSpawn(animation spawnAnimation) {
+func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan (error), wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	dest := animation.dest
 	newVal := animation.newVal
 
 	t, err := a.tileAtIdx(dest)
 	if err == nil {
-		panic(fmt.Sprint("tile shouldn't already exist at", t.pos))
+		errCh <- fmt.Errorf("aninimateSpawn - tile shouldn't already exist at %v", t.pos)
+		return
 	}
 
 	// Make a small new tile
@@ -230,42 +320,16 @@ func (a *Arena) animateSpawn(animation spawnAnimation) {
 	}
 }
 
-// animateMoveToCombine animates a tile moving into another like tile, resulting
-// in a combine.
-func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation) {
-	origin, dest := animation.origin, animation.dest
+func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh chan (error), wg *sync.WaitGroup) {
+	defer wg.Done()
 
-	// Move origin tile to destination
-	originTile, err := a.tileAtIdx(origin)
-	if err != nil {
-		panic(fmt.Sprint("could not find origin tile at", origin))
-	}
-	moveVec := turdgl.Sub(a.tilePos(dest), a.tilePos(origin))
-	const steps = 20
-	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
-	for i := 0; i < steps; i++ {
-		originTile.tb.Move(moveStep)
-		time.Sleep(6 * time.Millisecond)
-	}
-
-	// Mark tiles for destruction. The combined tile will be newly spawned seperately
-	destTile, err := a.tileAtIdx(dest)
-	if err == nil {
-		// There may or may not already be a tile at the destination
-		fmt.Println("Setting", destTile.pos, "destroy=true")
-		destTile.destroy = true
-	}
-	fmt.Println("Setting", originTile.pos, "destroy=true")
-	originTile.destroy = true
-}
-
-func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation) {
 	dest := animation.dest
 	newVal := animation.newVal
 
 	t, err := a.tileAtIdx(dest)
 	if err == nil {
-		panic(fmt.Sprint("tile shouldn't already exist at", t.pos))
+		errCh <- fmt.Errorf("animateNewFromCombine - tile shouldn't already exist at %v", t.pos)
+		return
 	}
 
 	// Make a new tile
@@ -329,8 +393,6 @@ func (a *Arena) trimTiles() {
 	for _, t := range a.tiles {
 		if !t.destroy {
 			remainingTiles = append(remainingTiles, t)
-		} else {
-			fmt.Println("Removing tile at", t.pos)
 		}
 	}
 	a.tiles = remainingTiles
@@ -474,8 +536,6 @@ func generateAnimations(before, after [arenaSize][arenaSize]grid.Tile, dir grid.
 			}
 			// Tiles with the Cmb set are from combinations
 			if after[y][x].Cmb {
-				fmt.Println("New combination at", coord{x, y}, "from", dir, "move")
-
 				// Newly formed tile from combination
 				moves = append(moves, newFromCombineAnimation{
 					dest:   coord{x, y},
@@ -493,8 +553,6 @@ func generateAnimations(before, after [arenaSize][arenaSize]grid.Tile, dir grid.
 					beforeRow = [arenaSize]grid.Tile{before[0][x], before[1][x], before[2][x], before[3][x]}
 					afterRow = [arenaSize]grid.Tile{after[0][x], after[1][x], after[2][x], after[3][x]}
 				}
-				fmt.Println("beforeRow:", beforeRow)
-				fmt.Println("afterRow:", afterRow)
 
 				// The tiles that combined in the last turn can be ascertained from which tiles are
 				// missing, and the direction of movement

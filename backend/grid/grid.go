@@ -81,6 +81,19 @@ func (g *Grid) ClearCmbFlags() {
 	}
 }
 
+// NumTiles returns the number of non zero tiles on the grid.
+func (g *Grid) NumTiles() int {
+	n := 0
+	for i := range g.Tiles {
+		for j := range g.Tiles[i] {
+			if g.Tiles[i][j].Val != 0 {
+				n++
+			}
+		}
+	}
+	return n
+}
+
 // Outcome represents the outcome of a game.
 type Outcome int
 

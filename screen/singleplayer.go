@@ -15,7 +15,8 @@ type SingleplayerScreen struct {
 	win     *turdgl.Window
 	backend *backend.Game
 
-	arena *common.Arena
+	arena        *common.Arena
+	arenaInputCh chan (func())
 
 	debugGridText  *turdgl.Text
 	debugTimeText  *turdgl.Text
@@ -28,7 +29,8 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		win:     win,
 		backend: backend.NewGame(),
 
-		arena: common.NewArena(turdgl.Vec{X: 700, Y: 80}),
+		arena:        common.NewArena(turdgl.Vec{X: 700, Y: 80}),
+		arenaInputCh: make(chan func(), 100),
 
 		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 100, Y: 100}, game.FontPath),
 		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 500, Y: 100}, game.FontPath),
@@ -38,42 +40,43 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 
 // Init initialises the screen.
 func (s *SingleplayerScreen) Init() {
-	// Load initial UI
-	// Serialise and deserialise grid to simulate receiving JSON from server
-	b, err := s.backend.Serialise()
-	if err != nil {
-		panic(err)
-	}
-	var game backend.Game
-	if err := json.Unmarshal(b, &game); err != nil {
-		panic(err)
-	}
-
 	// Load debug UI
 	s.debugGridText.SetText(s.backend.Grid.Debug())
 	s.debugTimeText.SetText(s.backend.Timer.Time.String())
 	s.debugScoreText.SetText(fmt.Sprint(s.backend.Score.Current))
 
-	// Set keybinds
+	// Set keybinds. User inputs are sent to the backend via a buffered channel
+	// so the backend game cannot execute multiple moves before the frontend has
+	// finished animating the first one
 	s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
-		s.backend.ExecuteMove(grid.DirUp)
-		s.debugGridText.SetText(s.backend.Grid.Debug())
+		s.arenaInputCh <- func() {
+			s.backend.ExecuteMove(grid.DirUp)
+			s.debugGridText.SetText(s.backend.Grid.Debug())
+		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
-		s.backend.ExecuteMove(grid.DirDown)
-		s.debugGridText.SetText(s.backend.Grid.Debug())
+		s.arenaInputCh <- func() {
+			s.backend.ExecuteMove(grid.DirDown)
+			s.debugGridText.SetText(s.backend.Grid.Debug())
+		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
-		s.backend.ExecuteMove(grid.DirLeft)
-		s.debugGridText.SetText(s.backend.Grid.Debug())
+		s.arenaInputCh <- func() {
+			s.backend.ExecuteMove(grid.DirLeft)
+			s.debugGridText.SetText(s.backend.Grid.Debug())
+		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
-		s.backend.ExecuteMove(grid.DirRight)
-		s.debugGridText.SetText(s.backend.Grid.Debug())
+		s.arenaInputCh <- func() {
+			s.backend.ExecuteMove(grid.DirRight)
+			s.debugGridText.SetText(s.backend.Grid.Debug())
+		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
-		s.backend.Reset()
-		s.arena.Reset()
+		s.arenaInputCh <- func() {
+			s.backend.Reset()
+			s.arena.Reset()
+		}
 	})
 }
 
@@ -90,6 +93,7 @@ func (s *SingleplayerScreen) Deinit() {
 	s.win.UnregisterKeybind(turdgl.KeyLeft, turdgl.KeyPress)
 	s.win.UnregisterKeybind(turdgl.KeyRight, turdgl.KeyPress)
 
+	s.arena.Destroy()
 }
 
 // Update updates and draws the singleplayer screen.
@@ -103,6 +107,15 @@ func (s *SingleplayerScreen) Update() {
 		fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
 	)
 
+	// Handle user inputs from user. Only 1 input must be sent per update cycle,
+	// because the frontend can only animate one move at a time.
+	select {
+	case inputFunc := <-s.arenaInputCh:
+		inputFunc()
+	default:
+		// No user input; continue
+	}
+
 	// Serialise and deserialise grid to simulate receiving JSON from server
 	b, err := s.backend.Serialise()
 	if err != nil {
@@ -113,9 +126,11 @@ func (s *SingleplayerScreen) Update() {
 		panic(err)
 	}
 
+	// Draw arena of tiles
 	s.arena.Animate(game)
-	s.arena.Draw(s.win) // TODO: ONLY DRAW NON-ZERO TILES
+	s.arena.Draw(s.win)
 
+	// Draw temporary debug grid
 	s.win.Draw(s.debugGridText)
 	s.win.Draw(s.debugTimeText)
 	s.win.Draw(s.debugScoreText)
