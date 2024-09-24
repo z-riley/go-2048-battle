@@ -38,10 +38,28 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 }
 
 // Init initialises the screen.
-func (s *MultiplayerMenuScreen) Init() {}
+func (s *MultiplayerMenuScreen) Init() {
+	s.win.RegisterKeybind(turdgl.Key1, turdgl.KeyRelease, func() {
+		SetScreen(MultiplayerJoin)
+	})
+	s.win.RegisterKeybind(turdgl.Key2, turdgl.KeyRelease, func() {
+		SetScreen(MultiplayerHost)
+	})
+	s.win.RegisterKeybind(turdgl.Key3, turdgl.KeyRelease, func() {
+		SetScreen(Title)
+	})
+	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+		SetScreen(Title)
+	})
+}
 
 // Deinit deinitialises the screen.
-func (s *MultiplayerMenuScreen) Deinit() {}
+func (s *MultiplayerMenuScreen) Deinit() {
+	s.win.UnregisterKeybind(turdgl.Key1, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(turdgl.Key2, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(turdgl.Key3, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
+}
 
 // Update updates and draws multiplayer menu screen.
 func (s *MultiplayerMenuScreen) Update() {

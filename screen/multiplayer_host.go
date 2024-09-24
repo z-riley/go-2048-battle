@@ -52,10 +52,16 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 }
 
 // Init initialises the screen.
-func (s *MultiplayerHostScreen) Init() {}
+func (s *MultiplayerHostScreen) Init() {
+	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+		SetScreen(MultiplayerMenu)
+	})
+}
 
 // Deinit deinitialises the screen.
-func (s *MultiplayerHostScreen) Deinit() {}
+func (s *MultiplayerHostScreen) Deinit() {
+	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
+}
 
 // Update updates and draws multiplayer host screen.
 func (s *MultiplayerHostScreen) Update() {

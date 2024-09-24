@@ -20,13 +20,11 @@ func main() {
 	defer win.Destroy()
 
 	// Register window-level keybinds (for development only)
-	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
 	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
 
 	// Create screens
 	screen.Init(win)
 	screen.SetScreen(screen.Title)
-	screen.SetScreen(screen.Singleplayer)
 
 	debugWidget := debug.NewDebugWidget(win)
 

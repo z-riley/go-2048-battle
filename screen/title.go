@@ -47,6 +47,9 @@ func (s *TitleScreen) Init() {
 		SetScreen(MultiplayerMenu)
 	})
 	s.win.RegisterKeybind(turdgl.Key3, turdgl.KeyRelease, s.win.Quit)
+	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+		SetScreen(Title)
+	})
 }
 
 // Deinit deinitialises the screen.
@@ -54,6 +57,7 @@ func (s *TitleScreen) Deinit() {
 	s.win.UnregisterKeybind(turdgl.Key1, turdgl.KeyRelease)
 	s.win.UnregisterKeybind(turdgl.Key2, turdgl.KeyRelease)
 	s.win.UnregisterKeybind(turdgl.Key3, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
 }
 
 // Update draws the title screen and updates its components.

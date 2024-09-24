@@ -46,10 +46,16 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 }
 
 // Init initialises the screen.
-func (s *MultiplayerJoinScreen) Init() {}
+func (s *MultiplayerJoinScreen) Init() {
+	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+		SetScreen(MultiplayerMenu)
+	})
+}
 
 // Deinit deinitialises the screen.
-func (s *MultiplayerJoinScreen) Deinit() {}
+func (s *MultiplayerJoinScreen) Deinit() {
+	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
+}
 
 // Update updates and draws multiplayer join screen.
 func (s *MultiplayerJoinScreen) Update() {

@@ -77,6 +77,9 @@ func (s *SingleplayerScreen) Init() {
 			s.arena.Reset()
 		}
 	})
+	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
+		SetScreen(Title)
+	})
 }
 
 // Deinit deinitialises the screen.
@@ -91,6 +94,7 @@ func (s *SingleplayerScreen) Deinit() {
 	s.win.UnregisterKeybind(turdgl.KeyDown, turdgl.KeyPress)
 	s.win.UnregisterKeybind(turdgl.KeyLeft, turdgl.KeyPress)
 	s.win.UnregisterKeybind(turdgl.KeyRight, turdgl.KeyPress)
+	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyPress)
 
 	s.arena.Destroy()
 }
