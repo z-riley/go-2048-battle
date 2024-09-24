@@ -15,10 +15,11 @@ import (
 
 // Tile settings
 const (
-	tileSizePx       float64 = 60
-	tileSpacingPx    float64 = tileSizePx * 1.2
-	tileCornerRadius         = 3
-	tileFont                 = game.FontPath
+	tileSizePx        float64 = 72
+	tileBoundryFactor float64 = 0.2
+	tileSpacingPx     float64 = tileSizePx * (1 + tileBoundryFactor)
+	tileCornerRadius          = 3
+	tileFont                  = game.FontPath
 
 	arenaSize = grid.GridLen
 )
@@ -34,7 +35,8 @@ type tile struct {
 func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
 	tile := tile{
 		tb: turdgl.NewTextBox(
-			turdgl.NewCurvedRect(sizePx, sizePx, tileCornerRadius, pos), tileFont).
+			turdgl.NewCurvedRect(sizePx, sizePx, tileCornerRadius, pos),
+			tileFont).
 			SetTextAlignment(turdgl.AlignTopCentre).
 			SetText(fmt.Sprint(val)).
 			SetTextColour(tileTextColour(val)),
@@ -53,11 +55,12 @@ type animationState struct {
 
 // Arena displays the grid of a game.
 type Arena struct {
-	pos         turdgl.Vec                               // pixel position of the arena anchor
-	tiles       []*tile                                  // every non-zero tile
-	bgTiles     [arenaSize][arenaSize]*turdgl.CurvedRect // every grid space
-	latestState backend.Game                             // used to detect changes in game state (for animations etc...)
-	animationCh chan (animationState)                    // for sending animations to animator goroutine
+	pos             turdgl.Vec                               // pixel position of the arena anchor
+	tiles           []*tile                                  // every non-zero tile
+	bgTiles         [arenaSize][arenaSize]*turdgl.CurvedRect // every grid space
+	arenaBackground *turdgl.CurvedRect                       // the background of the arena
+	latestState     backend.Game                             // used to detect changes in game state (for animations etc...)
+	animationCh     chan (animationState)                    // for sending animations to animator goroutine
 }
 
 // NewArena constructs a new arena widget.
@@ -73,16 +76,28 @@ func NewArena(pos turdgl.Vec) *Arena {
 					Y: pos.Y + float64(i)*tileSpacingPx,
 				},
 			)
-			bgTiles[j][i].SetStyle(turdgl.Style{Colour: turdgl.DarkSlateGrey})
+			bgTiles[j][i].SetStyle(turdgl.Style{Colour: tileBackgroundColour})
 		}
 	}
 
+	arenaBG := turdgl.NewCurvedRect(
+		tileSpacingPx*4+tileSizePx*tileBoundryFactor,
+		tileSpacingPx*4+tileSizePx*tileBoundryFactor,
+		tileCornerRadius,
+		turdgl.Vec{
+			X: pos.X - tileSizePx*tileBoundryFactor,
+			Y: pos.Y - tileSizePx*tileBoundryFactor,
+		},
+	)
+	arenaBG.SetStyle(turdgl.Style{Colour: arenaBackgroundColour})
+
 	a := Arena{
-		pos:         pos,
-		tiles:       make([]*tile, 0, arenaSize*arenaSize),
-		bgTiles:     bgTiles,
-		latestState: backend.Game{Grid: &grid.Grid{Tiles: [4][4]grid.Tile{}}},
-		animationCh: make(chan animationState, 50),
+		pos:             pos,
+		tiles:           make([]*tile, 0, arenaSize*arenaSize),
+		bgTiles:         bgTiles,
+		arenaBackground: arenaBG,
+		latestState:     backend.Game{Grid: &grid.Grid{Tiles: [4][4]grid.Tile{}}},
+		animationCh:     make(chan animationState, 50),
 	}
 
 	// Begin listening to animation channel
@@ -98,6 +113,8 @@ func (a *Arena) Destroy() {
 
 // Draw draws the arena.
 func (a *Arena) Draw(win *turdgl.Window) {
+	win.DrawBackground(a.arenaBackground)
+
 	for i := range arenaSize {
 		for j := range arenaSize {
 			win.DrawBackground(a.bgTiles[j][i])

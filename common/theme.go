@@ -15,6 +15,9 @@ var (
 
 	buttonColourUnpressed = turdgl.RGB(143, 122, 101)
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
+
+	tileBackgroundColour  = turdgl.RGB(180, 170, 158)
+	arenaBackgroundColour = turdgl.RGB(167, 153, 140)
 )
 
 // tileColour returns the colour for a tile of a given value.
