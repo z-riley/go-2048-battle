@@ -25,6 +25,7 @@ func main() {
 	// Create screens
 	screen.Init(win)
 	screen.SetScreen(screen.Title)
+	screen.SetScreen(screen.MultiplayerHost)
 
 	debugWidget := debug.NewDebugWidget(win)
 

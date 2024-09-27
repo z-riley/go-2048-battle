@@ -11,17 +11,7 @@ type EntryBox struct{ *turdgl.TextBox }
 
 // NewEntryBox constructs a new text box with suitable defaults.
 func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
-	r := turdgl.NewRect(
-		width, height, pos,
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
-	)
-	r.SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
-
-	t := turdgl.NewTextBox(r, FontPathMedium).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
-		SetText("Click to edit").
-		SetTextSize(36).
-		SetTextColour(LightFontColour)
+	t := NewTextBox(width, height, pos)
 	t.SetSelectedCB(func() { t.SetTextColour(turdgl.White) })
 	t.SetDeselectedCB(func() { t.SetTextColour(LightFontColour) })
 
@@ -30,4 +20,20 @@ func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
 
 func (t *EntryBox) Update(win *turdgl.Window) {
 	t.TextBox.Update(win)
+}
+
+func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
+	r := turdgl.NewRect(
+		width, height, pos,
+		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
+	)
+	r.SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
+
+	tb := turdgl.NewTextBox(r, FontPathMedium).
+		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
+		SetText("Click to edit").
+		SetTextSize(36).
+		SetTextColour(LightFontColour)
+
+	return tb
 }
