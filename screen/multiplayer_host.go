@@ -88,6 +88,11 @@ func (s *MultiplayerHostScreen) Init() {
 		SetScreen(MultiplayerMenu)
 	})
 
+	// Set up server
+	s.server.SetCallback(func(id int, msg []byte) {
+		fmt.Println("Received from client", id, ":", string(msg))
+	})
+
 	// Start server to allow other players to connect
 	go func() {
 		s.server.Run("0.0.0.0", serverPort)

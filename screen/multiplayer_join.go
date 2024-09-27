@@ -1,8 +1,11 @@
 package screen
 
 import (
+	"fmt"
+
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/turdgl"
+	"github.com/z-riley/turdserve"
 )
 
 type MultiplayerJoinScreen struct {
@@ -11,6 +14,8 @@ type MultiplayerJoinScreen struct {
 	title   *turdgl.Text
 	buttons []*common.MenuButton
 	entries []*common.EntryBox
+
+	client *turdserve.Client
 }
 
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
@@ -24,25 +29,53 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	ipHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host IP:")
 
 	ipEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
+	ipEntry.SetText("127.0.0.1")
 
 	nameHeading := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}, func() {})
 	nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Your name:")
 
 	nameEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
 
-	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(Title) })
+	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {})
 	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
 
 	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(MultiplayerMenu) })
 	back.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
-	return &MultiplayerJoinScreen{
-		win,
-		title,
-		[]*common.MenuButton{ipHeading, nameHeading, join, back},
-		[]*common.EntryBox{nameEntry, ipEntry},
+	s := MultiplayerJoinScreen{
+		win:     win,
+		title:   title,
+		buttons: []*common.MenuButton{ipHeading, nameHeading, join, back},
+		entries: []*common.EntryBox{nameEntry, ipEntry},
+		client:  turdserve.NewClient(),
 	}
+
+	join.SetCallback(func(mouse turdgl.MouseState) {
+		s.joinGame()
+	})
+
+	return &s
+}
+
+func (s *MultiplayerJoinScreen) joinGame() {
+	fmt.Println("joinGame called")
+
+	ip := s.entries[1].Body.Text()
+	if err := s.client.Connect(ip, serverPort); err != nil {
+		fmt.Println("Client failed to connect. TODO handle this gracefully")
+		return
+	}
+
+	s.client.SetCallback(func(b []byte) {
+		fmt.Println("Received data from server:", string(b))
+	})
+
+	if err := s.client.Write([]byte("hello from client")); err != nil {
+		fmt.Println("Failed to send message to server")
+	}
+
+	// SetScreen(multiplayerGame)
 }
 
 // Init initialises the screen.
