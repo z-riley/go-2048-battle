@@ -11,56 +11,58 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
-type SingleplayerScreen struct {
+type MultiplayerScreen struct {
 	win     *turdgl.Window
 	backend *backend.Game
+
+	title *turdgl.Text
 
 	score     *common.GameUIBox
 	highScore *common.GameUIBox
 	newGame   *turdgl.Button
 
-	arena        *common.Arena
-	arenaInputCh chan (func())
+	arena         *common.Arena
+	arenaInputCh  chan (func())
+	opponentArena *common.Arena
 
 	timer            *turdgl.Text
 	backgroundColour color.RGBA
-
-	debugGridText  *turdgl.Text
-	debugTimeText  *turdgl.Text
-	debugScoreText *turdgl.Text
 }
 
-// NewSingleplayerScreen constructs a new singleplayer menu screen.
-func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
-	s := SingleplayerScreen{
+// NewMultiplayerScreen constructs a new singleplayer menu screen.
+func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
+	s := MultiplayerScreen{
 		win:     win,
-		backend: backend.NewGame(&backend.Opts{SaveToDisk: true}),
+		backend: backend.NewGame(&backend.Opts{SaveToDisk: false}),
+
+		title: turdgl.NewText("Head to Head", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
+			SetColour(common.LightFontColour).
+			SetAlignment(turdgl.AlignCentre).
+			SetSize(40),
 
 		score: common.NewGameTextBox(
 			90, 90,
-			turdgl.Vec{X: 300, Y: 70},
+			turdgl.Vec{X: 100, Y: 70},
 			common.ArenaBackgroundColour,
 		).SetHeading("SCORE"),
 		highScore: common.NewGameTextBox(
 			90, 90,
-			turdgl.Vec{X: 500, Y: 70},
+			turdgl.Vec{X: 220, Y: 70},
 			common.ArenaBackgroundColour,
 		).SetHeading("BEST"),
 
-		arena:        common.NewArena(turdgl.Vec{X: 250, Y: 250}),
+		arena:        common.NewArena(turdgl.Vec{X: 100, Y: 250}),
 		arenaInputCh: make(chan func(), 100),
 
-		timer:            common.NewGameText("", turdgl.Vec{X: 520, Y: 620}),
-		backgroundColour: common.BackgroundColour,
+		opponentArena: common.NewArena(turdgl.Vec{X: 700, Y: 250}),
 
-		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium),
-		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium),
-		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium),
+		timer:            common.NewGameText("", turdgl.Vec{X: 370, Y: 620}),
+		backgroundColour: common.BackgroundColour,
 	}
 
 	s.newGame = common.NewGameButton(
 		200, 50,
-		turdgl.Vec{X: 300, Y: 180},
+		turdgl.Vec{X: 100, Y: 180},
 		func() {
 			s.arenaInputCh <- func() {
 				s.backend.Reset()
@@ -73,37 +75,28 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 }
 
 // Init initialises the screen.
-func (s *SingleplayerScreen) Init() {
-	// Load debug UI
-	s.debugGridText.SetText(s.backend.Grid.Debug())
-	s.debugTimeText.SetText(s.backend.Timer.Time.String())
-	s.debugScoreText.SetText(fmt.Sprint(s.backend.Score.Current))
-
+func (s *MultiplayerScreen) Init() {
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
 	// finished animating the first one
 	s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
 		s.arenaInputCh <- func() {
 			s.backend.ExecuteMove(grid.DirUp)
-			s.debugGridText.SetText(s.backend.Grid.Debug())
 		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
 		s.arenaInputCh <- func() {
 			s.backend.ExecuteMove(grid.DirDown)
-			s.debugGridText.SetText(s.backend.Grid.Debug())
 		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
 		s.arenaInputCh <- func() {
 			s.backend.ExecuteMove(grid.DirLeft)
-			s.debugGridText.SetText(s.backend.Grid.Debug())
 		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
 		s.arenaInputCh <- func() {
 			s.backend.ExecuteMove(grid.DirRight)
-			s.debugGridText.SetText(s.backend.Grid.Debug())
 		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
@@ -118,7 +111,7 @@ func (s *SingleplayerScreen) Init() {
 }
 
 // Deinit deinitialises the screen.
-func (s *SingleplayerScreen) Deinit() {
+func (s *MultiplayerScreen) Deinit() {
 	s.backend.Timer.Pause()
 
 	if err := s.backend.Save(); err != nil {
@@ -135,15 +128,8 @@ func (s *SingleplayerScreen) Deinit() {
 }
 
 // Update updates and draws the singleplayer screen.
-func (s *SingleplayerScreen) Update() {
+func (s *MultiplayerScreen) Update() {
 	s.win.SetBackground(s.backgroundColour)
-
-	// Temporary debug text
-	s.debugGridText.SetText(s.backend.Grid.Debug())
-	s.debugTimeText.SetText(s.backend.Timer.Time.String())
-	s.debugScoreText.SetText(
-		fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
-	)
 
 	// Handle user inputs from user. Only 1 input must be sent per update cycle,
 	// because the frontend can only animate one move at a time.
@@ -165,6 +151,8 @@ func (s *SingleplayerScreen) Update() {
 	}
 
 	// Draw UI widgets
+	s.win.Draw(s.title)
+
 	s.score.Draw(s.win)
 	s.score.SetBody(fmt.Sprint(game.Score.Current))
 
@@ -181,6 +169,10 @@ func (s *SingleplayerScreen) Update() {
 	s.arena.Animate(game)
 	s.arena.Draw(s.win)
 
+	// Draw opponent's arena
+	s.opponentArena.Animate(game)
+	s.opponentArena.Draw(s.win)
+
 	// Check for win or lose
 	switch game.Outcome {
 	case grid.None:
@@ -191,8 +183,4 @@ func (s *SingleplayerScreen) Update() {
 		s.backgroundColour = common.BackgroundColourLose
 	}
 
-	// Draw temporary debug grid
-	s.win.Draw(s.debugGridText)
-	s.win.Draw(s.debugTimeText)
-	s.win.Draw(s.debugScoreText)
 }

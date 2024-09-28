@@ -19,6 +19,7 @@ const (
 	MultiplayerMenu
 	MultiplayerJoin
 	MultiplayerHost
+	Multiplayer
 )
 
 // currentScreen holds the game's current screen.
@@ -35,6 +36,7 @@ func Init(win *turdgl.Window) {
 		MultiplayerMenu: NewMultiplayerMenuScreen(win),
 		MultiplayerJoin: NewMultiplayerJoinScreen(win),
 		MultiplayerHost: NewMultiplayerHostScreen(win),
+		Multiplayer:     NewMultiplayerScreen(win),
 	}
 }
 

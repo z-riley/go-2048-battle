@@ -11,8 +11,8 @@ func main() {
 	// Create window
 	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "2048 Battle",
-		Width:  config.Width,
-		Height: config.Height,
+		Width:  config.WinWidth,
+		Height: config.WinHeight,
 	})
 	if err != nil {
 		panic(err)
@@ -25,7 +25,7 @@ func main() {
 	// Create screens
 	screen.Init(win)
 	screen.SetScreen(screen.Title)
-	screen.SetScreen(screen.Singleplayer)
+	screen.SetScreen(screen.MultiplayerMenu)
 
 	debugWidget := debug.NewDebugWidget(win)
 

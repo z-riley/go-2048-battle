@@ -7,7 +7,7 @@ import (
 
 func TestSerialiseDeserialise(t *testing.T) {
 	// Create a game and let the timer change value
-	game := NewGame()
+	game := NewGame(nil)
 	game.Timer.Reset().Resume()
 	time.Sleep(100 * time.Millisecond)
 	b, err := game.Serialise()

@@ -14,26 +14,71 @@ type Game struct {
 	Outcome grid.Outcome `json:"outcome"`
 	Score   *Score       `json:"currentScore"`
 	Timer   *Timer       `json:"time"`
+
+	opts *Opts
 }
 
-// NewGame returns the top-level struct for the game.
-func NewGame() *Game {
+// ops contains configuration for the game.
+type Opts struct {
+	SaveToDisk bool
+}
+
+// NewGame returns the top-level struct for the game. If opts are nil, the
+// default is used.
+func NewGame(opts *Opts) *Game {
+	if opts == nil {
+		opts = &Opts{
+			SaveToDisk: true,
+		}
+	}
+
 	g := &Game{
 		Grid:    grid.NewGrid(),
 		Outcome: grid.None,
 		Score:   NewScore(),
 		Timer:   NewTimer(),
+		opts:    opts,
 	}
 
-	err := g.Load()
-	if err != nil {
-		fmt.Println("No save file found. Creating new one")
-		if err := g.Save(); err != nil {
-			panic(err)
+	if g.opts.SaveToDisk {
+		err := g.Load()
+		if err != nil {
+			fmt.Println("No save file found. Creating new one")
+			if err := g.Save(); err != nil {
+				panic(err)
+			}
 		}
 	}
 
 	return g
+}
+
+// Reset resets the game.
+func (g *Game) Reset() {
+	g.Grid.Reset()
+	g.Score.Reset()
+	g.Timer.Reset().Pause()
+}
+
+// ExecuteMove carries out a move in the given direction.
+func (g *Game) ExecuteMove(dir grid.Direction) {
+	pointsGained := g.Grid.Move(dir)
+	g.Score.AddToCurrent(pointsGained)
+
+	if g.Outcome == grid.Lose {
+		g.Timer.Pause()
+	} else {
+		g.Timer.Resume()
+	}
+
+	// Note: the game should save on exit anyway but save after after move just in case
+	if g.opts.SaveToDisk {
+		go func() {
+			if err := g.Save(); err != nil {
+				panic(err)
+			}
+		}()
+	}
 }
 
 // Serialise converts the current game state into JSON.
@@ -71,31 +116,4 @@ func (g *Game) Load() error {
 	// Cmb flags are required to be unset for the animations to work correctly
 	g.Grid.ClearCmbFlags()
 	return nil
-}
-
-// ExecuteMove carries out a move in the given direction.
-func (g *Game) ExecuteMove(dir grid.Direction) {
-	pointsGained := g.Grid.Move(dir)
-	g.Score.AddToCurrent(pointsGained)
-
-	if g.Outcome == grid.Lose {
-		g.Timer.Pause()
-	} else {
-		g.Timer.Resume()
-	}
-
-	// Note: the game should save on exit anyway but save after after move just in case
-	go func() {
-		if err := g.Save(); err != nil {
-			panic(err)
-		}
-	}()
-}
-
-// Reset resets the game.
-func (g *Game) Reset() {
-	// widget.SetCurrentScore(0)
-	g.Grid.Reset()
-	g.Score.Reset()
-	g.Timer.Reset().Pause()
 }

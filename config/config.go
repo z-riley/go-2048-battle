@@ -1,7 +1,8 @@
 package config
 
 const (
-	Width  = 1200
-	Height = 768
-	Debug  = true
+	Version   = "0.0.1"
+	WinWidth  = 1200
+	WinHeight = 768
+	Debug     = true
 )

@@ -1,6 +1,7 @@
 package screen
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image/color"
@@ -9,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/z-riley/go-2048-battle/common"
+	"github.com/z-riley/go-2048-battle/comms"
+	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/turdgl"
 	"github.com/z-riley/turdserve"
 )
@@ -58,13 +61,13 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 	ipBody.Body.SetOffset(turdgl.Vec{X: 0, Y: 32}).SetText(ipAddr)
 
 	var cards []*playerCard
-	for i := 0; i < 1; i++ {
+	for i := range 1 {
 		pos := turdgl.Vec{X: 300, Y: 450 + float64(i)*80}
 		label := fmt.Sprintf("Waiting for player %d", i+2)
 		cards = append(cards, newPlayerCard(pos, label))
 	}
 
-	start := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 650}, func() { SetScreen(Title) })
+	start := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 650}, func() { SetScreen(Multiplayer) })
 	start.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Start game")
 
 	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 600 + 20, Y: 650}, func() { SetScreen(MultiplayerMenu) })
@@ -89,8 +92,10 @@ func (s *MultiplayerHostScreen) Init() {
 	})
 
 	// Set up server
-	s.server.SetCallback(func(id int, msg []byte) {
-		fmt.Println("Received from client", id, ":", string(msg))
+	s.server.SetCallback(func(id int, b []byte) {
+		if err := s.handleClientData(id, b); err != nil {
+			fmt.Println("Failed to handle connection:", err)
+		}
 	})
 
 	// Start server to allow other players to connect
@@ -129,6 +134,47 @@ func (s *MultiplayerHostScreen) Update() {
 		s.win.Draw(p)
 	}
 
+}
+
+// handleClientData handles data from client.
+func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
+	s.playerCards[id].setReady()
+
+	fmt.Println("Received from client", id, ":", string(b))
+
+	var msg comms.Message
+	if err := json.Unmarshal(b, &msg); err != nil {
+		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)
+	}
+
+	switch msg.Type {
+	case comms.MsgConnect:
+		var data comms.PlayerData
+		if err := json.Unmarshal(msg.Content, &data); err != nil {
+			return fmt.Errorf("failed to unmarshal player data: %w", err)
+		}
+		return s.handleMsgConnect(id, data)
+
+	case comms.MsgGameUpdate:
+
+	default:
+		return fmt.Errorf("unsupported error type \"%s\"", msg.Type)
+	}
+
+	return nil
+}
+
+// handleMsgConnect handles
+func (s *MultiplayerHostScreen) handleMsgConnect(id int, data comms.PlayerData) error {
+	// Make sure versions are compatible
+	if data.Version != config.Version {
+		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
+	}
+
+	// Update player card with new data
+	s.playerCards[id].name.Body.SetText(data.Username)
+	fmt.Println("buhr")
+	return nil
 }
 
 var (

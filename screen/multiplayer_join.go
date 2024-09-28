@@ -1,9 +1,12 @@
 package screen
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/z-riley/go-2048-battle/common"
+	"github.com/z-riley/go-2048-battle/comms"
+	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/turdgl"
 	"github.com/z-riley/turdserve"
 )
@@ -36,7 +39,7 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 
 	nameEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
 
-	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {})
+	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(Multiplayer) })
 	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
 
 	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(MultiplayerMenu) })
@@ -52,30 +55,54 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	}
 
 	join.SetCallback(func(mouse turdgl.MouseState) {
-		s.joinGame()
+		if err := s.joinGame(); err != nil {
+			fmt.Println("Failed to join game:", err)
+		}
 	})
 
 	return &s
 }
 
-func (s *MultiplayerJoinScreen) joinGame() {
-	fmt.Println("joinGame called")
+func (s *MultiplayerJoinScreen) joinGame() error {
 
-	ip := s.entries[1].Body.Text()
+	// Connect using the user-specified IP address
+	ipEntry := s.entries[1]
+	ip := ipEntry.Body.Text()
 	if err := s.client.Connect(ip, serverPort); err != nil {
-		fmt.Println("Client failed to connect. TODO handle this gracefully")
-		return
+		return fmt.Errorf("failed to connect to server: %w", err)
 	}
 
 	s.client.SetCallback(func(b []byte) {
 		fmt.Println("Received data from server:", string(b))
 	})
 
-	if err := s.client.Write([]byte("hello from client")); err != nil {
-		fmt.Println("Failed to send message to server")
+	// Construct message containing player data
+	usernameEntry := s.entries[0]
+	username := usernameEntry.Body.Text()
+	content, err := json.Marshal(comms.PlayerData{
+		Version:  config.Version,
+		Username: username,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal player data: %w", err)
+	}
+	msg, err := json.Marshal(
+		comms.Message{
+			Type:    comms.MsgConnect,
+			Content: content,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal joining message: %w", err)
 	}
 
-	// SetScreen(multiplayerGame)
+	// Send data to host
+	if err := s.client.Write(msg); err != nil {
+		return fmt.Errorf("failed to send message to server: %w", err)
+	}
+
+	SetScreen(Multiplayer)
+
+	return nil
 }
 
 // Init initialises the screen.
