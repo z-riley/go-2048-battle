@@ -14,8 +14,13 @@ type SingleplayerScreen struct {
 	win     *turdgl.Window
 	backend *backend.Game
 
+	score     *common.GameUIBox
+	highScore *common.GameUIBox
+
 	arena        *common.Arena
 	arenaInputCh chan (func())
+
+	timer *turdgl.Text
 
 	debugGridText  *turdgl.Text
 	debugTimeText  *turdgl.Text
@@ -28,12 +33,26 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		win:     win,
 		backend: backend.NewGame(),
 
-		arena:        common.NewArena(turdgl.Vec{X: 700, Y: 80}),
+		score: common.NewGameUIBox(
+			90, 90,
+			turdgl.Vec{X: 300, Y: 70},
+			common.ArenaBackgroundColour).SetHeading("SCORE"),
+		highScore: common.NewGameUIBox(
+			90, 90,
+			turdgl.Vec{X: 500, Y: 70},
+			common.ArenaBackgroundColour).SetHeading("BEST"),
+
+		arena: common.NewArena(turdgl.Vec{
+			X: 250,
+			Y: 250,
+		}),
 		arenaInputCh: make(chan func(), 100),
 
-		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 100, Y: 100}, common.FontPathMedium),
-		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 500, Y: 100}, common.FontPathMedium),
-		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 400, Y: 100}, common.FontPathMedium),
+		timer: common.NewGameText("", turdgl.Vec{X: 520, Y: 620}),
+
+		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium),
+		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium),
+		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium),
 	}
 }
 
@@ -128,6 +147,14 @@ func (s *SingleplayerScreen) Update() {
 	if err := json.Unmarshal(b, &game); err != nil {
 		panic(err)
 	}
+
+	// Draw UI widgets
+	s.score.Draw(s.win)
+	s.score.SetBody(fmt.Sprint(game.Score.Current))
+	s.highScore.Draw(s.win)
+	s.highScore.SetBody(fmt.Sprint(game.Score.High))
+	s.timer.SetText(game.Timer.Time.String())
+	s.win.Draw(s.timer)
 
 	// Draw arena of tiles
 	s.arena.Animate(game)

@@ -11,13 +11,14 @@ var (
 
 	DarkerFontColour  = turdgl.RGB(191, 178, 171)
 	LightFontColour   = turdgl.RGB(221, 208, 201)
+	WhiteFontColour   = turdgl.RGB(252, 247, 244)
 	LighterFontColour = turdgl.RGB(251, 238, 231)
 
 	buttonColourUnpressed = turdgl.RGB(143, 122, 101)
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
 
 	tileBackgroundColour  = turdgl.RGB(180, 170, 158)
-	arenaBackgroundColour = turdgl.RGB(167, 153, 140)
+	ArenaBackgroundColour = turdgl.RGB(157, 143, 130)
 )
 
 const (
@@ -67,6 +68,6 @@ func tileTextColour(val int) color.Color {
 	case 4:
 		return turdgl.RGB(120, 110, 100)
 	default:
-		return turdgl.RGB(252, 247, 244)
+		return WhiteFontColour
 	}
 }

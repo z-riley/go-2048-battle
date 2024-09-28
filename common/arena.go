@@ -12,15 +12,20 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
-// Tile settings
+// Adjustable settings
 const (
-	tileSizePx        float64 = 72
-	tileBoundryFactor float64 = 0.15
-	tileSpacingPx     float64 = tileSizePx * (1 + tileBoundryFactor)
-	tileCornerRadius          = 3
-	tileFont                  = FontPathBold
+	ArenaSizePx = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
 
-	arenaSize = grid.GridLen
+	TileSizePx        float64 = 72   // the width and height of a tile, in pixels
+	tileCornerRadius  float64 = 3    // the radius, in pixels, of the rounded corners of the tiles
+	TileBoundryFactor float64 = 0.15 // the gap between tiles as a proportion of the tile size
+)
+
+// Derived constants
+const (
+	tileSpacingPx float64 = TileSizePx * (1 + TileBoundryFactor)
+	tileFont              = FontPathBold
+	numTiles              = grid.GridLen
 )
 
 // tile is a visual representation of a game tile.
@@ -56,22 +61,23 @@ type animationState struct {
 
 // Arena displays the grid of a game.
 type Arena struct {
-	pos             turdgl.Vec                               // pixel position of the arena anchor
-	tiles           []*tile                                  // every non-zero tile
-	bgTiles         [arenaSize][arenaSize]*turdgl.CurvedRect // every grid space
-	arenaBackground *turdgl.CurvedRect                       // the background of the arena
-	latestState     backend.Game                             // used to detect changes in game state (for animations etc...)
-	animationCh     chan (animationState)                    // for sending animations to animator goroutine
+	pos             turdgl.Vec                             // pixel position of the arena anchor
+	tiles           []*tile                                // every non-zero tile
+	bgTiles         [numTiles][numTiles]*turdgl.CurvedRect // every grid space
+	arenaBackground *turdgl.CurvedRect                     // the background of the arena
+	latestState     backend.Game                           // used to detect changes in game state (for animations etc...)
+	animationCh     chan (animationState)                  // for sending animations to animator goroutine
 }
 
-// NewArena constructs a new arena widget.
+// NewArena constructs a new arena widget. pos is the top-left pixel of the
+// top-left tile (excluding the arena background).
 func NewArena(pos turdgl.Vec) *Arena {
 	// Generate background tiles
-	bgTiles := [arenaSize][arenaSize]*turdgl.CurvedRect{}
-	for i := range arenaSize {
-		for j := range arenaSize {
+	bgTiles := [numTiles][numTiles]*turdgl.CurvedRect{}
+	for i := range numTiles {
+		for j := range numTiles {
 			bgTiles[j][i] = turdgl.NewCurvedRect(
-				tileSizePx, tileSizePx, tileCornerRadius,
+				TileSizePx, TileSizePx, tileCornerRadius,
 				turdgl.Vec{
 					X: pos.X + float64(j)*tileSpacingPx,
 					Y: pos.Y + float64(i)*tileSpacingPx,
@@ -82,19 +88,18 @@ func NewArena(pos turdgl.Vec) *Arena {
 	}
 
 	arenaBG := turdgl.NewCurvedRect(
-		tileSpacingPx*4+tileSizePx*tileBoundryFactor,
-		tileSpacingPx*4+tileSizePx*tileBoundryFactor,
+		ArenaSizePx, ArenaSizePx,
 		tileCornerRadius,
 		turdgl.Vec{
-			X: pos.X - tileSizePx*tileBoundryFactor,
-			Y: pos.Y - tileSizePx*tileBoundryFactor,
+			X: pos.X - TileSizePx*TileBoundryFactor,
+			Y: pos.Y - TileSizePx*TileBoundryFactor,
 		},
 	)
-	arenaBG.SetStyle(turdgl.Style{Colour: arenaBackgroundColour})
+	arenaBG.SetStyle(turdgl.Style{Colour: ArenaBackgroundColour})
 
 	a := Arena{
 		pos:             pos,
-		tiles:           make([]*tile, 0, arenaSize*arenaSize),
+		tiles:           make([]*tile, 0, numTiles*numTiles),
 		bgTiles:         bgTiles,
 		arenaBackground: arenaBG,
 		latestState:     backend.Game{Grid: &grid.Grid{Tiles: [4][4]grid.Tile{}}},
@@ -116,8 +121,8 @@ func (a *Arena) Destroy() {
 func (a *Arena) Draw(win *turdgl.Window) {
 	win.DrawBackground(a.arenaBackground)
 
-	for i := range arenaSize {
-		for j := range arenaSize {
+	for i := range numTiles {
+		for j := range numTiles {
 			win.DrawBackground(a.bgTiles[j][i])
 		}
 	}
@@ -129,13 +134,13 @@ func (a *Arena) Draw(win *turdgl.Window) {
 // Load updates the arena to match the backend game data.
 func (a *Arena) Load(g backend.Game) {
 	var newTiles []*tile
-	for i := range arenaSize {
-		for j := range arenaSize {
+	for i := range numTiles {
+		for j := range numTiles {
 			val := g.Grid.Tiles[i][j].Val
 			if val != 0 {
 				newTiles = append(newTiles,
 					newTile(
-						tileSizePx,
+						TileSizePx,
 						turdgl.Vec{
 							X: a.pos.X + float64(j)*tileSpacingPx,
 							Y: a.pos.Y + float64(i)*tileSpacingPx,
@@ -151,7 +156,7 @@ func (a *Arena) Load(g backend.Game) {
 
 // Reset clears thed current game data from the arena.
 func (a *Arena) Reset() {
-	a.tiles = make([]*tile, 0, arenaSize*arenaSize)
+	a.tiles = make([]*tile, 0, numTiles*numTiles)
 }
 
 // Animate animates the arena to match the given game state.
@@ -187,7 +192,7 @@ func (a *Arena) handleAnimations() {
 		// fmt.Print("\n")
 
 		// Listen to errors being produced by animations
-		errCh := make(chan error, arenaSize*arenaSize)
+		errCh := make(chan error, numTiles*numTiles)
 
 		// Animate stage 1: tiles moving and combining
 		var wg sync.WaitGroup
@@ -315,12 +320,12 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan (error), wg *s
 	}
 
 	// Make a small new tile
-	const originalSize = tileSizePx / 6
+	const originalSize = TileSizePx / 6
 	newTile := newTile(
 		originalSize,
 		turdgl.Vec{
-			X: a.pos.X + float64(dest.x)*tileSpacingPx + (tileSizePx-originalSize)/2,
-			Y: a.pos.Y + float64(dest.y)*tileSpacingPx + (tileSizePx-originalSize)/2,
+			X: a.pos.X + float64(dest.x)*tileSpacingPx + (TileSizePx-originalSize)/2,
+			Y: a.pos.Y + float64(dest.y)*tileSpacingPx + (TileSizePx-originalSize)/2,
 		},
 		newVal,
 		dest,
@@ -329,7 +334,7 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan (error), wg *s
 
 	// Animate tile growing to normal size
 	const (
-		growPx   = (tileSizePx - originalSize) / 2
+		growPx   = (TileSizePx - originalSize) / 2
 		steps    = 10
 		stepSize = growPx / steps
 	)
@@ -357,7 +362,7 @@ func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh c
 
 	// Make a new tile
 	newTile := newTile(
-		tileSizePx,
+		TileSizePx,
 		turdgl.Vec{
 			X: a.pos.X + float64(dest.x)*tileSpacingPx,
 			Y: a.pos.Y + float64(dest.y)*tileSpacingPx,
@@ -373,15 +378,15 @@ func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh c
 	originalPos := shape.GetPos() // position of shape before animation starts
 	for i := float64(1); i <= expandPx; i++ {
 		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
-		shape.SetHeight(tileSizePx + i*2)
-		shape.SetWidth(tileSizePx + i*2)
+		shape.SetHeight(TileSizePx + i*2)
+		shape.SetWidth(TileSizePx + i*2)
 		time.Sleep(10 * time.Millisecond)
 	}
 	time.Sleep(30 * time.Millisecond)
 	for i := float64(expandPx) - 1; i > 0; i-- {
 		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
-		shape.SetHeight(tileSizePx + i*2)
-		shape.SetWidth(tileSizePx + i*2)
+		shape.SetHeight(TileSizePx + i*2)
+		shape.SetWidth(TileSizePx + i*2)
 		time.Sleep(10 * time.Millisecond)
 	}
 }
@@ -544,11 +549,11 @@ func (a newFromCombineAnimation) String() string {
 }
 
 // generateAnimations generates animation data for transitioning between grid states.
-func generateAnimations(before, after [arenaSize][arenaSize]grid.Tile, dir grid.Direction) []animation {
+func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Direction) []animation {
 	var moves []animation
 
 	// Index "before" tiles by UUID
-	beforeUUIDs := make(map[uuid.UUID]coord, arenaSize*arenaSize)
+	beforeUUIDs := make(map[uuid.UUID]coord, numTiles*numTiles)
 	for y := 0; y < len(before); y++ {
 		for x := 0; x < len(before[y]); x++ {
 			beforeUUIDs[before[y][x].UUID] = coord{x, y}
@@ -574,16 +579,16 @@ func generateAnimations(before, after [arenaSize][arenaSize]grid.Tile, dir grid.
 					newVal: after[y][x].Val,
 				})
 
-				var beforeRow [arenaSize]grid.Tile
-				var afterRow [arenaSize]grid.Tile
+				var beforeRow [numTiles]grid.Tile
+				var afterRow [numTiles]grid.Tile
 				if dir == grid.DirLeft || dir == grid.DirRight {
 					// Horizontal move
 					beforeRow = before[y]
 					afterRow = after[y]
 				} else {
 					// Vertical move
-					beforeRow = [arenaSize]grid.Tile{before[0][x], before[1][x], before[2][x], before[3][x]}
-					afterRow = [arenaSize]grid.Tile{after[0][x], after[1][x], after[2][x], after[3][x]}
+					beforeRow = [numTiles]grid.Tile{before[0][x], before[1][x], before[2][x], before[3][x]}
+					afterRow = [numTiles]grid.Tile{after[0][x], after[1][x], after[2][x], after[3][x]}
 				}
 
 				// The tiles that combined in the last turn can be ascertained from which tiles are

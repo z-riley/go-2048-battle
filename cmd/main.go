@@ -1,7 +1,7 @@
 package main
 
 import (
-	game "github.com/z-riley/go-2048-battle"
+	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/go-2048-battle/debug"
 	"github.com/z-riley/go-2048-battle/screen"
 	"github.com/z-riley/turdgl"
@@ -11,8 +11,8 @@ func main() {
 	// Create window
 	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "2048 Battle",
-		Width:  game.Width,
-		Height: game.Height,
+		Width:  config.Width,
+		Height: config.Height,
 	})
 	if err != nil {
 		panic(err)
@@ -25,7 +25,7 @@ func main() {
 	// Create screens
 	screen.Init(win)
 	screen.SetScreen(screen.Title)
-	screen.SetScreen(screen.MultiplayerHost)
+	screen.SetScreen(screen.Singleplayer)
 
 	debugWidget := debug.NewDebugWidget(win)
 
@@ -34,7 +34,7 @@ func main() {
 		// Update screen
 		screen.CurrentScreen().Update()
 
-		if game.Debug {
+		if config.Debug {
 			// Add debug overlay
 			debugWidget.Update()
 		}
