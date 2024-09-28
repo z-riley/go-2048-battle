@@ -55,3 +55,23 @@ func (b *MenuButton) Update(win *turdgl.Window) {
 	// Call underlying button update function
 	b.Button.Update(win)
 }
+
+// GameButton is a button that's used in the main game's UI.
+type GameButton turdgl.Button
+
+// NewGameButton constructs a new game button with sensible defaults.
+func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
+	r := turdgl.NewCurvedRect(width, height, 3, pos)
+	r.SetStyle(turdgl.Style{Colour: OrangeColour})
+
+	b := turdgl.NewButton(r, FontPathBold).
+		SetLabelText("BUTTON").
+		SetLabelSize(24).
+		SetLabelColour(WhiteFontColour).
+		SetLabelAlignment(turdgl.AlignCustom).
+		SetCallback(func(turdgl.MouseState) { cb() })
+	b.Behaviour = turdgl.OnRelease
+	b.Label.SetOffset(turdgl.Vec{X: width / 2, Y: height / 1.2})
+
+	return b
+}

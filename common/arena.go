@@ -154,7 +154,7 @@ func (a *Arena) Load(g backend.Game) {
 	a.tiles = newTiles
 }
 
-// Reset clears thed current game data from the arena.
+// Reset clears the current game data from the arena.
 func (a *Arena) Reset() {
 	a.tiles = make([]*tile, 0, numTiles*numTiles)
 }

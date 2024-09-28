@@ -44,8 +44,8 @@ type GameUIBox struct {
 	body    *turdgl.TextBox
 }
 
-// NewGameUIBox constructs a new UI box.
-func NewGameUIBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *GameUIBox {
+// NewGameTextBox constructs a new text box for the game's UI.
+func NewGameTextBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *GameUIBox {
 	headingPos := turdgl.Vec{
 		X: pos.X + width/2,
 		Y: pos.Y + 25,

@@ -16,6 +16,7 @@ type SingleplayerScreen struct {
 
 	score     *common.GameUIBox
 	highScore *common.GameUIBox
+	newGame   *turdgl.Button
 
 	arena        *common.Arena
 	arenaInputCh chan (func())
@@ -29,18 +30,20 @@ type SingleplayerScreen struct {
 
 // NewSingleplayerScreen constructs a new singleplayer menu screen.
 func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
-	return &SingleplayerScreen{
+	s := SingleplayerScreen{
 		win:     win,
 		backend: backend.NewGame(),
 
-		score: common.NewGameUIBox(
+		score: common.NewGameTextBox(
 			90, 90,
 			turdgl.Vec{X: 300, Y: 70},
-			common.ArenaBackgroundColour).SetHeading("SCORE"),
-		highScore: common.NewGameUIBox(
+			common.ArenaBackgroundColour,
+		).SetHeading("SCORE"),
+		highScore: common.NewGameTextBox(
 			90, 90,
 			turdgl.Vec{X: 500, Y: 70},
-			common.ArenaBackgroundColour).SetHeading("BEST"),
+			common.ArenaBackgroundColour,
+		).SetHeading("BEST"),
 
 		arena: common.NewArena(turdgl.Vec{
 			X: 250,
@@ -54,6 +57,19 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium),
 		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium),
 	}
+
+	s.newGame = common.NewGameButton(
+		200, 50,
+		turdgl.Vec{X: 300, Y: 180},
+		func() {
+			s.arenaInputCh <- func() {
+				s.backend.Reset()
+				s.arena.Reset()
+			}
+		},
+	).SetLabelText("NEW")
+
+	return &s
 }
 
 // Init initialises the screen.
@@ -151,8 +167,13 @@ func (s *SingleplayerScreen) Update() {
 	// Draw UI widgets
 	s.score.Draw(s.win)
 	s.score.SetBody(fmt.Sprint(game.Score.Current))
+
 	s.highScore.Draw(s.win)
 	s.highScore.SetBody(fmt.Sprint(game.Score.High))
+
+	s.win.Draw(s.newGame)
+	s.newGame.Update(s.win)
+
 	s.timer.SetText(game.Timer.Time.String())
 	s.win.Draw(s.timer)
 

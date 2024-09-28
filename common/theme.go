@@ -18,7 +18,10 @@ var (
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
 
 	tileBackgroundColour  = turdgl.RGB(180, 170, 158)
+	tile16Colour          = turdgl.RGB(232, 154, 108)
 	ArenaBackgroundColour = turdgl.RGB(157, 143, 130)
+
+	OrangeColour = turdgl.RGB(231, 150, 97)
 )
 
 const (
@@ -36,7 +39,7 @@ func tileColour(val int) color.Color {
 	case 8:
 		return turdgl.RGB(232, 180, 130)
 	case 16:
-		return turdgl.RGB(232, 154, 108)
+		return tile16Colour
 	case 32:
 		return turdgl.RGB(230, 130, 102)
 	case 64:
