@@ -38,6 +38,9 @@ func NewGame() *Game {
 
 // Serialise converts the current game state into JSON.
 func (g *Game) Serialise() ([]byte, error) {
+	// Update outcome state before serialising
+	g.Outcome = g.Grid.Outcome()
+
 	return json.Marshal(g)
 }
 

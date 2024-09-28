@@ -7,7 +7,9 @@ import (
 )
 
 var (
-	BackgroundColour = turdgl.RGB(46, 36, 27)
+	BackgroundColour     = turdgl.RGB(46, 36, 27)
+	BackgroundColourWin  = turdgl.RGB(36, 59, 34)
+	BackgroundColourLose = turdgl.RGB(38, 15, 15)
 
 	DarkerFontColour  = turdgl.RGB(191, 178, 171)
 	LightFontColour   = turdgl.RGB(221, 208, 201)

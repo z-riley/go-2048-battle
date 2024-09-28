@@ -3,6 +3,7 @@ package screen
 import (
 	"encoding/json"
 	"fmt"
+	"image/color"
 
 	"github.com/z-riley/go-2048-battle/backend"
 	"github.com/z-riley/go-2048-battle/backend/grid"
@@ -21,7 +22,8 @@ type SingleplayerScreen struct {
 	arena        *common.Arena
 	arenaInputCh chan (func())
 
-	timer *turdgl.Text
+	timer            *turdgl.Text
+	backgroundColour color.RGBA
 
 	debugGridText  *turdgl.Text
 	debugTimeText  *turdgl.Text
@@ -51,7 +53,8 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		}),
 		arenaInputCh: make(chan func(), 100),
 
-		timer: common.NewGameText("", turdgl.Vec{X: 520, Y: 620}),
+		timer:            common.NewGameText("", turdgl.Vec{X: 520, Y: 620}),
+		backgroundColour: common.BackgroundColour,
 
 		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium),
 		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium),
@@ -136,7 +139,7 @@ func (s *SingleplayerScreen) Deinit() {
 
 // Update updates and draws the singleplayer screen.
 func (s *SingleplayerScreen) Update() {
-	s.win.SetBackground(common.BackgroundColour)
+	s.win.SetBackground(s.backgroundColour)
 
 	// Temporary debug text
 	s.debugGridText.SetText(s.backend.Grid.Debug())
@@ -180,6 +183,17 @@ func (s *SingleplayerScreen) Update() {
 	// Draw arena of tiles
 	s.arena.Animate(game)
 	s.arena.Draw(s.win)
+
+	// Check for win or lose
+	fmt.Println(game.Outcome)
+	switch game.Outcome {
+	case grid.None:
+		s.backgroundColour = common.BackgroundColour
+	case grid.Win:
+		s.backgroundColour = common.BackgroundColourWin
+	case grid.Lose:
+		s.backgroundColour = common.BackgroundColourLose
+	}
 
 	// Draw temporary debug grid
 	s.win.Draw(s.debugGridText)

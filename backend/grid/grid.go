@@ -95,12 +95,12 @@ func (g *Grid) NumTiles() int {
 }
 
 // Outcome represents the outcome of a game.
-type Outcome int
+type Outcome string
 
 const (
-	None Outcome = iota
-	Win
-	Lose
+	None Outcome = "none"
+	Win  Outcome = "win"
+	Lose Outcome = "lose"
 )
 
 // Outcome returns the current outcome of the grid.
