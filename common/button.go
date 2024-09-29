@@ -66,7 +66,7 @@ func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 
 	b := turdgl.NewButton(r, FontPathBold).
 		SetLabelText("BUTTON").
-		SetLabelSize(24).
+		SetLabelSize(20).
 		SetLabelColour(WhiteFontColour).
 		SetLabelAlignment(turdgl.AlignCustom).
 		SetCallback(func(turdgl.MouseState) { cb() })

@@ -21,6 +21,7 @@ var (
 
 	tileBackgroundColour  = turdgl.RGB(180, 170, 158)
 	tile16Colour          = turdgl.RGB(232, 154, 108)
+	Tile2048Colour        = turdgl.RGB(238, 193, 48)
 	ArenaBackgroundColour = turdgl.RGB(157, 143, 130)
 
 	OrangeColour = turdgl.RGB(231, 150, 97)
@@ -55,7 +56,7 @@ func tileColour(val int) color.Color {
 	case 1024:
 		return turdgl.RGB(224, 192, 65)
 	case 2048:
-		return turdgl.RGB(238, 193, 48)
+		return Tile2048Colour
 	case 4096:
 		return turdgl.RGB(255, 59, 59)
 	case 8192:

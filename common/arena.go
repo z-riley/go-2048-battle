@@ -61,12 +61,12 @@ type animationState struct {
 
 // Arena displays the grid of a game.
 type Arena struct {
-	pos             turdgl.Vec                             // pixel position of the arena anchor
-	tiles           []*tile                                // every non-zero tile
-	bgTiles         [numTiles][numTiles]*turdgl.CurvedRect // every grid space
-	arenaBackground *turdgl.CurvedRect                     // the background of the arena
-	latestState     backend.Game                           // used to detect changes in game state (for animations etc...)
-	animationCh     chan (animationState)                  // for sending animations to animator goroutine
+	pos         turdgl.Vec                             // pixel position of the arena anchor
+	tiles       []*tile                                // every non-zero tile
+	bgTiles     [numTiles][numTiles]*turdgl.CurvedRect // every grid space
+	background  *turdgl.CurvedRect                     // the background of the arena
+	latestState backend.Game                           // used to detect changes in game state (for animations etc...)
+	animationCh chan (animationState)                  // for sending animations to animator goroutine
 }
 
 // NewArena constructs a new arena widget. pos is the top-left pixel of the
@@ -98,12 +98,12 @@ func NewArena(pos turdgl.Vec) *Arena {
 	arenaBG.SetStyle(turdgl.Style{Colour: ArenaBackgroundColour})
 
 	a := Arena{
-		pos:             pos,
-		tiles:           make([]*tile, 0, numTiles*numTiles),
-		bgTiles:         bgTiles,
-		arenaBackground: arenaBG,
-		latestState:     backend.Game{Grid: &grid.Grid{Tiles: [4][4]grid.Tile{}}},
-		animationCh:     make(chan animationState, 50),
+		pos:         pos,
+		tiles:       make([]*tile, 0, numTiles*numTiles),
+		bgTiles:     bgTiles,
+		background:  arenaBG,
+		latestState: backend.Game{Grid: &grid.Grid{Tiles: [4][4]grid.Tile{}}},
+		animationCh: make(chan animationState, 50),
 	}
 
 	// Begin listening to animation channel
@@ -119,16 +119,32 @@ func (a *Arena) Destroy() {
 
 // Draw draws the arena.
 func (a *Arena) Draw(win *turdgl.Window) {
-	win.DrawBackground(a.arenaBackground)
+	win.DrawBackground(a.background)
 
 	for i := range numTiles {
 		for j := range numTiles {
 			win.DrawBackground(a.bgTiles[j][i])
 		}
 	}
+
 	for _, t := range a.tiles {
 		win.DrawForeground(t.tb)
 	}
+}
+
+// Pos returns the top left pixel coordinate of the whole arena.
+func (a *Arena) Pos() turdgl.Vec {
+	return a.background.GetPos()
+}
+
+// Width returns the total width of the arena.
+func (a *Arena) Width() float64 {
+	return a.background.Width()
+}
+
+// Height returns the total width of the arena.
+func (a *Arena) Height() float64 {
+	return a.background.Height()
 }
 
 // Load updates the arena to match the backend game data.

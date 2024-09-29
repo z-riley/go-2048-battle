@@ -15,6 +15,7 @@ type SingleplayerScreen struct {
 	win     *turdgl.Window
 	backend *backend.Game
 
+	logo2048  *turdgl.TextBox
 	score     *common.GameUIBox
 	highScore *common.GameUIBox
 	newGame   *turdgl.Button
@@ -36,17 +37,6 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		win:     win,
 		backend: backend.NewGame(&backend.Opts{SaveToDisk: true}),
 
-		score: common.NewGameTextBox(
-			90, 90,
-			turdgl.Vec{X: 300, Y: 70},
-			common.ArenaBackgroundColour,
-		).SetHeading("SCORE"),
-		highScore: common.NewGameTextBox(
-			90, 90,
-			turdgl.Vec{X: 500, Y: 70},
-			common.ArenaBackgroundColour,
-		).SetHeading("BEST"),
-
 		arena:        common.NewArena(turdgl.Vec{X: 250, Y: 250}),
 		arenaInputCh: make(chan func(), 100),
 
@@ -58,9 +48,19 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium),
 	}
 
+	s.logo2048 = turdgl.NewTextBox(turdgl.NewCurvedRect(
+		120, 120, 3,
+		turdgl.Vec{X: s.arena.Pos().X, Y: 100},
+	), common.FontPathBold).SetText("2048").
+		SetTextSize(34).
+		SetTextColour(common.WhiteFontColour)
+	s.logo2048.Body.SetAlignment(turdgl.AlignTopCentre)
+	s.logo2048.Shape.SetStyle(turdgl.Style{Colour: common.Tile2048Colour})
+
+	const wNewGame = 200
 	s.newGame = common.NewGameButton(
-		200, 50,
-		turdgl.Vec{X: 300, Y: 180},
+		wNewGame, 40,
+		turdgl.Vec{X: s.arena.Pos().X + s.arena.Width() - wNewGame, Y: 180},
 		func() {
 			s.arenaInputCh <- func() {
 				s.backend.Reset()
@@ -68,6 +68,19 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 			}
 		},
 	).SetLabelText("NEW")
+
+	const wScore = 90
+	s.score = common.NewGameTextBox(
+		wScore, wScore,
+		turdgl.Vec{X: s.arena.Pos().X + s.arena.Width() - wNewGame, Y: 70},
+		common.ArenaBackgroundColour,
+	).SetHeading("SCORE")
+
+	s.highScore = common.NewGameTextBox(
+		wScore, wScore,
+		turdgl.Vec{X: s.arena.Pos().X + s.arena.Width() - wScore, Y: 70},
+		common.ArenaBackgroundColour,
+	).SetHeading("BEST")
 
 	return &s
 }
@@ -166,6 +179,8 @@ func (s *SingleplayerScreen) Update() {
 	}
 
 	// Draw UI widgets
+	s.win.Draw(s.logo2048)
+
 	s.score.Draw(s.win)
 	s.score.SetBody(fmt.Sprint(game.Score.Current))
 
