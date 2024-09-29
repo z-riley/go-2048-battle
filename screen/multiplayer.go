@@ -17,16 +17,16 @@ type MultiplayerScreen struct {
 	win   *turdgl.Window
 	title *turdgl.Text
 
-	score     *common.GameUIBox
-	highScore *common.GameUIBox
-	newGame   *turdgl.Button
+	newGame *turdgl.Button
 
+	score        *common.GameUIBox
 	backend      *backend.Game
 	arena        *common.Arena
 	arenaInputCh chan (func())
 
-	opponentBackend *backend.Game
+	opponentScore   *common.GameUIBox
 	opponentArena   *common.Arena
+	opponentBackend *backend.Game
 
 	timer            *turdgl.Text
 	backgroundColour color.RGBA
@@ -48,14 +48,14 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 
 		score: common.NewGameTextBox(
 			90, 90,
-			turdgl.Vec{X: 100, Y: 70},
+			turdgl.Vec{X: 320, Y: 120},
 			common.ArenaBackgroundColour,
 		).SetHeading("SCORE"),
-		highScore: common.NewGameTextBox(
+		opponentScore: common.NewGameTextBox(
 			90, 90,
-			turdgl.Vec{X: 220, Y: 70},
+			turdgl.Vec{X: 700, Y: 120},
 			common.ArenaBackgroundColour,
-		).SetHeading("BEST"),
+		).SetHeading("SCORE"),
 
 		backend:      backend.NewGame(&backend.Opts{SaveToDisk: false}),
 		arena:        common.NewArena(turdgl.Vec{X: 100, Y: 250}),
@@ -91,15 +91,17 @@ func isHost(data InitData) bool {
 // Init initialises the screen.
 func (s *MultiplayerScreen) Init(initData InitData) {
 	if server, ok := initData[serverKey]; ok {
-		// Set up server
+		// Host mode
 		s.server = server.(*turdserve.Server)
 		s.server.SetCallback(func(id int, b []byte) {
 			if err := s.handleOpponentData(b); err != nil {
 				fmt.Println("Failed to handle opponent data as server", err)
 			}
+		}).SetDisconnectCallback(func(id int) {
+			fmt.Println("Opponent has left the game")
 		})
 	} else if client, ok := initData[clientKey]; ok {
-		// Set up client
+		// Guest mode
 		s.client = client.(*turdserve.Client)
 		s.client.SetCallback(func(b []byte) {
 			if err := s.handleOpponentData(b); err != nil {
@@ -109,6 +111,8 @@ func (s *MultiplayerScreen) Init(initData InitData) {
 	} else {
 		panic("neither server or client was passed to MultiplayerScreen Init")
 	}
+
+	fmt.Println("GOTEEEEEEEEEEEEE")
 
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
@@ -184,34 +188,23 @@ func (s *MultiplayerScreen) Update() {
 		// No user input; continue
 	}
 
-	// Serialise and deserialise grid to simulate receiving JSON from server
-	// TODO: remove this once multiplayer fully working
-	b, err := s.backend.Serialise()
-	if err != nil {
-		panic(err)
-	}
-	var game backend.Game
-	if err := json.Unmarshal(b, &game); err != nil {
-		panic(err)
-	}
-
 	// Draw UI widgets
 	s.win.Draw(s.title)
 
 	s.score.Draw(s.win)
-	s.score.SetBody(fmt.Sprint(game.Score.Current))
+	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))
 
-	s.highScore.Draw(s.win)
-	s.highScore.SetBody(fmt.Sprint(game.Score.High))
+	s.opponentScore.Draw(s.win)
+	s.opponentScore.SetBody(fmt.Sprint(s.opponentBackend.Score.CurrentScore()))
 
 	s.win.Draw(s.newGame)
 	s.newGame.Update(s.win)
 
-	s.timer.SetText(game.Timer.Time.String())
+	s.timer.SetText(s.backend.Timer.Time.String())
 	s.win.Draw(s.timer)
 
 	// Draw arena of tiles
-	s.arena.Animate(game)
+	s.arena.Animate(*s.backend)
 	s.arena.Draw(s.win)
 
 	// Draw opponent's arena
@@ -219,7 +212,7 @@ func (s *MultiplayerScreen) Update() {
 	s.opponentArena.Draw(s.win)
 
 	// Check for win or lose
-	switch game.Outcome {
+	switch s.backend.Outcome {
 	case grid.None:
 		s.backgroundColour = common.BackgroundColour
 	case grid.Win:

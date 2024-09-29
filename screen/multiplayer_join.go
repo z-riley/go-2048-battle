@@ -3,6 +3,7 @@ package screen
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
@@ -18,7 +19,8 @@ type MultiplayerJoinScreen struct {
 	buttons []*common.MenuButton
 	entries []*common.EntryBox
 
-	client *turdserve.Client
+	hostReady bool
+	client    *turdserve.Client
 }
 
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
@@ -32,7 +34,7 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	ipHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host IP:")
 
 	ipEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
-	ipEntry.SetText("127.0.0.1")
+	ipEntry.SetText("127.0.0.1") // temporary for local testing
 
 	nameHeading := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}, func() {})
 	nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Your name:")
@@ -42,22 +44,45 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {})
 	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
 
-	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(MultiplayerMenu, nil) })
+	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() {})
 	back.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
 	s := MultiplayerJoinScreen{
-		win:     win,
-		title:   title,
-		buttons: []*common.MenuButton{ipHeading, nameHeading, join, back},
-		entries: []*common.EntryBox{nameEntry, ipEntry},
-		client:  turdserve.NewClient(),
+		win:       win,
+		title:     title,
+		buttons:   []*common.MenuButton{ipHeading, nameHeading, join, back},
+		entries:   []*common.EntryBox{nameEntry, ipEntry},
+		hostReady: false,
+		client:    turdserve.NewClient(),
 	}
+
+	back.SetCallback(func(_ turdgl.MouseState) {
+		join.SetLabelText("Join")
+		SetScreen(MultiplayerMenu, nil)
+	})
 
 	join.SetCallback(func(_ turdgl.MouseState) {
 		if err := s.joinGame(); err != nil {
 			fmt.Println("Failed to join game:", err)
+			return
 		}
+
+		join.SetLabelText("Waiting for host")
+
+		// Disable the button
+		join.SetCallback(func(_ turdgl.MouseState) {})
+
+		go func() {
+			for {
+				// Pass client to next screen
+				if s.hostReady {
+					SetScreen(Multiplayer, InitData{clientKey: s.client})
+					return
+				}
+				time.Sleep(250 & time.Millisecond)
+			}
+		}()
 	})
 
 	return &s
@@ -107,7 +132,9 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 	}
 
 	s.client.SetCallback(func(b []byte) {
-		fmt.Println("Received data from server:", string(b))
+		if err := s.handleServerData(b); err != nil {
+			fmt.Println("Failed to handle data from server:", err)
+		}
 	})
 
 	// Construct message containing player data
@@ -134,10 +161,33 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 		return fmt.Errorf("failed to send message to server: %w", err)
 	}
 
-	// TODO: wait for host to click begin game (need new message type)
-
-	// Pass client to next screen
-	SetScreen(Multiplayer, InitData{clientKey: s.client})
-
 	return nil
+}
+
+// handleServerData handles all data received from the server.
+func (s *MultiplayerJoinScreen) handleServerData(b []byte) error {
+	var msg comms.Message
+	if err := json.Unmarshal(b, &msg); err != nil {
+		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)
+	}
+
+	switch msg.Type {
+	case comms.TypeEventData:
+		var data comms.EventData
+		if err := json.Unmarshal(msg.Content, &data); err != nil {
+			return fmt.Errorf("failed to unmarshal event data: %w", err)
+		}
+		s.handleEventData(data)
+		return nil
+
+	default:
+		return fmt.Errorf("unsupported message type \"%s\"", msg.Type)
+	}
+}
+
+// handleEventData handles incoming player data.
+func (s *MultiplayerJoinScreen) handleEventData(data comms.EventData) {
+	if data.Event == comms.EventHostStartGame {
+		s.hostReady = true
+	}
 }

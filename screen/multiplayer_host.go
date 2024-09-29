@@ -97,7 +97,7 @@ func (s *MultiplayerHostScreen) Init(_ InitData) {
 	// Set up server
 	s.server.SetCallback(func(id int, b []byte) {
 		if err := s.handleClientData(id, b); err != nil {
-			fmt.Println("Failed to handle connection:", err)
+			fmt.Println("Failed to handle data from client:", err)
 		}
 	}).SetDisconnectCallback(func(id int) {
 		s.handleClientDisconnect(id)
@@ -191,6 +191,26 @@ func (s *MultiplayerHostScreen) startGame() error {
 	for i := range maxPlayers - 1 {
 		if !s.playerCards[i].isReady() {
 			return fmt.Errorf("player %d not ready", i)
+		}
+	}
+
+	// Inform other players that game is starting
+	eventData, err := json.Marshal(comms.EventData{Event: comms.EventHostStartGame})
+	if err != nil {
+		return fmt.Errorf("failed to marshal event data: %w", err)
+	}
+	msg, err := json.Marshal(
+		comms.Message{
+			Type:    comms.TypeEventData,
+			Content: eventData,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal event message: %w", err)
+	}
+	for _, id := range s.server.GetClientIDs() {
+		fmt.Println("Writing to client ID", id)
+		if err := s.server.WriteToClient(id, msg); err != nil {
+			return fmt.Errorf("failed to send message to server: %w", err)
 		}
 	}
 
