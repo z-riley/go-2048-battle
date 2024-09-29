@@ -39,10 +39,10 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 
 	nameEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
 
-	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(Multiplayer) })
+	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {})
 	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
 
-	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(MultiplayerMenu) })
+	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(MultiplayerMenu, nil) })
 	back.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
@@ -54,7 +54,7 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 		client:  turdserve.NewClient(),
 	}
 
-	join.SetCallback(func(mouse turdgl.MouseState) {
+	join.SetCallback(func(_ turdgl.MouseState) {
 		if err := s.joinGame(); err != nil {
 			fmt.Println("Failed to join game:", err)
 		}
@@ -63,52 +63,10 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	return &s
 }
 
-func (s *MultiplayerJoinScreen) joinGame() error {
-
-	// Connect using the user-specified IP address
-	ipEntry := s.entries[1]
-	ip := ipEntry.Body.Text()
-	if err := s.client.Connect(ip, serverPort); err != nil {
-		return fmt.Errorf("failed to connect to server: %w", err)
-	}
-
-	s.client.SetCallback(func(b []byte) {
-		fmt.Println("Received data from server:", string(b))
-	})
-
-	// Construct message containing player data
-	usernameEntry := s.entries[0]
-	username := usernameEntry.Body.Text()
-	content, err := json.Marshal(comms.PlayerData{
-		Version:  config.Version,
-		Username: username,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to marshal player data: %w", err)
-	}
-	msg, err := json.Marshal(
-		comms.Message{
-			Type:    comms.MsgConnect,
-			Content: content,
-		})
-	if err != nil {
-		return fmt.Errorf("failed to marshal joining message: %w", err)
-	}
-
-	// Send data to host
-	if err := s.client.Write(msg); err != nil {
-		return fmt.Errorf("failed to send message to server: %w", err)
-	}
-
-	SetScreen(Multiplayer)
-
-	return nil
-}
-
 // Init initialises the screen.
-func (s *MultiplayerJoinScreen) Init() {
+func (s *MultiplayerJoinScreen) Init(_ InitData) {
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
-		SetScreen(MultiplayerMenu)
+		SetScreen(MultiplayerMenu, nil)
 	})
 }
 
@@ -133,4 +91,53 @@ func (s *MultiplayerJoinScreen) Update() {
 		e.Update(s.win)
 	}
 
+}
+
+// clientKey is used for indentifying the server in InitData.
+const clientKey = "client"
+
+// joinGame attempts to join a multiplayer game.
+func (s *MultiplayerJoinScreen) joinGame() error {
+
+	// Connect using the user-specified IP address
+	ipEntry := s.entries[1]
+	ip := ipEntry.Body.Text()
+	if err := s.client.Connect(ip, serverPort); err != nil {
+		return fmt.Errorf("failed to connect to server: %w", err)
+	}
+
+	s.client.SetCallback(func(b []byte) {
+		fmt.Println("Received data from server:", string(b))
+	})
+
+	// Construct message containing player data
+	usernameEntry := s.entries[0]
+	username := usernameEntry.Body.Text()
+	playerData, err := json.Marshal(comms.PlayerData{
+		Version:  config.Version,
+		Username: username,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal player data: %w", err)
+	}
+	msg, err := json.Marshal(
+		comms.Message{
+			Type:    comms.TypePlayerData,
+			Content: playerData,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal joining message: %w", err)
+	}
+
+	// Send data to host
+	if err := s.client.Write(msg); err != nil {
+		return fmt.Errorf("failed to send message to server: %w", err)
+	}
+
+	// TODO: wait for host to click begin game (need new message type)
+
+	// Pass client to next screen
+	SetScreen(Multiplayer, InitData{clientKey: s.client})
+
+	return nil
 }

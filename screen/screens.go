@@ -2,16 +2,20 @@ package screen
 
 import "github.com/z-riley/turdgl"
 
-type ID int
+// InitData can be passed to screens' Init function to share data between screens.
+type InitData map[string]any
 
 type Screen interface {
 	// Init initialises the screen.
-	Init()
+	Init(InitData)
 	// Update updates and draws the screen.
 	Update()
 	// Deinit deinitialises the screen.
 	Deinit()
 }
+
+// ID is the unique identifier for a screen.
+type ID int
 
 const (
 	Title ID = iota
@@ -46,8 +50,8 @@ func CurrentScreen() Screen {
 }
 
 // SetScreen changes the current screen to the given ID.
-func SetScreen(s ID) {
+func SetScreen(s ID, data InitData) {
 	CurrentScreen().Deinit()
 	currentScreen = s
-	CurrentScreen().Init()
+	CurrentScreen().Init(data)
 }

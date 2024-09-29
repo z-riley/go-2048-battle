@@ -8,33 +8,39 @@ import (
 	"github.com/z-riley/go-2048-battle/backend"
 	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/go-2048-battle/common"
+	"github.com/z-riley/go-2048-battle/comms"
 	"github.com/z-riley/turdgl"
+	"github.com/z-riley/turdserve"
 )
 
 type MultiplayerScreen struct {
-	win     *turdgl.Window
-	backend *backend.Game
-
+	win   *turdgl.Window
 	title *turdgl.Text
 
 	score     *common.GameUIBox
 	highScore *common.GameUIBox
 	newGame   *turdgl.Button
 
-	arena         *common.Arena
-	arenaInputCh  chan (func())
-	opponentArena *common.Arena
+	backend      *backend.Game
+	arena        *common.Arena
+	arenaInputCh chan (func())
+
+	opponentBackend *backend.Game
+	opponentArena   *common.Arena
 
 	timer            *turdgl.Text
 	backgroundColour color.RGBA
+
+	// TODO: find a neater way of doing client/server polymorphism
+	// but don't forget to account for 1 server -> multiple clients
+	server *turdserve.Server
+	client *turdserve.Client
 }
 
 // NewMultiplayerScreen constructs a new singleplayer menu screen.
 func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 	s := MultiplayerScreen{
-		win:     win,
-		backend: backend.NewGame(&backend.Opts{SaveToDisk: false}),
-
+		win: win,
 		title: turdgl.NewText("Head to Head", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
 			SetColour(common.LightFontColour).
 			SetAlignment(turdgl.AlignCentre).
@@ -51,10 +57,12 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 			common.ArenaBackgroundColour,
 		).SetHeading("BEST"),
 
+		backend:      backend.NewGame(&backend.Opts{SaveToDisk: false}),
 		arena:        common.NewArena(turdgl.Vec{X: 100, Y: 250}),
 		arenaInputCh: make(chan func(), 100),
 
-		opponentArena: common.NewArena(turdgl.Vec{X: 700, Y: 250}),
+		opponentBackend: backend.NewGame(&backend.Opts{SaveToDisk: false}),
+		opponentArena:   common.NewArena(turdgl.Vec{X: 700, Y: 250}),
 
 		timer:            common.NewGameText("", turdgl.Vec{X: 370, Y: 620}),
 		backgroundColour: common.BackgroundColour,
@@ -74,8 +82,34 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 	return &s
 }
 
+// isHost returns true if screen is in host mode.
+func isHost(data InitData) bool {
+	_, ok := data[serverKey]
+	return ok
+}
+
 // Init initialises the screen.
-func (s *MultiplayerScreen) Init() {
+func (s *MultiplayerScreen) Init(initData InitData) {
+	if server, ok := initData[serverKey]; ok {
+		// Set up server
+		s.server = server.(*turdserve.Server)
+		s.server.SetCallback(func(id int, b []byte) {
+			if err := s.handleOpponentData(b); err != nil {
+				fmt.Println("Failed to handle opponent data as server", err)
+			}
+		})
+	} else if client, ok := initData[clientKey]; ok {
+		// Set up client
+		s.client = client.(*turdserve.Client)
+		s.client.SetCallback(func(b []byte) {
+			if err := s.handleOpponentData(b); err != nil {
+				fmt.Println("Failed to handle opponent data as client", err)
+			}
+		})
+	} else {
+		panic("neither server or client was passed to MultiplayerScreen Init")
+	}
+
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
 	// finished animating the first one
@@ -106,7 +140,7 @@ func (s *MultiplayerScreen) Init() {
 		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
-		SetScreen(Title)
+		SetScreen(Title, nil)
 	})
 }
 
@@ -124,6 +158,12 @@ func (s *MultiplayerScreen) Deinit() {
 	s.win.UnregisterKeybind(turdgl.KeyRight, turdgl.KeyPress)
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyPress)
 
+	if s.server != nil {
+		s.server.Destroy()
+	} else if s.client != nil {
+		s.client.Destroy()
+	}
+
 	s.arena.Destroy()
 }
 
@@ -136,11 +176,16 @@ func (s *MultiplayerScreen) Update() {
 	select {
 	case inputFunc := <-s.arenaInputCh:
 		inputFunc()
+		if err := s.sendGameUpdate(); err != nil {
+			fmt.Println("Failed to send game update:", err)
+		}
+
 	default:
 		// No user input; continue
 	}
 
 	// Serialise and deserialise grid to simulate receiving JSON from server
+	// TODO: remove this once multiplayer fully working
 	b, err := s.backend.Serialise()
 	if err != nil {
 		panic(err)
@@ -170,7 +215,7 @@ func (s *MultiplayerScreen) Update() {
 	s.arena.Draw(s.win)
 
 	// Draw opponent's arena
-	s.opponentArena.Animate(game)
+	s.opponentArena.Animate(*s.opponentBackend)
 	s.opponentArena.Draw(s.win)
 
 	// Check for win or lose
@@ -183,4 +228,71 @@ func (s *MultiplayerScreen) Update() {
 		s.backgroundColour = common.BackgroundColourLose
 	}
 
+}
+
+// sendGameUpdate sends the local game state to the opponent.
+func (s *MultiplayerScreen) sendGameUpdate() error {
+	// Send game data update to opponent
+	gameData, err := json.Marshal(comms.GameData{
+		Game: *s.backend,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal player data: %w", err)
+	}
+	msg, err := json.Marshal(
+		comms.Message{
+			Type:    comms.TypeGameData,
+			Content: gameData,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal joining message: %w", err)
+	}
+
+	// Send data to opponent
+	if s.server != nil {
+		for _, id := range s.server.GetClientIDs() {
+			if err := s.server.WriteToClient(id, msg); err != nil {
+				return fmt.Errorf("failed to send message to server: %w", err)
+			}
+		}
+	} else {
+		if err := s.client.Write(msg); err != nil {
+			return fmt.Errorf("failed to send message to server: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// handleOpponentData handles data from the opponent.
+func (s *MultiplayerScreen) handleOpponentData(b []byte) error {
+	// Note: in matches with 3 or more players, the server would need to forward
+	// the incoming client data to the other clients. However, with 2 players, this
+	// isn't necessary
+
+	var msg comms.Message
+	if err := json.Unmarshal(b, &msg); err != nil {
+		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)
+	}
+
+	switch msg.Type {
+	case comms.TypeGameData:
+		var data comms.GameData
+		if err := json.Unmarshal(msg.Content, &data); err != nil {
+			return fmt.Errorf("failed to unmarshal game data: %w", err)
+		}
+		return s.handleGameData(data)
+
+	default:
+		return fmt.Errorf("unsupported message type \"%s\"", msg.Type)
+	}
+}
+
+// handlePlayerData handles incoming game data from the opponent.
+func (s *MultiplayerScreen) handleGameData(data comms.GameData) error {
+	fmt.Println("Received new data from opponent: ", data)
+
+	s.opponentBackend = &data.Game
+
+	return nil
 }

@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/google/uuid v1.6.0
 	github.com/z-riley/turdgl v0.0.0-20240928082240-a6bceb172590
-	github.com/z-riley/turdserve v0.0.0-20240924204242-ba3d2144fa70
+	github.com/z-riley/turdserve v0.0.0-20240929075615-11b6fcd6fe3a
 )
 
 require (

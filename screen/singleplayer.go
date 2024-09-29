@@ -73,7 +73,7 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 }
 
 // Init initialises the screen.
-func (s *SingleplayerScreen) Init() {
+func (s *SingleplayerScreen) Init(_ InitData) {
 	// Load debug UI
 	s.debugGridText.SetText(s.backend.Grid.Debug())
 	s.debugTimeText.SetText(s.backend.Timer.Time.String())
@@ -113,7 +113,7 @@ func (s *SingleplayerScreen) Init() {
 		}
 	})
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
-		SetScreen(Title)
+		SetScreen(Title, nil)
 	})
 }
 
@@ -155,6 +155,7 @@ func (s *SingleplayerScreen) Update() {
 	}
 
 	// Serialise and deserialise grid to simulate receiving JSON from server
+	// TODO: remove this once multiplayer is working
 	b, err := s.backend.Serialise()
 	if err != nil {
 		panic(err)

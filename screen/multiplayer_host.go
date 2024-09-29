@@ -2,12 +2,8 @@ package screen
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"image/color"
-	"net"
-	"os"
-	"strings"
 
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
@@ -36,10 +32,10 @@ type MultiplayerHostScreen struct {
 // NewTitle Screen constructs a new multiplayer host screen in the given window.
 func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 	ipAddr := func() string {
-		if isWSL() {
+		if comms.IsWSL() {
 			return "check WSL host"
 		}
-		conn, err := LocalIP()
+		conn, err := comms.LocalIP()
 		if err != nil {
 			panic(err)
 		}
@@ -63,18 +59,17 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 	var cards []*playerCard
 	for i := range 1 {
 		pos := turdgl.Vec{X: 300, Y: 450 + float64(i)*80}
-		label := fmt.Sprintf("Waiting for player %d", i+2)
-		cards = append(cards, newPlayerCard(pos, label))
+		cards = append(cards, newPlayerCard(pos, i))
 	}
 
-	start := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 650}, func() { SetScreen(Multiplayer) })
+	start := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 650}, func() {})
 	start.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Start game")
 
-	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 600 + 20, Y: 650}, func() { SetScreen(MultiplayerMenu) })
+	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 600 + 20, Y: 650}, func() { SetScreen(MultiplayerMenu, nil) })
 	back.SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
-	return &MultiplayerHostScreen{
+	s := MultiplayerHostScreen{
 		win:         win,
 		title:       title,
 		labels:      []*turdgl.TextBox{ipHeading, ipBody},
@@ -83,12 +78,20 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 		playerCards: cards,
 		server:      turdserve.NewServer(maxPlayers - 1),
 	}
+
+	start.SetCallback(func(_ turdgl.MouseState) {
+		if err := s.startGame(); err != nil {
+			fmt.Println("Failed to start game:", err)
+		}
+	})
+
+	return &s
 }
 
 // Init initialises the screen.
-func (s *MultiplayerHostScreen) Init() {
+func (s *MultiplayerHostScreen) Init(_ InitData) {
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
-		SetScreen(MultiplayerMenu)
+		SetScreen(MultiplayerMenu, nil)
 	})
 
 	// Set up server
@@ -96,18 +99,21 @@ func (s *MultiplayerHostScreen) Init() {
 		if err := s.handleClientData(id, b); err != nil {
 			fmt.Println("Failed to handle connection:", err)
 		}
+	}).SetDisconnectCallback(func(id int) {
+		s.handleClientDisconnect(id)
 	})
 
 	// Start server to allow other players to connect
 	go func() {
-		s.server.Run("0.0.0.0", serverPort)
+		if err := s.server.Run("0.0.0.0", serverPort); err != nil {
+			panic("server crashed: " + err.Error())
+		}
 	}()
 }
 
 // Deinit deinitialises the screen.
 func (s *MultiplayerHostScreen) Deinit() {
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
-	s.server.Destroy()
 }
 
 // Update updates and draws multiplayer host screen.
@@ -136,9 +142,8 @@ func (s *MultiplayerHostScreen) Update() {
 
 }
 
-// handleClientData handles data from client.
+// handleClientData handles all data received from a client.
 func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
-	s.playerCards[id].setReady()
 
 	fmt.Println("Received from client", id, ":", string(b))
 
@@ -148,35 +153,53 @@ func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
 	}
 
 	switch msg.Type {
-	case comms.MsgConnect:
+	case comms.TypePlayerData:
 		var data comms.PlayerData
 		if err := json.Unmarshal(msg.Content, &data); err != nil {
 			return fmt.Errorf("failed to unmarshal player data: %w", err)
 		}
-		return s.handleMsgConnect(id, data)
-
-	case comms.MsgGameUpdate:
+		return s.handlePlayerData(id, data)
 
 	default:
-		return fmt.Errorf("unsupported error type \"%s\"", msg.Type)
+		return fmt.Errorf("unsupported message type \"%s\"", msg.Type)
 	}
-
-	return nil
 }
 
-// handleMsgConnect handles
-func (s *MultiplayerHostScreen) handleMsgConnect(id int, data comms.PlayerData) error {
+// handlePlayerData handles incoming player data.
+func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) error {
 	// Make sure versions are compatible
 	if data.Version != config.Version {
 		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
 	}
 
 	// Update player card with new data
-	s.playerCards[id].name.Body.SetText(data.Username)
-	fmt.Println("buhr")
+	s.playerCards[id].setReady(data.Username)
 	return nil
 }
 
+func (s *MultiplayerHostScreen) handleClientDisconnect(id int) {
+	// Remove data from player card
+	s.playerCards[id].setNotReady()
+}
+
+// serverKey is used for indentifying the server in InitData.
+const serverKey = "server"
+
+// startGame attempts to start a multiplayer game.
+func (s *MultiplayerHostScreen) startGame() error {
+	// Check all players are connected
+	for i := range maxPlayers - 1 {
+		if !s.playerCards[i].isReady() {
+			return fmt.Errorf("player %d not ready", i)
+		}
+	}
+
+	// Pass server to next screen
+	SetScreen(Multiplayer, InitData{serverKey: s.server})
+	return nil
+}
+
+// Styles for playerCards.
 var (
 	styleNotReady = turdgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 2}
 	styleReady    = turdgl.Style{Colour: color.RGBA{0, 255, 0, 255}, Thickness: 0, Bloom: 10}
@@ -184,11 +207,14 @@ var (
 
 // playerCard displays a player in the lobby.
 type playerCard struct {
+	id    int
+	ready bool
+
 	name  *common.EntryBox
 	light *turdgl.Circle
 }
 
-func newPlayerCard(pos turdgl.Vec, txt string) *playerCard {
+func newPlayerCard(pos turdgl.Vec, id int) *playerCard {
 	const (
 		width  = 400
 		height = 60
@@ -199,12 +225,17 @@ func newPlayerCard(pos turdgl.Vec, txt string) *playerCard {
 		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
 		SetTextSize(30).
 		SetTextColour(common.DarkerFontColour).
-		SetText(txt)
+		SetText(fmt.Sprintf("Waiting for player %d", id+2))
 
 	lightPos := turdgl.Vec{X: pos.X + width + 40, Y: pos.Y + height/2}
 	light := turdgl.NewCircle(height*0.8, lightPos, turdgl.WithStyle(styleNotReady))
 
-	return &playerCard{name, light}
+	return &playerCard{
+		id:    id,
+		ready: false,
+		name:  name,
+		light: light,
+	}
 }
 
 func (p *playerCard) Draw(buf *turdgl.FrameBuffer) {
@@ -212,72 +243,18 @@ func (p *playerCard) Draw(buf *turdgl.FrameBuffer) {
 	p.light.Draw(buf)
 }
 
-func (p *playerCard) setReady() {
+func (p *playerCard) setReady(username string) {
+	p.ready = true
+	p.name.Body.SetText(username)
 	p.light.SetStyle(styleReady)
 }
 
 func (p *playerCard) setNotReady() {
+	p.ready = false
+	p.name.Body.SetText(fmt.Sprintf("Waiting for player %d", p.id+2))
 	p.light.SetStyle(styleNotReady)
 }
 
-//////////////
-
-// LocalIP returns the device's local IP address.
-func LocalIP() (net.IP, error) {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return nil, err
-	}
-	for _, i := range ifaces {
-		addrs, err := i.Addrs()
-		if err != nil {
-			return nil, err
-		}
-
-		for _, addr := range addrs {
-			var ip net.IP
-			switch v := addr.(type) {
-			case *net.IPNet:
-				ip = v.IP
-			case *net.IPAddr:
-				ip = v.IP
-			}
-
-			if isPrivateIP(ip) {
-				return ip, nil
-			}
-		}
-	}
-
-	return nil, errors.New("no IP")
-}
-
-// isPrivate IP returns true if the given IP address is reserved (private).
-func isPrivateIP(ip net.IP) bool {
-	var privateIPBlocks []*net.IPNet
-	for _, cidr := range []string{
-		"10.0.0.0/8",     // RFC1918
-		"172.16.0.0/12",  // RFC1918
-		"192.168.0.0/16", // RFC1918
-	} {
-		_, block, _ := net.ParseCIDR(cidr)
-		privateIPBlocks = append(privateIPBlocks, block)
-	}
-
-	for _, block := range privateIPBlocks {
-		if block.Contains(ip) {
-			return true
-		}
-	}
-
-	return false
-}
-
-// isWSL returns true if the device is a WSL instance.
-func isWSL() bool {
-	data, err := os.ReadFile("/proc/sys/kernel/osrelease")
-	if err != nil {
-		return false // unable to read, assume not WSL
-	}
-	return strings.Contains(string(data), "microsoft")
+func (p *playerCard) isReady() bool {
+	return p.ready
 }

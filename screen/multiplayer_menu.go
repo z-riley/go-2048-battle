@@ -19,13 +19,13 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 
-	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, func() { SetScreen(MultiplayerJoin) })
+	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, func() { SetScreen(MultiplayerJoin, nil) })
 	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join game")
 
-	host := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(MultiplayerHost) })
+	host := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(MultiplayerHost, nil) })
 	host.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host game")
 
-	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(Title) })
+	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(Title, nil) })
 	back.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
 	// TODO: poke around 2048 app UI and copy that menu style
@@ -38,18 +38,18 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 }
 
 // Init initialises the screen.
-func (s *MultiplayerMenuScreen) Init() {
+func (s *MultiplayerMenuScreen) Init(_ InitData) {
 	s.win.RegisterKeybind(turdgl.Key1, turdgl.KeyRelease, func() {
-		SetScreen(MultiplayerJoin)
+		SetScreen(MultiplayerJoin, nil)
 	})
 	s.win.RegisterKeybind(turdgl.Key2, turdgl.KeyRelease, func() {
-		SetScreen(MultiplayerHost)
+		SetScreen(MultiplayerHost, nil)
 	})
 	s.win.RegisterKeybind(turdgl.Key3, turdgl.KeyRelease, func() {
-		SetScreen(Title)
+		SetScreen(Title, nil)
 	})
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
-		SetScreen(Title)
+		SetScreen(Title, nil)
 	})
 }
 
