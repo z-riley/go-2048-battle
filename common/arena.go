@@ -442,9 +442,11 @@ func (a *Arena) trimTiles() {
 func tileFontSize(val int) float64 {
 	chars := len(fmt.Sprint(val))
 	switch {
-	case chars < 4:
+	case chars < 3:
 		return 36
-	case chars == 4:
+	case chars < 4:
+		return 30
+	case chars < 5:
 		return 26
 	default:
 		return 18

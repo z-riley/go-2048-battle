@@ -18,7 +18,9 @@ type SingleplayerScreen struct {
 	logo2048  *turdgl.TextBox
 	score     *common.GameUIBox
 	highScore *common.GameUIBox
+	menu      *turdgl.Button
 	newGame   *turdgl.Button
+	guide     *turdgl.Text
 
 	arena        *common.Arena
 	arenaInputCh chan (func())
@@ -40,7 +42,6 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		arena:        common.NewArena(turdgl.Vec{X: 250, Y: 250}),
 		arenaInputCh: make(chan func(), 100),
 
-		timer:            common.NewGameText("", turdgl.Vec{X: 520, Y: 620}),
 		backgroundColour: common.BackgroundColour,
 
 		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium),
@@ -48,19 +49,25 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium),
 	}
 
+	// Everything is sized relative to the tile size
+	const unit = common.TileSizePx
+
+	// Everything is positioned relative to the arena grid
+	anchor := s.arena.Pos()
+
 	s.logo2048 = turdgl.NewTextBox(turdgl.NewCurvedRect(
-		120, 120, 3,
-		turdgl.Vec{X: s.arena.Pos().X, Y: 100},
+		1.36*unit, 1.36*unit, 3,
+		turdgl.Vec{X: anchor.X, Y: anchor.Y - 2.58*unit},
 	), common.FontPathBold).SetText("2048").
-		SetTextSize(34).
+		SetTextSize(32).
 		SetTextColour(common.WhiteFontColour)
-	s.logo2048.Body.SetAlignment(turdgl.AlignTopCentre)
+	s.logo2048.Body.SetAlignment(turdgl.AlignCustom).SetOffset(turdgl.Vec{Y: 27})
 	s.logo2048.Shape.SetStyle(turdgl.Style{Colour: common.Tile2048Colour})
 
-	const wNewGame = 200
+	const widgetWidth = unit * 1.27
 	s.newGame = common.NewGameButton(
-		wNewGame, 40,
-		turdgl.Vec{X: s.arena.Pos().X + s.arena.Width() - wNewGame, Y: 180},
+		widgetWidth, 0.4*unit,
+		turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
 		func() {
 			s.arenaInputCh <- func() {
 				s.backend.Reset()
@@ -69,18 +76,35 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		},
 	).SetLabelText("NEW")
 
+	s.menu = common.NewGameButton(
+		widgetWidth, 0.4*unit,
+		turdgl.Vec{X: anchor.X + s.arena.Width() - widgetWidth, Y: anchor.Y - 1.21*unit},
+		func() {
+			SetScreen(Title, nil)
+		},
+	).SetLabelText("MENU")
+
 	const wScore = 90
 	s.score = common.NewGameTextBox(
 		wScore, wScore,
-		turdgl.Vec{X: s.arena.Pos().X + s.arena.Width() - wNewGame, Y: 70},
+		turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 2.58*unit},
 		common.ArenaBackgroundColour,
 	).SetHeading("SCORE")
 
 	s.highScore = common.NewGameTextBox(
 		wScore, wScore,
-		turdgl.Vec{X: s.arena.Pos().X + s.arena.Width() - wScore, Y: 70},
+		turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
 		common.ArenaBackgroundColour,
 	).SetHeading("BEST")
+
+	s.guide = turdgl.NewText(
+		"Join the numbers and get to the 2048 tile!",
+		turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.28*unit},
+		common.FontPathBold,
+	).SetSize(16).SetColour(common.GreyTextColour)
+
+	s.timer = common.NewGameText("", turdgl.Vec{X: anchor.X + s.arena.Width(), Y: 620}).
+		SetAlignment(turdgl.AlignBottomRight)
 
 	return &s
 }
@@ -187,8 +211,13 @@ func (s *SingleplayerScreen) Update() {
 	s.highScore.Draw(s.win)
 	s.highScore.SetBody(fmt.Sprint(game.Score.High))
 
+	s.win.Draw(s.menu)
+	s.menu.Update(s.win)
+
 	s.win.Draw(s.newGame)
 	s.newGame.Update(s.win)
+
+	s.win.Draw(s.guide)
 
 	s.timer.SetText(game.Timer.Time.String())
 	s.win.Draw(s.timer)

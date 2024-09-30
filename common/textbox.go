@@ -51,7 +51,7 @@ func NewGameTextBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *G
 		Y: pos.Y + 25,
 	}
 	heading := turdgl.NewText("Heading", headingPos, FontPathBold).
-		SetColour(WhiteFontColour).
+		SetColour(LightFontColour).
 		SetSize(16).
 		SetAlignment(turdgl.AlignTopCentre)
 
@@ -91,6 +91,6 @@ func (g *GameUIBox) SetBody(s string) *GameUIBox {
 // NewGameText constructs text with sensible defaults.
 func NewGameText(body string, pos turdgl.Vec) *turdgl.Text {
 	return turdgl.NewText(body, pos, FontPathBold).
-		SetColour(ArenaBackgroundColour).
-		SetSize(18)
+		SetColour(GreyTextColour).
+		SetSize(17)
 }

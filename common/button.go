@@ -62,11 +62,11 @@ type GameButton turdgl.Button
 // NewGameButton constructs a new game button with sensible defaults.
 func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
 	r := turdgl.NewCurvedRect(width, height, 3, pos)
-	r.SetStyle(turdgl.Style{Colour: OrangeColour})
+	r.SetStyle(turdgl.Style{Colour: buttonOrangeColour})
 
 	b := turdgl.NewButton(r, FontPathBold).
 		SetLabelText("BUTTON").
-		SetLabelSize(20).
+		SetLabelSize(14).
 		SetLabelColour(WhiteFontColour).
 		SetLabelAlignment(turdgl.AlignCustom).
 		SetCallback(func(turdgl.MouseState) { cb() })

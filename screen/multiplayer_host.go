@@ -244,7 +244,7 @@ func newPlayerCard(pos turdgl.Vec, id int) *playerCard {
 	name.SetTextAlignment(turdgl.AlignCustom).
 		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
 		SetTextSize(30).
-		SetTextColour(common.DarkerFontColour).
+		SetTextColour(common.GreyTextColour).
 		SetText(fmt.Sprintf("Waiting for player %d", id+2))
 
 	lightPos := turdgl.Vec{X: pos.X + width + 40, Y: pos.Y + height/2}

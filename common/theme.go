@@ -6,25 +6,46 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
+// Menu colours
 var (
-	BackgroundColour     = turdgl.RGB(46, 36, 27)
-	BackgroundColourWin  = turdgl.RGB(36, 59, 34)
-	BackgroundColourLose = turdgl.RGB(38, 15, 15)
-
-	DarkerFontColour  = turdgl.RGB(191, 178, 171)
 	LightFontColour   = turdgl.RGB(221, 208, 201)
-	WhiteFontColour   = turdgl.RGB(252, 247, 244)
 	LighterFontColour = turdgl.RGB(251, 238, 231)
 
 	buttonColourUnpressed = turdgl.RGB(143, 122, 101)
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
+)
 
-	tileBackgroundColour  = turdgl.RGB(180, 170, 158)
-	tile16Colour          = turdgl.RGB(232, 154, 108)
-	Tile2048Colour        = turdgl.RGB(238, 193, 48)
-	ArenaBackgroundColour = turdgl.RGB(157, 143, 130)
+// UI colours
+var (
+	BackgroundColour     = turdgl.RGB(248, 248, 237) // official colour
+	BackgroundColourWin  = turdgl.RGB(36, 59, 34)
+	BackgroundColourLose = turdgl.RGB(38, 15, 15)
 
-	OrangeColour = turdgl.RGB(231, 150, 97)
+	LightGreyTextColour = turdgl.RGB(240, 229, 215) // official colour
+	GreyTextColour      = turdgl.RGB(120, 110, 100) // official colour
+	WhiteFontColour     = turdgl.RGB(255, 255, 255) // official colour
+
+	buttonOrangeColour    = turdgl.RGB(235, 152, 91)  // official colour
+	tileBackgroundColour  = turdgl.RGB(204, 192, 180) // official colour
+	ArenaBackgroundColour = turdgl.RGB(187, 173, 160) // official colour
+
+)
+
+// Tile colours
+var (
+	tile2Colour    = turdgl.RGB(239, 229, 218) // official colour
+	tile4Colour    = turdgl.RGB(236, 224, 198) // official colour
+	tile8Colour    = turdgl.RGB(242, 176, 121) // official colour
+	tile16Colour   = turdgl.RGB(235, 140, 83)  // official colour
+	tile32Colour   = turdgl.RGB(245, 123, 93)  // official colour
+	tile64Colour   = turdgl.RGB(233, 89, 55)   // official colour
+	tile128Colour  = turdgl.RGB(242, 217, 107) // official colour
+	tile256Colour  = turdgl.RGB(241, 208, 76)  // official colour
+	tile512Colour  = turdgl.RGB(229, 192, 43)  // official colour
+	tile1024Colour = turdgl.RGB(224, 192, 65)
+	Tile2048Colour = turdgl.RGB(235, 196, 2) // official colour
+	tile4096Colour = turdgl.RGB(255, 59, 59)
+	tile8192Colour = turdgl.RGB(255, 32, 33)
 )
 
 const (
@@ -36,31 +57,31 @@ const (
 func tileColour(val int) color.Color {
 	switch val {
 	case 2:
-		return turdgl.RGB(236, 229, 219)
+		return tile2Colour
 	case 4:
-		return turdgl.RGB(235, 224, 202)
+		return tile4Colour
 	case 8:
-		return turdgl.RGB(232, 180, 130)
+		return tile8Colour
 	case 16:
 		return tile16Colour
 	case 32:
-		return turdgl.RGB(230, 130, 102)
+		return tile32Colour
 	case 64:
-		return turdgl.RGB(228, 103, 71)
+		return tile64Colour
 	case 128:
-		return turdgl.RGB(234, 209, 127)
+		return tile128Colour
 	case 256:
-		return turdgl.RGB(232, 206, 113)
+		return tile256Colour
 	case 512:
-		return turdgl.RGB(238, 199, 68)
+		return tile512Colour
 	case 1024:
-		return turdgl.RGB(224, 192, 65)
+		return tile1024Colour
 	case 2048:
 		return Tile2048Colour
 	case 4096:
-		return turdgl.RGB(255, 59, 59)
+		return tile4096Colour
 	case 8192:
-		return turdgl.RGB(255, 32, 33)
+		return tile8192Colour
 	default:
 		return turdgl.RGB(255, 0, 0)
 	}
@@ -69,10 +90,8 @@ func tileColour(val int) color.Color {
 // tileTextColour returns the colour of the text for tile of a given value.
 func tileTextColour(val int) color.Color {
 	switch val {
-	case 2:
-		return turdgl.RGB(120, 110, 100)
-	case 4:
-		return turdgl.RGB(120, 110, 100)
+	case 2, 4:
+		return GreyTextColour
 	default:
 		return WhiteFontColour
 	}
