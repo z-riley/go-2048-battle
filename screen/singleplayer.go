@@ -55,14 +55,11 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 	// Everything is positioned relative to the arena grid
 	anchor := s.arena.Pos()
 
-	s.logo2048 = turdgl.NewTextBox(turdgl.NewCurvedRect(
-		1.36*unit, 1.36*unit, 3,
+	s.logo2048 = common.NewLogoBox(
+		1.36*unit, 1.36*unit,
 		turdgl.Vec{X: anchor.X, Y: anchor.Y - 2.58*unit},
-	), common.FontPathBold).SetText("2048").
-		SetTextSize(32).
-		SetTextColour(common.WhiteFontColour)
-	s.logo2048.Body.SetAlignment(turdgl.AlignCustom).SetOffset(turdgl.Vec{Y: 27})
-	s.logo2048.Shape.SetStyle(turdgl.Style{Colour: common.Tile2048Colour})
+		"2048",
+	)
 
 	const widgetWidth = unit * 1.27
 	s.newGame = common.NewGameButton(

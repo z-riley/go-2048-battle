@@ -112,8 +112,6 @@ func (s *MultiplayerScreen) Init(initData InitData) {
 		panic("neither server or client was passed to MultiplayerScreen Init")
 	}
 
-	fmt.Println("GOTEEEEEEEEEEEEE")
-
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
 	// finished animating the first one

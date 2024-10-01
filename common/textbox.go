@@ -94,3 +94,19 @@ func NewGameText(body string, pos turdgl.Vec) *turdgl.Text {
 		SetColour(GreyTextColour).
 		SetSize(17)
 }
+
+// NewLogoBox constructs a new "2048" tile logo.
+func NewLogoBox(width, height float64, pos turdgl.Vec, txt string) *turdgl.TextBox {
+	logo := turdgl.NewTextBox(
+		turdgl.NewCurvedRect(width, height, 3, pos),
+		FontPathBold,
+	).
+		SetText(txt).
+		SetTextSize(32).
+		SetTextColour(WhiteFontColour)
+
+	logo.Body.SetAlignment(turdgl.AlignCustom).SetOffset(turdgl.Vec{Y: 27})
+	logo.Shape.SetStyle(turdgl.Style{Colour: Tile2048Colour})
+
+	return logo
+}
