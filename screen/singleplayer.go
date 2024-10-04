@@ -39,7 +39,7 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		win:     win,
 		backend: backend.NewGame(&backend.Opts{SaveToDisk: true}),
 
-		arena:        common.NewArena(turdgl.Vec{X: 250, Y: 250}),
+		arena:        common.NewArena(turdgl.Vec{X: 440, Y: 300}),
 		arenaInputCh: make(chan func(), 100),
 
 		backgroundColour: common.BackgroundColour,
@@ -100,7 +100,9 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 		common.FontPathBold,
 	).SetSize(16).SetColour(common.GreyTextColour)
 
-	s.timer = common.NewGameText("", turdgl.Vec{X: anchor.X + s.arena.Width(), Y: 620}).
+	s.timer = common.NewGameText("",
+		turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.1},
+	).
 		SetAlignment(turdgl.AlignBottomRight)
 
 	return &s
