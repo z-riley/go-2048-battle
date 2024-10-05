@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/go-2048-battle/debug"
 	"github.com/z-riley/go-2048-battle/screen"
@@ -8,14 +11,21 @@ import (
 )
 
 func main() {
+	const path = "./assets/icon.png"
+	icon, err := os.Open(path)
+	if err != nil {
+		log.Println("Failed to load window icon:", path)
+	}
+
 	// Create window
 	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "2048 Battle",
 		Width:  config.WinWidth,
 		Height: config.WinHeight,
+		Icon:   icon,
 	})
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to create new window: %v", err)
 	}
 	defer win.Destroy()
 
