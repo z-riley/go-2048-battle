@@ -16,7 +16,7 @@ type TitleScreen struct {
 func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 	// Main title
 	title := turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.LightFontColour).
+		SetColour(common.ArenaBackgroundColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 

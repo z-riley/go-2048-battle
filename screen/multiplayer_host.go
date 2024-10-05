@@ -43,7 +43,7 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 	}()
 
 	title := turdgl.NewText("Host game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.LightFontColour).
+		SetColour(common.ArenaBackgroundColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 

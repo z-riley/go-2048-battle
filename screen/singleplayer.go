@@ -12,8 +12,8 @@ import (
 )
 
 type SingleplayerScreen struct {
-	win     *turdgl.Window
-	backend *backend.Game
+	win              *turdgl.Window
+	backgroundColour color.RGBA
 
 	logo2048  *turdgl.TextBox
 	score     *common.GameUIBox
@@ -21,12 +21,11 @@ type SingleplayerScreen struct {
 	menu      *turdgl.Button
 	newGame   *turdgl.Button
 	guide     *turdgl.Text
+	timer     *turdgl.Text
 
+	backend      *backend.Game
 	arena        *common.Arena
 	arenaInputCh chan (func())
-
-	timer            *turdgl.Text
-	backgroundColour color.RGBA
 
 	debugGridText  *turdgl.Text
 	debugTimeText  *turdgl.Text
@@ -102,8 +101,7 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 
 	s.timer = common.NewGameText("",
 		turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.1},
-	).
-		SetAlignment(turdgl.AlignBottomRight)
+	).SetAlignment(turdgl.AlignBottomRight)
 
 	return &s
 }

@@ -15,7 +15,7 @@ type MultiplayerMenuScreen struct {
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
 func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 	title := turdgl.NewText("Multiplayer", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.LightFontColour).
+		SetColour(common.ArenaBackgroundColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 

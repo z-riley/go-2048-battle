@@ -14,22 +14,27 @@ import (
 )
 
 type MultiplayerScreen struct {
-	win   *turdgl.Window
-	title *turdgl.Text
+	win              *turdgl.Window
+	backgroundColour color.RGBA
 
-	newGame *turdgl.Button
-
+	// Player's grid
+	newGame      *turdgl.Button
 	score        *common.GameUIBox
+	menu         *turdgl.Button
+	guide        *turdgl.Text
 	backend      *backend.Game
 	arena        *common.Arena
 	arenaInputCh chan (func())
 
+	// Opponent's grid
 	opponentScore   *common.GameUIBox
+	opponentGuide   *turdgl.Text
 	opponentArena   *common.Arena
 	opponentBackend *backend.Game
 
-	timer            *turdgl.Text
-	backgroundColour color.RGBA
+	// Shared widgets
+	timer *turdgl.Text
+	title *turdgl.Text
 
 	// TODO: find a neater way of doing client/server polymorphism
 	// but don't forget to account for 1 server -> multiple clients
@@ -42,50 +47,85 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 	s := MultiplayerScreen{
 		win: win,
 		title: turdgl.NewText("Head to Head", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-			SetColour(common.LightFontColour).
+			SetColour(common.ArenaBackgroundColour).
 			SetAlignment(turdgl.AlignCentre).
 			SetSize(40),
 
-		score: common.NewGameTextBox(
-			90, 90,
-			turdgl.Vec{X: 320, Y: 120},
-			common.ArenaBackgroundColour,
-		).SetHeading("SCORE"),
-		opponentScore: common.NewGameTextBox(
-			90, 90,
-			turdgl.Vec{X: 700, Y: 120},
-			common.ArenaBackgroundColour,
-		).SetHeading("SCORE"),
-
 		backend:      backend.NewGame(&backend.Opts{SaveToDisk: false}),
-		arena:        common.NewArena(turdgl.Vec{X: 100, Y: 250}),
+		arena:        common.NewArena(turdgl.Vec{X: 100, Y: 300}),
 		arenaInputCh: make(chan func(), 100),
 
 		opponentBackend: backend.NewGame(&backend.Opts{SaveToDisk: false}),
-		opponentArena:   common.NewArena(turdgl.Vec{X: 700, Y: 250}),
+		opponentArena:   common.NewArena(turdgl.Vec{X: 700, Y: 300}),
 
-		timer:            common.NewGameText("", turdgl.Vec{X: 370, Y: 620}),
 		backgroundColour: common.BackgroundColour,
 	}
 
-	s.newGame = common.NewGameButton(
-		200, 50,
-		turdgl.Vec{X: 100, Y: 180},
-		func() {
-			s.arenaInputCh <- func() {
-				s.backend.Reset()
-				s.arena.Reset()
-			}
-		},
-	).SetLabelText("NEW")
+	// Everything is sized relative to the tile size
+	const unit = common.TileSizePx
+
+	// Player's grid:
+	{
+		// Everything is positioned relative to the arena grid
+		anchor := s.arena.Pos()
+
+		const widgetWidth = unit * 1.27
+		s.newGame = common.NewGameButton(
+			widgetWidth, 0.4*unit,
+			turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
+			func() {
+				s.arenaInputCh <- func() {
+					s.backend.Reset()
+					s.arena.Reset()
+				}
+			},
+		).SetLabelText("NEW")
+
+		s.menu = common.NewGameButton(
+			widgetWidth, 0.4*unit,
+			turdgl.Vec{X: anchor.X + s.arena.Width() - widgetWidth, Y: anchor.Y - 1.21*unit},
+			func() {
+				SetScreen(Multiplayer, nil)
+			},
+		).SetLabelText("MENU")
+
+		const wScore = 90
+		s.score = common.NewGameTextBox(
+			90, 90,
+			turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
+			common.ArenaBackgroundColour,
+		).SetHeading("SCORE")
+
+		s.guide = turdgl.NewText(
+			"Your grid", // TODO: Make this
+			turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.28*unit},
+			common.FontPathBold,
+		).SetSize(16).SetColour(common.GreyTextColour)
+
+		s.timer = common.NewGameText("",
+			turdgl.Vec{X: 600, Y: anchor.Y},
+		).SetAlignment(turdgl.AlignBottomRight)
+	}
+
+	// Opponent's grid:
+	{
+		// Everything is positioned relative to the arena grid
+		opponentAnchor := s.opponentArena.Pos()
+
+		s.opponentScore = common.NewGameTextBox(
+			90, 90,
+			turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 2.58*unit},
+			common.ArenaBackgroundColour,
+		).SetHeading("SCORE")
+
+		s.opponentGuide = turdgl.NewText(
+			"Opponent's grid",
+			turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.28*unit},
+			common.FontPathBold,
+		).SetSize(16).SetColour(common.GreyTextColour)
+	}
 
 	return &s
-}
-
-// isHost returns true if screen is in host mode.
-func isHost(data InitData) bool {
-	_, ok := data[serverKey]
-	return ok
 }
 
 // Init initialises the screen.
@@ -188,6 +228,11 @@ func (s *MultiplayerScreen) Update() {
 
 	// Draw UI widgets
 	s.win.Draw(s.title)
+	s.win.Draw(s.guide)
+	s.win.Draw(s.opponentGuide)
+
+	s.win.Draw(s.menu)
+	s.menu.Update(s.win)
 
 	s.score.Draw(s.win)
 	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))

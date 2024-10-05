@@ -26,7 +26,7 @@ type MultiplayerJoinScreen struct {
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
 func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	title := turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.LightFontColour).
+		SetColour(common.ArenaBackgroundColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 
