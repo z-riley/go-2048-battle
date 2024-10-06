@@ -10,6 +10,7 @@ import (
 	"github.com/z-riley/go-2048-battle/backend"
 	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/turdgl"
+	"golang.org/x/exp/constraints"
 )
 
 // Adjustable settings
@@ -304,6 +305,7 @@ func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh cha
 		errCh <- fmt.Errorf("animateMoveToCombine could not find origin tile at %v", origin)
 		return
 	}
+
 	moveVec := turdgl.Sub(a.tilePos(dest), a.tilePos(origin))
 	const steps = 20
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
@@ -315,7 +317,7 @@ func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh cha
 	// Mark tiles for destruction. The combined tile will be newly spawned seperately
 	destTile, err := a.tileAtIdx(dest)
 	if err == nil {
-		// There may or may not already be a tile at the destination
+		// Mark tile if it exists
 		destTile.destroy = true
 	}
 	originTile.destroy = true
@@ -417,8 +419,7 @@ func (a *Arena) tileAtIdx(pos coord) (*tile, error) {
 	return nil, fmt.Errorf("could not find tile at pos: %v", pos)
 }
 
-// tilePos generates the pixel position of a tile on the grid based on
-// its x and y index.
+// tilePos generates the pixel position of a tile on the grid based on its x and y index.
 func (a *Arena) tilePos(pos coord) turdgl.Vec {
 	return turdgl.Vec{
 		X: a.pos.X + float64(pos.x)*tileSpacingPx,
@@ -611,7 +612,7 @@ func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Di
 				// The tiles that combined in the last turn can be ascertained from which tiles are
 				// missing, and the direction of movement
 
-				// Get the other tiles in the row which went missing after the move
+				// Get the other tiles in the row that went missing after the move
 				missingTiles := make(map[uuid.UUID]grid.Tile)
 				for _, tile := range beforeRow {
 					if tile.Val != 0 {
@@ -622,12 +623,124 @@ func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Di
 					delete(missingTiles, tile.UUID)
 				}
 
-				// Get the positions of the tiles which went missing after the move
-				// TODO: need to behave differently for when origin is 2,2,2,2
+				// Count the number of combinations as a result of the move
+				var numCombines int
+				for _, tile := range afterRow {
+					if tile.Cmb {
+						numCombines++
+					}
+				}
+
+				// Get the positions of the tiles that went missing after the move
 				for uuid := range missingTiles {
 					origin := beforeUUIDs[uuid]
 					dest := coord{x, y}
-					if !origin.equals(dest) {
+
+					// TODO: break this out into seperate function and make it more concise
+					isLegalMove := func(origin, dest coord, dir grid.Direction) bool {
+						if origin.equals(dest) {
+							return false
+						}
+
+						// If there 4 tiles before, the maximum travel distance cannot be
+						// more than 2 in the direction of travel
+						const maxTravelDist = 2
+						travelDist := abs(dest.x-origin.x) + abs(dest.y-origin.y)
+						isInvalidDist := travelDist > maxTravelDist
+
+						isFourLikeTiles := numCombines == 2 &&
+							beforeRow[0].Val == beforeRow[1].Val &&
+							beforeRow[0].Val == beforeRow[2].Val &&
+							beforeRow[0].Val == beforeRow[3].Val
+
+						isTwoPairsOfTiles := !isFourLikeTiles && numCombines == 2 &&
+							beforeRow[0].Val == beforeRow[1].Val &&
+							beforeRow[2].Val == beforeRow[3].Val
+
+						switch dir {
+						case grid.DirLeft:
+							// X value should get smaller
+							if origin.x < dest.x {
+								return false
+							}
+							// Manual exclusion for 2,2,2,2 situations
+							if isFourLikeTiles {
+								if isInvalidDist {
+									return false
+								}
+								if origin.x == 2 && dest.x == 0 {
+									return false
+								}
+							}
+							// Manual exclusion for 2,2,4,4 situations
+							if isTwoPairsOfTiles {
+								if origin.x == 2 && dest.x == 0 {
+									return false
+								}
+								if origin.x == 3 && dest.x == 0 {
+									return false
+								}
+							}
+
+						case grid.DirRight:
+							// X value should get larger
+							if origin.x > dest.x {
+								return false
+							}
+							// Manual exclusion for 2,2,2,2 and 2,2,4,4 situations
+							if isFourLikeTiles || isTwoPairsOfTiles {
+								if isInvalidDist {
+									return false
+								}
+								if origin.x == 1 && dest.x == 3 {
+									return false
+								}
+							}
+
+						case grid.DirUp:
+							// Y value should get smaller
+							if origin.y < dest.y {
+								return false
+							}
+							// Manual exclusion for 2,2,2,2 situations
+							if isFourLikeTiles {
+								if isInvalidDist {
+									return false
+								}
+								if origin.y == 2 && dest.y == 0 {
+									return false
+								}
+							}
+							// Manual exclusion for 2,2,4,4 situations
+							if isTwoPairsOfTiles {
+								if origin.y == 2 && dest.y == 0 {
+									return false
+								}
+								if origin.y == 3 && dest.y == 0 {
+									return false
+								}
+							}
+
+						case grid.DirDown:
+							// Y value should get larger
+							if origin.y > dest.y {
+								return false
+							}
+							// Manual exclusion for 2,2,2,2 and 2,2,4,4 situations
+							if isFourLikeTiles || isTwoPairsOfTiles {
+								if isInvalidDist {
+									return false
+								}
+								if origin.y == 1 && dest.y == 3 {
+									return false
+								}
+							}
+						}
+
+						return true
+					}(origin, dest, dir)
+
+					if isLegalMove {
 						moves = append(moves, moveToCombineAnimation{
 							origin: origin,
 							dest:   dest,
@@ -652,4 +765,12 @@ func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Di
 	}
 
 	return moves
+}
+
+// abs returns the absolute value of a signed integer.
+func abs[T constraints.Signed](a T) T {
+	if a >= 0 {
+		return a
+	}
+	return -a
 }
