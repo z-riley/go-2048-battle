@@ -465,11 +465,11 @@ var errFieldDoesNotExist error = errors.New("field does not exist for this anima
 
 // animation provides data needed for animating tiles.
 type animation interface {
-	// Origin returns the start position of the tile. Error if doesn't exist.
+	// Origin returns the start position of the tile. Error if not applicable.
 	Origin() (coord, error)
 	// Dest returns the final position of the tile.
 	Dest() coord
-	// NewVal returns the new value resulting from a the animation. Error if doesn't exist.
+	// NewVal returns the new value resulting from a the animation. Error if not applicable.
 	NewVal() (int, error)
 	// String returns a human readible string of the animation.
 	String() string
@@ -570,201 +570,366 @@ func (a newFromCombineAnimation) String() string {
 func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Direction) []animation {
 	var moves []animation
 
-	// Index "before" tiles by UUID
-	beforeUUIDs := make(map[uuid.UUID]coord, numTiles*numTiles)
-	for y := 0; y < len(before); y++ {
-		for x := 0; x < len(before[y]); x++ {
-			beforeUUIDs[before[y][x].UUID] = coord{x, y}
+	if dir == grid.DirLeft || dir == grid.DirRight {
+		// Horizontal move; evaluate row-by-row
+		for i := range len(before) {
+			rowAnimations := generateRowAnimations(before[i], after[i], dir)
+
+			for _, rowAnimation := range rowAnimations {
+				switch a := rowAnimation.(type) {
+				case moveRowAnimation:
+					moves = append(moves, moveAnimation{
+						origin: coord{must(a.Origin()), i},
+						dest:   coord{a.Dest(), i},
+					})
+				case spawnRowAnimation:
+					moves = append(moves, spawnAnimation{
+						dest:   coord{a.Dest(), i},
+						newVal: must(a.NewVal()),
+					})
+				case moveToCombineRowAnimation:
+					moves = append(moves, moveToCombineAnimation{
+						origin: coord{must(a.Origin()), i},
+						dest:   coord{a.Dest(), i},
+					})
+				case newFromCombineRowAnimation:
+					moves = append(moves, newFromCombineAnimation{
+						dest:   coord{a.Dest(), i},
+						newVal: must(a.NewVal()),
+					})
+				}
+			}
+		}
+	} else {
+		// Vertical move; evaluate column-by-column
+		for i := range len(before) {
+			rowAnimations := generateRowAnimations(
+				[numTiles]grid.Tile{before[0][i], before[1][i], before[2][i], before[3][i]},
+				[numTiles]grid.Tile{after[0][i], after[1][i], after[2][i], after[3][i]},
+				dir,
+			)
+
+			for _, rowAnimation := range rowAnimations {
+				switch a := rowAnimation.(type) {
+				case moveRowAnimation:
+					moves = append(moves, moveAnimation{
+						origin: coord{i, must(a.Origin())},
+						dest:   coord{i, a.Dest()},
+					})
+				case spawnRowAnimation:
+					moves = append(moves, spawnAnimation{
+						dest:   coord{i, a.Dest()},
+						newVal: must(a.NewVal()),
+					})
+				case moveToCombineRowAnimation:
+					moves = append(moves, moveToCombineAnimation{
+						origin: coord{i, must(a.Origin())},
+						dest:   coord{i, a.Dest()},
+					})
+				case newFromCombineRowAnimation:
+					moves = append(moves, newFromCombineAnimation{
+						dest:   coord{i, a.Dest()},
+						newVal: must(a.NewVal()),
+					})
+				}
+			}
 		}
 	}
 
+	return moves
+}
+
+// rowAnimation provides data for animating a row of tiles.
+type rowAnimation interface {
+	// Origin returns the start index of the tile. Error if not applicable.
+	Origin() (int, error)
+	// Dest returns the final index of the tile.
+	Dest() int
+	// NewVal returns the new value resulting from a the animation. Error if not applicable.
+	NewVal() (int, error)
+}
+
+// moveAnimation represents the movement of a tile from one position to another, without
+// combining. Satisfies the animation interface.
+type moveRowAnimation struct {
+	origin int // tile index
+	dest   int // tile index
+}
+
+func (a moveRowAnimation) Origin() (int, error) {
+	return a.origin, nil
+}
+
+func (a moveRowAnimation) Dest() int {
+	return a.dest
+}
+
+func (a moveRowAnimation) NewVal() (int, error) {
+	return 0, errFieldDoesNotExist
+}
+
+func (a moveRowAnimation) String() string {
+	return fmt.Sprint("move from ", a.origin, " to ", a.dest)
+}
+
+// spawnRowAnimation represents a new tile spawning. Satisfies the animation interface.
+type spawnRowAnimation struct {
+	dest   int // tile index
+	newVal int // value of a newly spawned tile. 0 if N/A
+}
+
+func (a spawnRowAnimation) Origin() (int, error) {
+	return -1, errFieldDoesNotExist
+}
+
+func (a spawnRowAnimation) Dest() int {
+	return a.dest
+}
+
+func (a spawnRowAnimation) NewVal() (int, error) {
+	return a.newVal, nil
+}
+
+func (a spawnRowAnimation) String() string {
+	return fmt.Sprint("spawn at ", a.dest)
+}
+
+// moveToCombineRowAnimation represents the movement of a tile into another, to
+// combine it. Satisfies the rowAnimation interface.
+type moveToCombineRowAnimation struct {
+	origin int // tile index
+	dest   int // tile index
+}
+
+func (a moveToCombineRowAnimation) Origin() (int, error) {
+	return a.origin, nil
+}
+
+func (a moveToCombineRowAnimation) Dest() int {
+	return a.dest
+}
+
+func (a moveToCombineRowAnimation) NewVal() (int, error) {
+	return -1, errFieldDoesNotExist
+}
+
+func (a moveToCombineRowAnimation) String() string {
+	return fmt.Sprint("move-to-combine from ", a.origin, " to ", a.dest)
+}
+
+// newFromCombineRowAnimation represents a new tile being created from a combination.
+// Satisfies the rowAnimation interface.
+type newFromCombineRowAnimation struct {
+	dest   int // tile index
+	newVal int // the value of the newly made tile
+}
+
+func (a newFromCombineRowAnimation) Origin() (int, error) {
+	return -1, errFieldDoesNotExist
+}
+
+func (a newFromCombineRowAnimation) Dest() int {
+	return a.dest
+}
+
+func (a newFromCombineRowAnimation) NewVal() (int, error) {
+	return a.newVal, nil
+}
+
+func (a newFromCombineRowAnimation) String() string {
+	return fmt.Sprint("new-from-combine at ", a.dest)
+}
+
+// generateAnimations generates animation data a row of tiles.
+func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction) []rowAnimation {
+	var moves []rowAnimation
+
+	// Index "before" tiles by UUID : position in row
+	beforeUUIDs := make(map[uuid.UUID]int, numTiles)
+	for x := 0; x < len(before); x++ {
+		beforeUUIDs[before[x].UUID] = x
+	}
+
 	// Evaluate "after" tiles
-	for y := 0; y < len(after); y++ {
-		for x := 0; x < len(after[y]); x++ {
-			// Tiles with the same UUIDs have moved
-			beforeCoord, ok := beforeUUIDs[after[y][x].UUID]
-			if ok && !beforeCoord.equals(coord{x, y}) {
-				moves = append(moves, moveAnimation{
-					origin: beforeCoord,
-					dest:   coord{x, y},
-				})
+	for x := 0; x < len(after); x++ {
+		// Tiles with the same UUIDs have moved
+		beforePos, ok := beforeUUIDs[after[x].UUID]
+		if ok && !(beforePos == x) {
+			moves = append(moves, moveRowAnimation{
+				origin: beforePos,
+				dest:   x,
+			})
+		}
+
+		// Tiles with the Cmb set are from combinations
+		if after[x].Cmb {
+			// Newly formed tile from combination
+			moves = append(moves, newFromCombineRowAnimation{
+				dest:   x,
+				newVal: after[x].Val,
+			})
+
+			// The tiles that combined in the last turn can be ascertained from which tiles are
+			// missing, and the direction of movement
+
+			// Get the other tiles in the row that went missing after the move
+			missingTiles := make(map[uuid.UUID]grid.Tile)
+			for _, tile := range before {
+				if tile.Val != 0 {
+					missingTiles[tile.UUID] = tile
+				}
 			}
-			// Tiles with the Cmb set are from combinations
-			if after[y][x].Cmb {
-				// Newly formed tile from combination
-				moves = append(moves, newFromCombineAnimation{
-					dest:   coord{x, y},
-					newVal: after[y][x].Val,
-				})
+			for _, tile := range after {
+				delete(missingTiles, tile.UUID)
+			}
 
-				var beforeRow [numTiles]grid.Tile
-				var afterRow [numTiles]grid.Tile
-				if dir == grid.DirLeft || dir == grid.DirRight {
-					// Horizontal move
-					beforeRow = before[y]
-					afterRow = after[y]
-				} else {
-					// Vertical move
-					beforeRow = [numTiles]grid.Tile{before[0][x], before[1][x], before[2][x], before[3][x]}
-					afterRow = [numTiles]grid.Tile{after[0][x], after[1][x], after[2][x], after[3][x]}
+			// Count the number of combinations as a result of the move
+			var numCombines int
+			for _, tile := range after {
+				if tile.Cmb {
+					numCombines++
 				}
+			}
 
-				// The tiles that combined in the last turn can be ascertained from which tiles are
-				// missing, and the direction of movement
+			// Get the positions of the tiles that went missing after the move
+			for uuid := range missingTiles {
+				origin := beforeUUIDs[uuid]
+				dest := x
 
-				// Get the other tiles in the row that went missing after the move
-				missingTiles := make(map[uuid.UUID]grid.Tile)
-				for _, tile := range beforeRow {
-					if tile.Val != 0 {
-						missingTiles[tile.UUID] = tile
+				// TODO: break this out into seperate function and make it more concise
+				isLegalMove := func(origin, dest int, dir grid.Direction) bool {
+					if origin == dest {
+						return false
 					}
-				}
-				for _, tile := range afterRow {
-					delete(missingTiles, tile.UUID)
-				}
 
-				// Count the number of combinations as a result of the move
-				var numCombines int
-				for _, tile := range afterRow {
-					if tile.Cmb {
-						numCombines++
-					}
-				}
+					// If there 4 tiles before, the maximum travel distance cannot be
+					// more than 2 in the direction of travel
+					const maxTravelDist = 2
+					travelDist := abs(dest - origin)
+					isInvalidDist := travelDist > maxTravelDist
 
-				// Get the positions of the tiles that went missing after the move
-				for uuid := range missingTiles {
-					origin := beforeUUIDs[uuid]
-					dest := coord{x, y}
+					isFourLikeTiles := numCombines == 2 &&
+						before[0].Val == before[1].Val &&
+						before[0].Val == before[2].Val &&
+						before[0].Val == before[3].Val
 
-					// TODO: break this out into seperate function and make it more concise
-					isLegalMove := func(origin, dest coord, dir grid.Direction) bool {
-						if origin.equals(dest) {
+					isTwoPairsOfTiles := !isFourLikeTiles && numCombines == 2 &&
+						before[0].Val == before[1].Val &&
+						before[2].Val == before[3].Val
+
+					switch dir {
+					case grid.DirLeft:
+						// X value should get smaller
+						if origin < dest {
 							return false
 						}
-
-						// If there 4 tiles before, the maximum travel distance cannot be
-						// more than 2 in the direction of travel
-						const maxTravelDist = 2
-						travelDist := abs(dest.x-origin.x) + abs(dest.y-origin.y)
-						isInvalidDist := travelDist > maxTravelDist
-
-						isFourLikeTiles := numCombines == 2 &&
-							beforeRow[0].Val == beforeRow[1].Val &&
-							beforeRow[0].Val == beforeRow[2].Val &&
-							beforeRow[0].Val == beforeRow[3].Val
-
-						isTwoPairsOfTiles := !isFourLikeTiles && numCombines == 2 &&
-							beforeRow[0].Val == beforeRow[1].Val &&
-							beforeRow[2].Val == beforeRow[3].Val
-
-						switch dir {
-						case grid.DirLeft:
-							// X value should get smaller
-							if origin.x < dest.x {
+						// Manual exclusion for 2,2,2,2 situations
+						if isFourLikeTiles {
+							if isInvalidDist {
 								return false
 							}
-							// Manual exclusion for 2,2,2,2 situations
-							if isFourLikeTiles {
-								if isInvalidDist {
-									return false
-								}
-								if origin.x == 2 && dest.x == 0 {
-									return false
-								}
-							}
-							// Manual exclusion for 2,2,4,4 situations
-							if isTwoPairsOfTiles {
-								if origin.x == 2 && dest.x == 0 {
-									return false
-								}
-								if origin.x == 3 && dest.x == 0 {
-									return false
-								}
-							}
-
-						case grid.DirRight:
-							// X value should get larger
-							if origin.x > dest.x {
+							if origin == 2 && dest == 0 {
 								return false
 							}
-							// Manual exclusion for 2,2,2,2 and 2,2,4,4 situations
-							if isFourLikeTiles || isTwoPairsOfTiles {
-								if isInvalidDist {
-									return false
-								}
-								if origin.x == 1 && dest.x == 3 {
-									return false
-								}
-							}
-
-						case grid.DirUp:
-							// Y value should get smaller
-							if origin.y < dest.y {
+						}
+						// Manual exclusion for 2,2,4,4 situations
+						if isTwoPairsOfTiles {
+							if origin == 2 && dest == 0 {
 								return false
 							}
-							// Manual exclusion for 2,2,2,2 situations
-							if isFourLikeTiles {
-								if isInvalidDist {
-									return false
-								}
-								if origin.y == 2 && dest.y == 0 {
-									return false
-								}
-							}
-							// Manual exclusion for 2,2,4,4 situations
-							if isTwoPairsOfTiles {
-								if origin.y == 2 && dest.y == 0 {
-									return false
-								}
-								if origin.y == 3 && dest.y == 0 {
-									return false
-								}
-							}
-
-						case grid.DirDown:
-							// Y value should get larger
-							if origin.y > dest.y {
+							if origin == 3 && dest == 0 {
 								return false
-							}
-							// Manual exclusion for 2,2,2,2 and 2,2,4,4 situations
-							if isFourLikeTiles || isTwoPairsOfTiles {
-								if isInvalidDist {
-									return false
-								}
-								if origin.y == 1 && dest.y == 3 {
-									return false
-								}
 							}
 						}
 
-						return true
-					}(origin, dest, dir)
+					case grid.DirRight:
+						// X value should get larger
+						if origin > dest {
+							return false
+						}
+						// Manual exclusion for 2,2,2,2 and 2,2,4,4 situations
+						if isFourLikeTiles || isTwoPairsOfTiles {
+							if isInvalidDist {
+								return false
+							}
+							if origin == 1 && dest == 3 {
+								return false
+							}
+						}
 
-					if isLegalMove {
-						moves = append(moves, moveToCombineAnimation{
-							origin: origin,
-							dest:   dest,
-						})
+					case grid.DirUp:
+						// Y value should get smaller
+						if origin < dest {
+							return false
+						}
+						// Manual exclusion for 2,2,2,2 situations
+						if isFourLikeTiles {
+							if isInvalidDist {
+								return false
+							}
+							if origin == 2 && dest == 0 {
+								return false
+							}
+						}
+						// Manual exclusion for 2,2,4,4 situations
+						if isTwoPairsOfTiles {
+							if origin == 2 && dest == 0 {
+								return false
+							}
+							if origin == 3 && dest == 0 {
+								return false
+							}
+						}
+
+					case grid.DirDown:
+						// Y value should get larger
+						if origin > dest {
+							return false
+						}
+						// Manual exclusion for 2,2,2,2 and 2,2,4,4 situations
+						if isFourLikeTiles || isTwoPairsOfTiles {
+							if isInvalidDist {
+								return false
+							}
+							if origin == 1 && dest == 3 {
+								return false
+							}
+						}
 					}
+
+					return true
+				}(origin, dest, dir)
+
+				if isLegalMove {
+					moves = append(moves, moveToCombineRowAnimation{
+						origin: origin,
+						dest:   dest,
+					})
 				}
 			}
 		}
 	}
 
 	// Non-combined tiles with unique UUIDs are newly spawned
-	for y := 0; y < len(after); y++ {
-		for x := 0; x < len(after[y]); x++ {
-			_, ok := beforeUUIDs[after[y][x].UUID]
-			if !ok && after[y][x].Val != 0 && !after[y][x].Cmb {
-				moves = append(moves, spawnAnimation{
-					dest:   coord{x, y},
-					newVal: after[y][x].Val,
-				})
-			}
+	for x := 0; x < len(after); x++ {
+		_, ok := beforeUUIDs[after[x].UUID]
+		if !ok && after[x].Val != 0 && !after[x].Cmb {
+			moves = append(moves, spawnRowAnimation{
+				dest:   x,
+				newVal: after[x].Val,
+			})
 		}
 	}
 
 	return moves
+}
+
+// must panics if err is not nil.
+func must[T any](val T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return val
 }
 
 // abs returns the absolute value of a signed integer.
