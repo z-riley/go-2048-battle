@@ -97,10 +97,10 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 		).SetHeading("SCORE")
 
 		s.guide = turdgl.NewText(
-			"Your grid", // TODO: Make this
-			turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.28*unit},
+			"Your grid",
+			turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.28*unit},
 			common.FontPathBold,
-		).SetSize(16).SetColour(common.GreyTextColour)
+		).SetSize(16).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopRight)
 
 		s.timer = common.NewGameText("",
 			turdgl.Vec{X: 600, Y: anchor.Y},
@@ -119,7 +119,7 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 		).SetHeading("SCORE")
 
 		s.opponentGuide = turdgl.NewText(
-			"Opponent's grid",
+			"Opponent's grid", // TODO: use opponent's username instead
 			turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.28*unit},
 			common.FontPathBold,
 		).SetSize(16).SetColour(common.GreyTextColour)
