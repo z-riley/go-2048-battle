@@ -170,7 +170,7 @@ func TestGenerateRowAnimations(t *testing.T) {
 
 }
 
-// sliceToMap converts a slice into a map, where each key is an element of the slice.
+// sliceToMap converts a slice into a map where each key is an element of the slice.
 func sliceToMap[T comparable](slice []T) map[T]struct{} {
 	m := make(map[T]struct{})
 	for _, element := range slice {

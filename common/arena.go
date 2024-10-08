@@ -568,7 +568,7 @@ func (a newFromCombineAnimation) String() string {
 
 // generateAnimations generates animation data for transitioning between grid states.
 func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Direction) []animation {
-	var moves []animation
+	var animations []animation
 
 	if dir == grid.DirLeft || dir == grid.DirRight {
 		// Horizontal move; evaluate row-by-row
@@ -578,22 +578,22 @@ func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Di
 			for _, rowAnimation := range rowAnimations {
 				switch a := rowAnimation.(type) {
 				case moveRowAnimation:
-					moves = append(moves, moveAnimation{
+					animations = append(animations, moveAnimation{
 						origin: coord{must(a.Origin()), i},
 						dest:   coord{a.Dest(), i},
 					})
 				case spawnRowAnimation:
-					moves = append(moves, spawnAnimation{
+					animations = append(animations, spawnAnimation{
 						dest:   coord{a.Dest(), i},
 						newVal: must(a.NewVal()),
 					})
 				case moveToCombineRowAnimation:
-					moves = append(moves, moveToCombineAnimation{
+					animations = append(animations, moveToCombineAnimation{
 						origin: coord{must(a.Origin()), i},
 						dest:   coord{a.Dest(), i},
 					})
 				case newFromCombineRowAnimation:
-					moves = append(moves, newFromCombineAnimation{
+					animations = append(animations, newFromCombineAnimation{
 						dest:   coord{a.Dest(), i},
 						newVal: must(a.NewVal()),
 					})
@@ -612,22 +612,22 @@ func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Di
 			for _, rowAnimation := range rowAnimations {
 				switch a := rowAnimation.(type) {
 				case moveRowAnimation:
-					moves = append(moves, moveAnimation{
+					animations = append(animations, moveAnimation{
 						origin: coord{i, must(a.Origin())},
 						dest:   coord{i, a.Dest()},
 					})
 				case spawnRowAnimation:
-					moves = append(moves, spawnAnimation{
+					animations = append(animations, spawnAnimation{
 						dest:   coord{i, a.Dest()},
 						newVal: must(a.NewVal()),
 					})
 				case moveToCombineRowAnimation:
-					moves = append(moves, moveToCombineAnimation{
+					animations = append(animations, moveToCombineAnimation{
 						origin: coord{i, must(a.Origin())},
 						dest:   coord{i, a.Dest()},
 					})
 				case newFromCombineRowAnimation:
-					moves = append(moves, newFromCombineAnimation{
+					animations = append(animations, newFromCombineAnimation{
 						dest:   coord{i, a.Dest()},
 						newVal: must(a.NewVal()),
 					})
@@ -636,7 +636,7 @@ func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Di
 		}
 	}
 
-	return moves
+	return animations
 }
 
 // rowAnimation provides data for animating a row of tiles.
@@ -742,7 +742,7 @@ func (a newFromCombineRowAnimation) String() string {
 
 // generateAnimations generates animation data a row of tiles.
 func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction) []rowAnimation {
-	var moves []rowAnimation
+	var rowAnimations []rowAnimation
 
 	// Index "before" tiles by UUID : position in row
 	beforeUUIDs := make(map[uuid.UUID]int, numTiles)
@@ -755,7 +755,7 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 		// Tiles with the same UUIDs have moved
 		beforePos, ok := beforeUUIDs[after[x].UUID]
 		if ok && !(beforePos == x) {
-			moves = append(moves, moveRowAnimation{
+			rowAnimations = append(rowAnimations, moveRowAnimation{
 				origin: beforePos,
 				dest:   x,
 			})
@@ -764,7 +764,7 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 		// Tiles with the Cmb set are from combinations
 		if after[x].Cmb {
 			// Newly formed tile from combination
-			moves = append(moves, newFromCombineRowAnimation{
+			rowAnimations = append(rowAnimations, newFromCombineRowAnimation{
 				dest:   x,
 				newVal: after[x].Val,
 			})
@@ -796,7 +796,6 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 				origin := beforeUUIDs[uuid]
 				dest := x
 
-				// TODO: break this out into seperate function and make it more concise
 				isLegalMove := func(origin, dest int, dir grid.Direction) bool {
 					if origin == dest {
 						return false
@@ -806,7 +805,6 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 					// more than 2 in the direction of travel
 					const maxTravelDist = 2
 					travelDist := abs(dest - origin)
-					isInvalidDist := travelDist > maxTravelDist
 
 					isFourLikeTiles := numCombines == 2 &&
 						before[0].Val == before[1].Val &&
@@ -818,14 +816,14 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 						before[2].Val == before[3].Val
 
 					switch dir {
-					case grid.DirLeft:
-						// X value should get smaller
+					case grid.DirLeft, grid.DirUp:
+						// Index should get smaller
 						if origin < dest {
 							return false
 						}
 						// Manual exclusion for 2,2,2,2 situations
 						if isFourLikeTiles {
-							if isInvalidDist {
+							if travelDist > maxTravelDist {
 								return false
 							}
 							if origin == 2 && dest == 0 {
@@ -842,53 +840,14 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 							}
 						}
 
-					case grid.DirRight:
-						// X value should get larger
+					case grid.DirRight, grid.DirDown:
+						// Index value should get larger
 						if origin > dest {
 							return false
 						}
 						// Manual exclusion for 2,2,2,2 and 2,2,4,4 situations
 						if isFourLikeTiles || isTwoPairsOfTiles {
-							if isInvalidDist {
-								return false
-							}
-							if origin == 1 && dest == 3 {
-								return false
-							}
-						}
-
-					case grid.DirUp:
-						// Y value should get smaller
-						if origin < dest {
-							return false
-						}
-						// Manual exclusion for 2,2,2,2 situations
-						if isFourLikeTiles {
-							if isInvalidDist {
-								return false
-							}
-							if origin == 2 && dest == 0 {
-								return false
-							}
-						}
-						// Manual exclusion for 2,2,4,4 situations
-						if isTwoPairsOfTiles {
-							if origin == 2 && dest == 0 {
-								return false
-							}
-							if origin == 3 && dest == 0 {
-								return false
-							}
-						}
-
-					case grid.DirDown:
-						// Y value should get larger
-						if origin > dest {
-							return false
-						}
-						// Manual exclusion for 2,2,2,2 and 2,2,4,4 situations
-						if isFourLikeTiles || isTwoPairsOfTiles {
-							if isInvalidDist {
+							if travelDist > maxTravelDist {
 								return false
 							}
 							if origin == 1 && dest == 3 {
@@ -901,7 +860,7 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 				}(origin, dest, dir)
 
 				if isLegalMove {
-					moves = append(moves, moveToCombineRowAnimation{
+					rowAnimations = append(rowAnimations, moveToCombineRowAnimation{
 						origin: origin,
 						dest:   dest,
 					})
@@ -914,14 +873,14 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 	for x := 0; x < len(after); x++ {
 		_, ok := beforeUUIDs[after[x].UUID]
 		if !ok && after[x].Val != 0 && !after[x].Cmb {
-			moves = append(moves, spawnRowAnimation{
+			rowAnimations = append(rowAnimations, spawnRowAnimation{
 				dest:   x,
 				newVal: after[x].Val,
 			})
 		}
 	}
 
-	return moves
+	return rowAnimations
 }
 
 // must panics if err is not nil.
