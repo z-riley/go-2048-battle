@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
@@ -32,10 +33,14 @@ func main() {
 	// Register window-level keybinds (for development only)
 	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
 
+	// Parse starting screen arg
+	screenStr := flag.String("screen", string(screen.Title), "starting screen")
+	flag.Parse()
+	start := screen.ID(*screenStr)
+
 	// Create screens
 	screen.Init(win)
-	screen.SetScreen(screen.Title, nil)
-	screen.SetScreen(screen.Singleplayer, nil)
+	screen.SetScreen(start, nil)
 
 	debugWidget := debug.NewDebugWidget(win)
 

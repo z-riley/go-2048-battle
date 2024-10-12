@@ -15,16 +15,20 @@ type Screen interface {
 }
 
 // ID is the unique identifier for a screen.
-type ID int
+type ID string
 
 const (
-	Title ID = iota
-	Singleplayer
-	MultiplayerMenu
-	MultiplayerJoin
-	MultiplayerHost
-	Multiplayer
+	Title           ID = "title"
+	Singleplayer    ID = "singleplayer"
+	MultiplayerMenu ID = "multiplayerMenu"
+	MultiplayerJoin ID = "multiplayerJoin"
+	MultiplayerHost ID = "multiplayerHost"
+	Multiplayer     ID = "multiplayer"
 )
+
+func (id ID) String() string {
+	return string(id)
+}
 
 // currentScreen holds the game's current screen.
 var currentScreen = Title
