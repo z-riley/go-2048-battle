@@ -118,17 +118,17 @@ func (a *Arena) Destroy() {
 }
 
 // Draw draws the arena.
-func (a *Arena) Draw(win *turdgl.Window) {
-	win.DrawBackground(a.background)
+func (a *Arena) Draw(buf *turdgl.FrameBuffer) {
+	a.background.Draw(buf)
 
 	for i := range numTiles {
 		for j := range numTiles {
-			win.DrawBackground(a.bgTiles[j][i])
+			a.bgTiles[j][i].Draw(buf)
 		}
 	}
 
 	for _, t := range a.tiles {
-		win.DrawForeground(t.tb)
+		t.tb.Draw(buf)
 	}
 }
 
@@ -189,8 +189,8 @@ func (a *Arena) SetLose() {
 	})
 }
 
-// Animate animates the arena to match the given game state.
-func (a *Arena) Animate(game backend.Game) {
+// Update animates the arena to match the given game state.
+func (a *Arena) Update(game backend.Game) {
 	defer func() {
 		// Update the local state upon exit
 		a.latestState.Grid.Tiles = game.Grid.Tiles

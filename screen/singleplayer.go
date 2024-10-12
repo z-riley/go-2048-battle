@@ -229,24 +229,28 @@ func (s *SingleplayerScreen) Update() {
 // Update updates and draws the singleplayer screen in a normal state.
 func (s *SingleplayerScreen) updateNormal(game backend.Game) {
 	s.win.SetBackground(common.BackgroundColour)
-	s.arena.SetNormal()
 
 	s.score.SetBody(fmt.Sprint(game.Score.Current))
 	s.menu.Update(s.win)
 	s.highScore.SetBody(fmt.Sprint(game.Score.High))
-	s.newGame.Update(s.win)
 	s.timer.SetText(game.Timer.Time.String())
+	s.newGame.Update(s.win)
 
-	s.win.Draw(s.logo2048)
-	s.score.Draw(s.win)
-	s.highScore.Draw(s.win)
-	s.win.Draw(s.menu) // TODO: convert these to turdgl.Drawable interface (s.menu.Draw(s.win.Framebuffer))
-	s.win.Draw(s.newGame)
-	s.win.Draw(s.guide)
-	s.win.Draw(s.timer)
+	s.arena.SetNormal()
+	s.arena.Update(game)
 
-	s.arena.Draw(s.win)
-	s.arena.Animate(game)
+	for _, d := range []turdgl.Drawable{
+		s.logo2048,
+		s.score,
+		s.highScore,
+		s.menu,
+		s.newGame,
+		s.guide,
+		s.timer,
+		s.arena,
+	} {
+		s.win.Draw(d)
+	}
 }
 
 // updateWin updates and draws the singleplayer screen in a winning state.
@@ -267,12 +271,15 @@ func (s *SingleplayerScreen) updateLose(game backend.Game) {
 
 	s.menu.Update(s.win)
 	s.newGame.Update(s.win)
+	s.arena.Update(game)
 
-	s.win.Draw(s.heading)
-	s.win.Draw(s.loseDialog)
-	s.win.Draw(s.menu)
-	s.win.Draw(s.newGame)
-
-	s.arena.Draw(s.win)
-	s.arena.Animate(game)
+	for _, d := range []turdgl.Drawable{
+		s.heading,
+		s.loseDialog,
+		s.menu,
+		s.newGame,
+		s.arena,
+	} {
+		s.win.Draw(d)
+	}
 }

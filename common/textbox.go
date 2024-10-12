@@ -71,9 +71,9 @@ func NewGameTextBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *G
 }
 
 // Draw draws the UI box to the window.
-func (g *GameUIBox) Draw(win *turdgl.Window) {
-	win.Draw(g.body)
-	win.Draw(g.heading)
+func (g *GameUIBox) Draw(buf *turdgl.FrameBuffer) {
+	g.body.Draw(buf)
+	g.heading.Draw(buf)
 }
 
 // SetHeading sets the heading text of the UI box.

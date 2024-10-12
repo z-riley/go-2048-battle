@@ -211,6 +211,16 @@ func (s *MultiplayerScreen) Deinit() {
 
 // Update updates and draws the singleplayer screen.
 func (s *MultiplayerScreen) Update() {
+	// Check for win or lose
+	switch s.backend.Grid.Outcome() {
+	case grid.None:
+		s.backgroundColour = common.BackgroundColour
+	case grid.Win:
+		s.backgroundColour = common.BackgroundColourWin
+	case grid.Lose:
+		s.backgroundColour = common.BackgroundColourLose
+	}
+
 	s.win.SetBackground(s.backgroundColour)
 
 	// Handle user inputs from user. Only 1 input must be sent per update cycle,
@@ -226,44 +236,29 @@ func (s *MultiplayerScreen) Update() {
 		// No user input; continue
 	}
 
-	// Draw UI widgets
-	s.win.Draw(s.title)
-	s.win.Draw(s.guide)
-	s.win.Draw(s.opponentGuide)
-
-	s.win.Draw(s.menu)
 	s.menu.Update(s.win)
-
-	s.score.Draw(s.win)
 	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))
-
-	s.opponentScore.Draw(s.win)
 	s.opponentScore.SetBody(fmt.Sprint(s.opponentBackend.Score.CurrentScore()))
-
-	s.win.Draw(s.newGame)
 	s.newGame.Update(s.win)
-
 	s.timer.SetText(s.backend.Timer.Time.String())
-	s.win.Draw(s.timer)
 
-	// Draw arena of tiles
-	s.arena.Animate(*s.backend)
-	s.arena.Draw(s.win)
+	s.arena.Update(*s.backend)
+	s.opponentArena.Update(*s.opponentBackend)
 
-	// Draw opponent's arena
-	s.opponentArena.Animate(*s.opponentBackend)
-	s.opponentArena.Draw(s.win)
-
-	// Check for win or lose
-	switch s.backend.Grid.Outcome() {
-	case grid.None:
-		s.backgroundColour = common.BackgroundColour
-	case grid.Win:
-		s.backgroundColour = common.BackgroundColourWin
-	case grid.Lose:
-		s.backgroundColour = common.BackgroundColourLose
+	for _, d := range []turdgl.Drawable{
+		s.title,
+		s.guide,
+		s.opponentGuide,
+		s.menu,
+		s.score,
+		s.opponentScore,
+		s.newGame,
+		s.timer,
+		s.arena,
+		s.opponentArena,
+	} {
+		s.win.Draw(d)
 	}
-
 }
 
 // sendGameUpdate sends the local game state to the opponent.
