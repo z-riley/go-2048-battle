@@ -1,13 +1,14 @@
 package screen
 
 import (
-	"encoding/json"
 	"fmt"
 	"image/color"
 
+	"github.com/brunoga/deep"
 	"github.com/z-riley/go-2048-battle/backend"
 	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/go-2048-battle/common"
+	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/turdgl"
 )
 
@@ -15,6 +16,7 @@ type SingleplayerScreen struct {
 	win              *turdgl.Window
 	backgroundColour color.RGBA
 
+	heading   *turdgl.Text
 	logo2048  *turdgl.TextBox
 	score     *common.GameUIBox
 	highScore *common.GameUIBox
@@ -22,6 +24,8 @@ type SingleplayerScreen struct {
 	newGame   *turdgl.Button
 	guide     *turdgl.Text
 	timer     *turdgl.Text
+
+	loseDialog *turdgl.Text
 
 	backend      *backend.Game
 	arena        *common.Arena
@@ -53,6 +57,18 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 
 	// Everything is positioned relative to the arena grid
 	anchor := s.arena.Pos()
+
+	s.heading = turdgl.NewText(
+		"-", // to be set later
+		turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 2.3*unit},
+		common.FontPathBold,
+	).SetSize(40).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
+
+	s.loseDialog = turdgl.NewText(
+		"-", // to be set later
+		turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 1.7*unit},
+		common.FontPathBold,
+	).SetSize(20).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
 
 	s.logo2048 = common.NewLogoBox(
 		1.36*unit, 1.36*unit,
@@ -100,8 +116,8 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 	).SetSize(16).SetColour(common.GreyTextColour)
 
 	s.timer = common.NewGameText("",
-		turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.1},
-	).SetAlignment(turdgl.AlignBottomRight)
+		turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.13},
+	).SetSize(16).SetAlignment(turdgl.AlignBottomRight)
 
 	return &s
 }
@@ -170,14 +186,14 @@ func (s *SingleplayerScreen) Deinit() {
 
 // Update updates and draws the singleplayer screen.
 func (s *SingleplayerScreen) Update() {
-	s.win.SetBackground(s.backgroundColour)
-
 	// Temporary debug text
-	s.debugGridText.SetText(s.backend.Grid.Debug())
-	s.debugTimeText.SetText(s.backend.Timer.Time.String())
-	s.debugScoreText.SetText(
-		fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
-	)
+	if config.Debug {
+		s.debugGridText.SetText(s.backend.Grid.Debug())
+		s.debugTimeText.SetText(s.backend.Timer.Time.String())
+		s.debugScoreText.SetText(
+			fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
+		)
+	}
 
 	// Handle user inputs from user. Only 1 input must be sent per update cycle,
 	// because the frontend can only animate one move at a time.
@@ -188,53 +204,75 @@ func (s *SingleplayerScreen) Update() {
 		// No user input; continue
 	}
 
-	// Serialise and deserialise grid to simulate receiving JSON from server
-	// TODO: remove this once multiplayer is working
-	b, err := s.backend.Serialise()
-	if err != nil {
-		panic(err)
-	}
-	var game backend.Game
-	if err := json.Unmarshal(b, &game); err != nil {
-		panic(err)
-	}
-
-	// Draw UI widgets
-	s.win.Draw(s.logo2048)
-
-	s.score.Draw(s.win)
-	s.score.SetBody(fmt.Sprint(game.Score.Current))
-
-	s.highScore.Draw(s.win)
-	s.highScore.SetBody(fmt.Sprint(game.Score.High))
-
-	s.win.Draw(s.menu)
-	s.menu.Update(s.win)
-
-	s.win.Draw(s.newGame)
-	s.newGame.Update(s.win)
-
-	s.win.Draw(s.guide)
-
-	s.timer.SetText(game.Timer.Time.String())
-	s.win.Draw(s.timer)
-
-	// Draw arena of tiles
-	s.arena.Animate(game)
-	s.arena.Draw(s.win)
+	// Deep copy so front has time to animate itself whilst allowing the back
+	// end to update
+	game := deep.MustCopy(*s.backend)
 
 	// Check for win or lose
-	switch game.Outcome {
+	switch game.Grid.Outcome() {
 	case grid.None:
-		s.backgroundColour = common.BackgroundColour
+		s.updateNormal(game)
 	case grid.Win:
-		s.backgroundColour = common.BackgroundColourWin
+		s.updateWin(game)
 	case grid.Lose:
-		s.backgroundColour = common.BackgroundColourLose
+		s.updateLose(game)
 	}
 
 	// Draw temporary debug grid
-	s.win.Draw(s.debugGridText)
-	s.win.Draw(s.debugTimeText)
-	s.win.Draw(s.debugScoreText)
+	if config.Debug {
+		s.win.Draw(s.debugGridText)
+		s.win.Draw(s.debugTimeText)
+		s.win.Draw(s.debugScoreText)
+	}
+}
+
+// Update updates and draws the singleplayer screen in a normal state.
+func (s *SingleplayerScreen) updateNormal(game backend.Game) {
+	s.win.SetBackground(common.BackgroundColour)
+	s.arena.SetNormal()
+
+	s.score.SetBody(fmt.Sprint(game.Score.Current))
+	s.menu.Update(s.win)
+	s.highScore.SetBody(fmt.Sprint(game.Score.High))
+	s.newGame.Update(s.win)
+	s.timer.SetText(game.Timer.Time.String())
+
+	s.win.Draw(s.logo2048)
+	s.score.Draw(s.win)
+	s.highScore.Draw(s.win)
+	s.win.Draw(s.menu) // TODO: convert these to turdgl.Drawable interface (s.menu.Draw(s.win.Framebuffer))
+	s.win.Draw(s.newGame)
+	s.win.Draw(s.guide)
+	s.win.Draw(s.timer)
+
+	s.arena.Draw(s.win)
+	s.arena.Animate(game)
+}
+
+// updateWin updates and draws the singleplayer screen in a winning state.
+func (s *SingleplayerScreen) updateWin(game backend.Game) {
+	// No special win screen for now
+	s.updateNormal(game)
+}
+
+// updateLose updates and draws the singleplayer screen in a losing state.
+func (s *SingleplayerScreen) updateLose(game backend.Game) {
+	s.win.SetBackground(common.BackgroundColour)
+	s.arena.SetLose()
+
+	s.heading.SetText("Game over!")
+	s.loseDialog.SetText(fmt.Sprintf(
+		"You earned %d points in %v.", game.Score.Current, game.Timer.Duration(),
+	))
+
+	s.menu.Update(s.win)
+	s.newGame.Update(s.win)
+
+	s.win.Draw(s.heading)
+	s.win.Draw(s.loseDialog)
+	s.win.Draw(s.menu)
+	s.win.Draw(s.newGame)
+
+	s.arena.Draw(s.win)
+	s.arena.Animate(game)
 }

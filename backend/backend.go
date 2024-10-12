@@ -10,10 +10,9 @@ import (
 
 // Game contains all reuquired data for a 2048 game.
 type Game struct {
-	Grid    *grid.Grid   `json:"grid"`
-	Outcome grid.Outcome `json:"outcome"`
-	Score   *Score       `json:"currentScore"`
-	Timer   *Timer       `json:"time"`
+	Grid  *grid.Grid `json:"grid"`
+	Score *Score     `json:"currentScore"`
+	Timer *Timer     `json:"time"`
 
 	opts *Opts
 }
@@ -33,11 +32,10 @@ func NewGame(opts *Opts) *Game {
 	}
 
 	g := &Game{
-		Grid:    grid.NewGrid(),
-		Outcome: grid.None,
-		Score:   NewScore(),
-		Timer:   NewTimer(),
-		opts:    opts,
+		Grid:  grid.NewGrid(),
+		Score: NewScore(),
+		Timer: NewTimer(),
+		opts:  opts,
 	}
 
 	if g.opts.SaveToDisk {
@@ -65,7 +63,7 @@ func (g *Game) ExecuteMove(dir grid.Direction) {
 	pointsGained := g.Grid.Move(dir)
 	g.Score.AddToCurrent(pointsGained)
 
-	if g.Outcome == grid.Lose {
+	if g.Grid.Outcome() == grid.Lose {
 		g.Timer.Pause()
 	} else {
 		g.Timer.Resume()
@@ -83,9 +81,6 @@ func (g *Game) ExecuteMove(dir grid.Direction) {
 
 // Serialise converts the current game state into JSON.
 func (g *Game) Serialise() ([]byte, error) {
-	// Update outcome state before serialising
-	g.Outcome = g.Grid.Outcome()
-
 	return json.Marshal(g)
 }
 

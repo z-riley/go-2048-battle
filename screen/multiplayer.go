@@ -255,7 +255,7 @@ func (s *MultiplayerScreen) Update() {
 	s.opponentArena.Draw(s.win)
 
 	// Check for win or lose
-	switch s.backend.Outcome {
+	switch s.backend.Grid.Outcome() {
 	case grid.None:
 		s.backgroundColour = common.BackgroundColour
 	case grid.Win:

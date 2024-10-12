@@ -3,8 +3,9 @@ module github.com/z-riley/go-2048-battle
 go 1.23.0
 
 require (
+	github.com/brunoga/deep v1.2.4
 	github.com/google/uuid v1.6.0
-	github.com/z-riley/turdgl v0.0.0-20241005073157-47e6a4489150
+	github.com/z-riley/turdgl v0.0.0-20241010200905-70b7776935f4
 	github.com/z-riley/turdserve v0.0.0-20240929075615-11b6fcd6fe3a
 	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa
 )

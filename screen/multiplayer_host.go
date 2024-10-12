@@ -52,9 +52,9 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 	nameEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
 
 	ipHeading := common.NewTextBox(400, 60, turdgl.Vec{X: 200 - 20, Y: 300})
-	ipHeading.Body.SetOffset(turdgl.Vec{X: 0, Y: 32}).SetText("Your IP:")
+	ipHeading.Text.SetOffset(turdgl.Vec{X: 0, Y: 32}).SetText("Your IP:")
 	ipBody := common.NewTextBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
-	ipBody.Body.SetOffset(turdgl.Vec{X: 0, Y: 32}).SetText(ipAddr)
+	ipBody.Text.SetOffset(turdgl.Vec{X: 0, Y: 32}).SetText(ipAddr)
 
 	var cards []*playerCard
 	for i := range 1 {
@@ -265,13 +265,13 @@ func (p *playerCard) Draw(buf *turdgl.FrameBuffer) {
 
 func (p *playerCard) setReady(username string) {
 	p.ready = true
-	p.name.Body.SetText(username)
+	p.name.Text.SetText(username)
 	p.light.SetStyle(styleReady)
 }
 
 func (p *playerCard) setNotReady() {
 	p.ready = false
-	p.name.Body.SetText(fmt.Sprintf("Waiting for player %d", p.id+2))
+	p.name.Text.SetText(fmt.Sprintf("Waiting for player %d", p.id+2))
 	p.light.SetStyle(styleNotReady)
 }
 

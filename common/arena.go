@@ -48,7 +48,7 @@ func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
 			SetTextColour(tileTextColour(val)),
 		pos: posIdx,
 	}
-	tile.tb.Body.SetOffset(turdgl.Vec{X: 0, Y: 28})
+	tile.tb.Text.SetOffset(turdgl.Vec{X: 0, Y: 28})
 	tile.tb.Shape.SetStyle(turdgl.Style{Colour: tileColour(val)})
 
 	return &tile
@@ -173,6 +173,20 @@ func (a *Arena) Load(g backend.Game) {
 // Reset clears the current game data from the arena.
 func (a *Arena) Reset() {
 	a.tiles = make([]*tile, 0, numTiles*numTiles)
+	a.SetNormal()
+}
+
+// SetNormal makes the arena show its losing state.
+func (a *Arena) SetNormal() {
+	a.background.SetStyle(turdgl.Style{Colour: ArenaBackgroundColour})
+}
+
+// SetLose makes the arena show its losing state.
+func (a *Arena) SetLose() {
+	a.background.SetStyle(turdgl.Style{
+		Colour: turdgl.DarkRed,
+		Bloom:  15,
+	})
 }
 
 // Animate animates the arena to match the given game state.

@@ -126,7 +126,7 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 
 	// Connect using the user-specified IP address
 	ipEntry := s.entries[1]
-	ip := ipEntry.Body.Text()
+	ip := ipEntry.Text.Text()
 	if err := s.client.Connect(ip, serverPort); err != nil {
 		return fmt.Errorf("failed to connect to server: %w", err)
 	}
@@ -139,7 +139,7 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 
 	// Construct message containing player data
 	usernameEntry := s.entries[0]
-	username := usernameEntry.Body.Text()
+	username := usernameEntry.Text.Text()
 	playerData, err := json.Marshal(comms.PlayerData{
 		Version:  config.Version,
 		Username: username,

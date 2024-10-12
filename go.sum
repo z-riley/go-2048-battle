@@ -1,3 +1,5 @@
+github.com/brunoga/deep v1.2.4 h1:Aj9E9oUbE+ccbyh35VC/NHlzzjfIVU69BXu2mt2LmL8=
+github.com/brunoga/deep v1.2.4/go.mod h1:GDV6dnXqn80ezsLSZ5Wlv1PdKAWAO4L5PnKYtv2dgaI=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/godbus/dbus/v5 v5.0.4/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
@@ -16,8 +18,8 @@ github.com/rs/zerolog v1.33.0 h1:1cU2KZkvPxNyfgEmhHAz/1A9Bz+llsdYzklWFzgp0r8=
 github.com/rs/zerolog v1.33.0/go.mod h1:/7mN4D5sKwJLZQ2b/znpjC3/GQWY/xaDXUM0kKWRHss=
 github.com/veandco/go-sdl2 v0.4.40 h1:fZv6wC3zz1Xt167P09gazawnpa0KY5LM7JAvKpX9d/U=
 github.com/veandco/go-sdl2 v0.4.40/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
-github.com/z-riley/turdgl v0.0.0-20241005073157-47e6a4489150 h1:TCSxmaPTmVbo0FDnBI9t3zgFzc/XGWgCcM8xaxk6tkk=
-github.com/z-riley/turdgl v0.0.0-20241005073157-47e6a4489150/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241010200905-70b7776935f4 h1:0zb+jC6JuP3uBneCjuAEkEDTBTLocxrpblm4unaIcXU=
+github.com/z-riley/turdgl v0.0.0-20241010200905-70b7776935f4/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
 github.com/z-riley/turdserve v0.0.0-20240929075615-11b6fcd6fe3a h1:voAv/zH9eMiTP+u0so6XxpCEu0TI6Jh3xTxfWx2N0+w=
 github.com/z-riley/turdserve v0.0.0-20240929075615-11b6fcd6fe3a/go.mod h1:i9Dlhid4XYNAFdTC4L94dEpXujy8FsfEGlkV7VH4Wmk=
 golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa h1:ELnwvuAXPNtPk1TJRuGkI9fDTwym6AYBu0qzT8AcHdI=
