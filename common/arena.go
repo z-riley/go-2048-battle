@@ -67,7 +67,7 @@ type Arena struct {
 	bgTiles     [numTiles][numTiles]*turdgl.CurvedRect // every grid space
 	background  *turdgl.CurvedRect                     // the background of the arena
 	latestState backend.Game                           // used to detect changes in game state (for animations etc...)
-	animationCh chan (animationState)                  // for sending animations to animator goroutine
+	animationCh chan animationState                    // for sending animations to animator goroutine
 }
 
 // NewArena constructs a new arena widget. pos is the top-left pixel of the
@@ -283,7 +283,7 @@ func (a *Arena) handleAnimations() {
 }
 
 // animateMove animates a tile moving.
-func (a *Arena) animateMove(animation moveAnimation, errCh chan (error), wg *sync.WaitGroup) {
+func (a *Arena) animateMove(animation moveAnimation, errCh chan error, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	origin, dest := animation.origin, animation.dest
@@ -308,7 +308,7 @@ func (a *Arena) animateMove(animation moveAnimation, errCh chan (error), wg *syn
 
 // animateMoveToCombine animates a tile moving into another like tile, resulting
 // in a combine.
-func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh chan (error), wg *sync.WaitGroup) {
+func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh chan error, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	origin, dest := animation.origin, animation.dest
@@ -338,7 +338,7 @@ func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh cha
 }
 
 // animateSpawn animates a tile spawn animation.
-func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan (error), wg *sync.WaitGroup) {
+func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan error, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	dest := animation.dest
@@ -379,7 +379,7 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan (error), wg *s
 	}
 }
 
-func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh chan (error), wg *sync.WaitGroup) {
+func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh chan error, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	dest := animation.dest

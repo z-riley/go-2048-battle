@@ -24,7 +24,7 @@ type MultiplayerScreen struct {
 	guide        *turdgl.Text
 	backend      *backend.Game
 	arena        *common.Arena
-	arenaInputCh chan (func())
+	arenaInputCh chan func()
 
 	// Opponent's grid
 	opponentScore   *common.GameUIBox

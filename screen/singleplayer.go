@@ -29,7 +29,7 @@ type SingleplayerScreen struct {
 
 	backend      *backend.Game
 	arena        *common.Arena
-	arenaInputCh chan (func())
+	arenaInputCh chan func()
 
 	debugGridText  *turdgl.Text
 	debugTimeText  *turdgl.Text

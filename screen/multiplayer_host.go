@@ -104,11 +104,19 @@ func (s *MultiplayerHostScreen) Init(_ InitData) {
 	})
 
 	// Start server to allow other players to connect
+	errCh := make(chan error)
 	go func() {
-		if err := s.server.Run("0.0.0.0", serverPort); err != nil {
-			panic("server crashed: " + err.Error())
+		fmt.Println("a")
+		for err := range errCh {
+			fmt.Println("b")
+			if err != nil {
+				panic("server crashed: " + err.Error())
+			}
 		}
 	}()
+	if err := s.server.Start("0.0.0.0", serverPort, errCh); err != nil {
+		panic(err)
+	}
 }
 
 // Deinit deinitialises the screen.

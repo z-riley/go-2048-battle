@@ -3,7 +3,6 @@ package screen
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
@@ -19,8 +18,8 @@ type MultiplayerJoinScreen struct {
 	buttons []*common.MenuButton
 	entries []*common.EntryBox
 
-	hostReady bool
-	client    *turdserve.Client
+	hostIsReady chan bool
+	client      *turdserve.Client
 }
 
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
@@ -49,16 +48,17 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
 
 	s := MultiplayerJoinScreen{
-		win:       win,
-		title:     title,
-		buttons:   []*common.MenuButton{ipHeading, nameHeading, join, back},
-		entries:   []*common.EntryBox{nameEntry, ipEntry},
-		hostReady: false,
-		client:    turdserve.NewClient(),
+		win:         win,
+		title:       title,
+		buttons:     []*common.MenuButton{ipHeading, nameHeading, join, back},
+		entries:     []*common.EntryBox{nameEntry, ipEntry},
+		hostIsReady: make(chan bool),
+		client:      turdserve.NewClient(),
 	}
 
 	back.SetCallback(func(_ turdgl.MouseState) {
 		join.SetLabelText("Join")
+		s.client.Destroy()
 		SetScreen(MultiplayerMenu, nil)
 	})
 
@@ -74,13 +74,9 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 		join.SetCallback(func(_ turdgl.MouseState) {})
 
 		go func() {
-			for {
-				// Pass client to next screen
-				if s.hostReady {
-					SetScreen(Multiplayer, InitData{clientKey: s.client})
-					return
-				}
-				time.Sleep(250 & time.Millisecond)
+			if <-s.hostIsReady {
+				SetScreen(Multiplayer, InitData{clientKey: s.client})
+				return
 			}
 		}()
 	})
@@ -127,8 +123,17 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 	// Connect using the user-specified IP address
 	ipEntry := s.entries[1]
 	ip := ipEntry.Text.Text()
-	if err := s.client.Connect(ip, serverPort); err != nil {
-		return fmt.Errorf("failed to connect to server: %w", err)
+	errCh := make(chan error)
+	go func() {
+		for err := range errCh {
+			if err != nil {
+				fmt.Println(fmt.Errorf("client error: %w", err).Error())
+				s.client.Destroy()
+			}
+		}
+	}()
+	if err := s.client.Connect(ip, serverPort, errCh); err != nil {
+		panic(err)
 	}
 
 	s.client.SetCallback(func(b []byte) {
@@ -188,6 +193,6 @@ func (s *MultiplayerJoinScreen) handleServerData(b []byte) error {
 // handleEventData handles incoming player data.
 func (s *MultiplayerJoinScreen) handleEventData(data comms.EventData) {
 	if data.Event == comms.EventHostStartGame {
-		s.hostReady = true
+		s.hostIsReady <- true
 	}
 }
