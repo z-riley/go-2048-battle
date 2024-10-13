@@ -2,7 +2,6 @@ package screen
 
 import (
 	"fmt"
-	"image/color"
 
 	"github.com/brunoga/deep"
 	"github.com/z-riley/go-2048-battle/backend"
@@ -13,158 +12,159 @@ import (
 )
 
 type SingleplayerScreen struct {
-	win              *turdgl.Window
-	backgroundColour color.RGBA
-
-	heading   *turdgl.Text
-	logo2048  *turdgl.TextBox
-	score     *common.GameUIBox
-	highScore *common.GameUIBox
-	menu      *turdgl.Button
-	newGame   *turdgl.Button
-	guide     *turdgl.Text
-	timer     *turdgl.Text
-
-	loseDialog *turdgl.Text
+	win *turdgl.Window
 
 	backend      *backend.Game
 	arena        *common.Arena
 	arenaInputCh chan func()
+
+	heading    *turdgl.Text
+	loseDialog *turdgl.Text
+	logo2048   *turdgl.TextBox
+	score      *common.GameUIBox
+	highScore  *common.GameUIBox
+	menu       *turdgl.Button
+	newGame    *turdgl.Button
+	guide      *turdgl.Text
+	timer      *turdgl.Text
 
 	debugGridText  *turdgl.Text
 	debugTimeText  *turdgl.Text
 	debugScoreText *turdgl.Text
 }
 
-// NewSingleplayerScreen constructs a new singleplayer menu screen.
+// NewSingleplayerScreen constructs an uninitialised new singleplayer menu screen.
 func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
-	s := SingleplayerScreen{
-		win:     win,
-		backend: backend.NewGame(&backend.Opts{SaveToDisk: true}),
-
-		arena:        common.NewArena(turdgl.Vec{X: 440, Y: 300}),
-		arenaInputCh: make(chan func(), 100),
-
-		backgroundColour: common.BackgroundColour,
-
-		debugGridText:  turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium),
-		debugTimeText:  turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium),
-		debugScoreText: turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium),
-	}
-
-	// Everything is sized relative to the tile size
-	const unit = common.TileSizePx
-
-	// Everything is positioned relative to the arena grid
-	anchor := s.arena.Pos()
-
-	s.heading = turdgl.NewText(
-		"-", // to be set later
-		turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 2.3*unit},
-		common.FontPathBold,
-	).SetSize(40).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
-
-	s.loseDialog = turdgl.NewText(
-		"-", // to be set later
-		turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 1.7*unit},
-		common.FontPathBold,
-	).SetSize(20).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
-
-	s.logo2048 = common.NewLogoBox(
-		1.36*unit, 1.36*unit,
-		turdgl.Vec{X: anchor.X, Y: anchor.Y - 2.58*unit},
-		"2048",
-	)
-
-	const widgetWidth = unit * 1.27
-	s.newGame = common.NewGameButton(
-		widgetWidth, 0.4*unit,
-		turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
-		func() {
-			s.arenaInputCh <- func() {
-				s.backend.Reset()
-				s.arena.Reset()
-			}
-		},
-	).SetLabelText("NEW")
-
-	s.menu = common.NewGameButton(
-		widgetWidth, 0.4*unit,
-		turdgl.Vec{X: anchor.X + s.arena.Width() - widgetWidth, Y: anchor.Y - 1.21*unit},
-		func() {
-			SetScreen(Title, nil)
-		},
-	).SetLabelText("MENU")
-
-	const wScore = 90
-	s.score = common.NewGameTextBox(
-		wScore, wScore,
-		turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 2.58*unit},
-		common.ArenaBackgroundColour,
-	).SetHeading("SCORE")
-
-	s.highScore = common.NewGameTextBox(
-		wScore, wScore,
-		turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
-		common.ArenaBackgroundColour,
-	).SetHeading("BEST")
-
-	s.guide = turdgl.NewText(
-		"Join the numbers and get to the 2048 tile!",
-		turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.28*unit},
-		common.FontPathBold,
-	).SetSize(16).SetColour(common.GreyTextColour)
-
-	s.timer = common.NewGameText("",
-		turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.13},
-	).SetSize(16).SetAlignment(turdgl.AlignBottomRight)
-
-	return &s
+	return &SingleplayerScreen{win: win}
 }
 
 // Init initialises the screen.
 func (s *SingleplayerScreen) Init(_ InitData) {
-	// Load debug UI
-	s.debugGridText.SetText(s.backend.Grid.Debug())
-	s.debugTimeText.SetText(s.backend.Timer.Time.String())
-	s.debugScoreText.SetText(fmt.Sprint(s.backend.Score.Current))
+	// Arena and supporting data structures
+	{
+		s.arena = common.NewArena(turdgl.Vec{X: 440, Y: 300})
+		s.backend = backend.NewGame(nil)
+		s.arenaInputCh = make(chan func(), 100)
+	}
+
+	// UI components
+	{
+		// Everything is sized relative to the tile size
+		const unit = common.TileSizePx
+
+		// Everything is positioned relative to the arena grid
+		anchor := s.arena.Pos()
+
+		s.heading = turdgl.NewText(
+			"", // to be set and drawn when player loses
+			turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 2.3*unit},
+			common.FontPathBold,
+		).SetSize(40).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
+
+		s.loseDialog = turdgl.NewText(
+			"", // to be set and drawn when player loses
+			turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 1.7*unit},
+			common.FontPathBold,
+		).SetSize(20).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
+
+		s.logo2048 = common.NewLogoBox(
+			1.36*unit, 1.36*unit,
+			turdgl.Vec{X: anchor.X, Y: anchor.Y - 2.58*unit},
+			"2048",
+		)
+
+		const wScore = 90
+		s.score = common.NewGameTextBox(
+			wScore, wScore,
+			turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 2.58*unit},
+			common.ArenaBackgroundColour,
+		).SetHeading("SCORE")
+
+		s.highScore = common.NewGameTextBox(
+			wScore, wScore,
+			turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
+			common.ArenaBackgroundColour,
+		).SetHeading("BEST")
+
+		const buttonWidth = unit * 1.27
+		s.menu = common.NewGameButton(
+			buttonWidth, 0.4*unit,
+			turdgl.Vec{X: anchor.X + s.arena.Width() - buttonWidth, Y: anchor.Y - 1.21*unit},
+			func() {
+				SetScreen(Title, nil)
+			},
+		).SetLabelText("MENU")
+
+		s.newGame = common.NewGameButton(
+			buttonWidth, 0.4*unit,
+			turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
+			func() {
+				s.arenaInputCh <- func() {
+					s.backend.Reset()
+					s.arena.Reset()
+				}
+			},
+		).SetLabelText("NEW")
+
+		s.guide = turdgl.NewText(
+			"Join the numbers and get to the 2048 tile!",
+			turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.28*unit},
+			common.FontPathBold,
+		).SetSize(16).SetColour(common.GreyTextColour)
+
+		s.timer = common.NewGameText("",
+			turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.13},
+		).SetSize(16).SetAlignment(turdgl.AlignBottomRight)
+	}
+
+	// Debug UI
+	if config.Debug {
+		s.debugGridText = turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium).
+			SetText(s.backend.Grid.Debug())
+		s.debugTimeText = turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
+			SetText(s.backend.Timer.Time.String())
+		s.debugScoreText = turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium).
+			SetText(fmt.Sprint(s.backend.Score.Current))
+	}
 
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
 	// finished animating the first one
-	s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.ExecuteMove(grid.DirUp)
-			s.debugGridText.SetText(s.backend.Grid.Debug())
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.ExecuteMove(grid.DirDown)
-			s.debugGridText.SetText(s.backend.Grid.Debug())
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.ExecuteMove(grid.DirLeft)
-			s.debugGridText.SetText(s.backend.Grid.Debug())
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.ExecuteMove(grid.DirRight)
-			s.debugGridText.SetText(s.backend.Grid.Debug())
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.Reset()
-			s.arena.Reset()
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
-		SetScreen(Title, nil)
-	})
+	{
+		s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.ExecuteMove(grid.DirUp)
+				s.debugGridText.SetText(s.backend.Grid.Debug())
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.ExecuteMove(grid.DirDown)
+				s.debugGridText.SetText(s.backend.Grid.Debug())
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.ExecuteMove(grid.DirLeft)
+				s.debugGridText.SetText(s.backend.Grid.Debug())
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.ExecuteMove(grid.DirRight)
+				s.debugGridText.SetText(s.backend.Grid.Debug())
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.Reset()
+				s.arena.Reset()
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
+			SetScreen(Title, nil)
+		})
+	}
 }
 
 // Deinit deinitialises the screen.

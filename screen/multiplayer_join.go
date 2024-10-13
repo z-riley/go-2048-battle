@@ -27,7 +27,7 @@ type MultiplayerJoinScreen struct {
 	client      *turdserve.Client
 }
 
-// NewTitle Screen constructs a new multiplayer menu screen for the given window.
+// NewTitle Screen constructs an uninitialised multiplayer join screen.
 func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	return &MultiplayerJoinScreen{win: win}
 }
