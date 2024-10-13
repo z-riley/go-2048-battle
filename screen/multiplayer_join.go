@@ -17,11 +17,11 @@ type MultiplayerJoinScreen struct {
 
 	title       *turdgl.Text
 	ipHeading   *common.MenuButton
+	ipEntry     *common.EntryBox
 	nameHeading *common.MenuButton
+	nameEntry   *common.EntryBox
 	join        *common.MenuButton
 	back        *common.MenuButton
-
-	entries []*common.EntryBox
 
 	hostIsReady chan bool
 	client      *turdserve.Client
@@ -29,62 +29,31 @@ type MultiplayerJoinScreen struct {
 
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
 func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
-	title := turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.ArenaBackgroundColour).
-		SetAlignment(turdgl.AlignCentre).
-		SetSize(40)
-
-	ipHeading := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 200}, func() {})
-	ipHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host IP:")
-
-	ipEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
-	ipEntry.SetText("127.0.0.1") // temporary for local testing
-
-	nameHeading := common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}, func() {})
-	nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Your name:")
-
-	nameEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
-
-	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {
-		// Set callback in Init()
-	})
-	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
-
-	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() {})
-	back.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
-
-	s := MultiplayerJoinScreen{
-		win:         win,
-		title:       title,
-		ipHeading:   ipHeading,
-		nameHeading: nameHeading,
-		join:        join,
-		back:        back,
-		entries:     []*common.EntryBox{nameEntry, ipEntry},
-		hostIsReady: make(chan bool),
-		client:      nil, // set in Init()
-	}
-
-	back.SetCallback(
-		func(_ turdgl.MouseState) {
-			join.SetLabelText("Join")
-			s.client.Destroy()
-			SetScreen(MultiplayerMenu, nil)
-		},
-	)
-
-	return &s
+	return &MultiplayerJoinScreen{win: win}
 }
 
 // Init initialises the screen.
 func (s *MultiplayerJoinScreen) Init(_ InitData) {
-	s.client = turdserve.NewClient()
+	s.title = turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
+		SetColour(common.ArenaBackgroundColour).
+		SetAlignment(turdgl.AlignCentre).
+		SetSize(40)
 
-	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
-		SetScreen(MultiplayerMenu, nil)
+	s.ipHeading = common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 200}, func() {})
+	s.ipHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host IP:")
+
+	s.ipEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
+	s.ipEntry.SetText("127.0.0.1") // temporary for local testing
+
+	s.nameHeading = common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}, func() {})
+	s.nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Your name:")
+
+	s.nameEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
+
+	s.join = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {
+		// Set callback in Init()
 	})
-
+	s.join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
 	s.join.SetCallback(
 		func(_ turdgl.MouseState) {
 			if err := s.joinGame(); err != nil {
@@ -105,6 +74,24 @@ func (s *MultiplayerJoinScreen) Init(_ InitData) {
 			}()
 		},
 	)
+
+	s.back = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() {})
+	s.back.SetLabelAlignment(turdgl.AlignCustom).
+		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
+	s.back.SetCallback(
+		func(_ turdgl.MouseState) {
+			s.join.SetLabelText("Join")
+			s.client.Destroy()
+			SetScreen(MultiplayerMenu, nil)
+		},
+	)
+
+	s.client = turdserve.NewClient()
+	s.hostIsReady = make(chan bool)
+
+	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+		SetScreen(MultiplayerMenu, nil)
+	})
 }
 
 // Deinit deinitialises the screen.
@@ -128,7 +115,10 @@ func (s *MultiplayerJoinScreen) Update() {
 		s.win.Draw(b)
 	}
 
-	for _, e := range s.entries {
+	for _, e := range []*common.EntryBox{
+		s.nameEntry,
+		s.ipEntry,
+	} {
 		s.win.Draw(e)
 		e.Update(s.win)
 	}
@@ -142,8 +132,7 @@ const clientKey = "client"
 func (s *MultiplayerJoinScreen) joinGame() error {
 
 	// Connect using the user-specified IP address
-	ipEntry := s.entries[1]
-	ip := ipEntry.Text.Text()
+	ip := s.ipEntry.Text.Text()
 	errCh := make(chan error)
 	go func() {
 		for err := range errCh {
@@ -164,8 +153,7 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 	})
 
 	// Construct message containing player data
-	usernameEntry := s.entries[0]
-	username := usernameEntry.Text.Text()
+	username := s.nameEntry.Text.Text()
 	playerData, err := json.Marshal(comms.PlayerData{
 		Version:  config.Version,
 		Username: username,
