@@ -1,6 +1,7 @@
 package screen
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -14,8 +15,12 @@ import (
 type MultiplayerJoinScreen struct {
 	win *turdgl.Window
 
-	title   *turdgl.Text
-	buttons []*common.MenuButton
+	title       *turdgl.Text
+	ipHeading   *common.MenuButton
+	nameHeading *common.MenuButton
+	join        *common.MenuButton
+	back        *common.MenuButton
+
 	entries []*common.EntryBox
 
 	hostIsReady chan bool
@@ -40,7 +45,9 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 
 	nameEntry := common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
 
-	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {})
+	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {
+		// Set callback in Init()
+	})
 	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
 
 	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() {})
@@ -50,45 +57,54 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	s := MultiplayerJoinScreen{
 		win:         win,
 		title:       title,
-		buttons:     []*common.MenuButton{ipHeading, nameHeading, join, back},
+		ipHeading:   ipHeading,
+		nameHeading: nameHeading,
+		join:        join,
+		back:        back,
 		entries:     []*common.EntryBox{nameEntry, ipEntry},
 		hostIsReady: make(chan bool),
-		client:      turdserve.NewClient(),
+		client:      nil, // set in Init()
 	}
 
-	back.SetCallback(func(_ turdgl.MouseState) {
-		join.SetLabelText("Join")
-		s.client.Destroy()
-		SetScreen(MultiplayerMenu, nil)
-	})
-
-	join.SetCallback(func(_ turdgl.MouseState) {
-		if err := s.joinGame(); err != nil {
-			fmt.Println("Failed to join game:", err)
-			return
-		}
-
-		join.SetLabelText("Waiting for host")
-
-		// Disable the button
-		join.SetCallback(func(_ turdgl.MouseState) {})
-
-		go func() {
-			if <-s.hostIsReady {
-				SetScreen(Multiplayer, InitData{clientKey: s.client})
-				return
-			}
-		}()
-	})
+	back.SetCallback(
+		func(_ turdgl.MouseState) {
+			join.SetLabelText("Join")
+			s.client.Destroy()
+			SetScreen(MultiplayerMenu, nil)
+		},
+	)
 
 	return &s
 }
 
 // Init initialises the screen.
 func (s *MultiplayerJoinScreen) Init(_ InitData) {
+	s.client = turdserve.NewClient()
+
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
 		SetScreen(MultiplayerMenu, nil)
 	})
+
+	s.join.SetCallback(
+		func(_ turdgl.MouseState) {
+			if err := s.joinGame(); err != nil {
+				fmt.Println("Failed to join game:", err)
+				return
+			}
+
+			s.join.SetLabelText("Waiting for host")
+
+			// Disable the button so user can't connect again
+			s.join.SetCallback(func(_ turdgl.MouseState) {})
+
+			go func() {
+				if <-s.hostIsReady {
+					SetScreen(Multiplayer, InitData{clientKey: s.client})
+					return
+				}
+			}()
+		},
+	)
 }
 
 // Deinit deinitialises the screen.
@@ -102,7 +118,12 @@ func (s *MultiplayerJoinScreen) Update() {
 
 	s.win.Draw(s.title)
 
-	for _, b := range s.buttons {
+	for _, b := range []*common.MenuButton{
+		s.ipHeading,
+		s.nameHeading,
+		s.join,
+		s.back,
+	} {
 		b.Update(s.win)
 		s.win.Draw(b)
 	}
@@ -132,8 +153,8 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 			}
 		}
 	}()
-	if err := s.client.Connect(ip, serverPort, errCh); err != nil {
-		panic(err)
+	if err := s.client.Connect(context.Background(), ip, serverPort, errCh); err != nil {
+		return fmt.Errorf("failed to connect to server: %w", err)
 	}
 
 	s.client.SetCallback(func(b []byte) {
