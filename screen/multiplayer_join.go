@@ -50,12 +50,8 @@ func (s *MultiplayerJoinScreen) Init(_ InitData) {
 
 	s.nameEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
 
-	s.join = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() {
-		// Set callback in Init()
-	})
-	s.join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
-	s.join.SetCallback(
-		func(_ turdgl.MouseState) {
+	s.join = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400},
+		func() {
 			if err := s.joinGame(); err != nil {
 				fmt.Println("Failed to join game:", err)
 				return
@@ -74,6 +70,7 @@ func (s *MultiplayerJoinScreen) Init(_ InitData) {
 			}()
 		},
 	)
+	s.join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
 
 	s.back = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() {})
 	s.back.SetLabelAlignment(turdgl.AlignCustom).
