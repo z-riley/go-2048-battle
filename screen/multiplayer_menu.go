@@ -8,37 +8,33 @@ import (
 type MultiplayerMenuScreen struct {
 	win *turdgl.Window
 
-	title   *turdgl.Text
-	buttons []*common.MenuButton
+	title *turdgl.Text
+	join  *common.MenuButton
+	host  *common.MenuButton
+	back  *common.MenuButton
 }
 
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
 func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
-	title := turdgl.NewText("Multiplayer", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.ArenaBackgroundColour).
-		SetAlignment(turdgl.AlignCentre).
-		SetSize(40)
-
-	join := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, func() { SetScreen(MultiplayerJoin, nil) })
-	join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join game")
-
-	host := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(MultiplayerHost, nil) })
-	host.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host game")
-
-	back := common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(Title, nil) })
-	back.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
-
-	// TODO: poke around 2048 app UI and copy that menu style
-
-	return &MultiplayerMenuScreen{
-		win,
-		title,
-		[]*common.MenuButton{join, host, back},
-	}
+	return &MultiplayerMenuScreen{win: win}
 }
 
 // Init initialises the screen.
 func (s *MultiplayerMenuScreen) Init(_ InitData) {
+	s.title = turdgl.NewText("Multiplayer", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
+		SetColour(common.ArenaBackgroundColour).
+		SetAlignment(turdgl.AlignCentre).
+		SetSize(40)
+
+	s.join = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, func() { SetScreen(MultiplayerJoin, nil) })
+	s.join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join game")
+
+	s.host = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(MultiplayerHost, nil) })
+	s.host.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host game")
+
+	s.back = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() { SetScreen(Title, nil) })
+	s.back.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
+
 	s.win.RegisterKeybind(turdgl.Key1, turdgl.KeyRelease, func() {
 		SetScreen(MultiplayerJoin, nil)
 	})
@@ -67,7 +63,11 @@ func (s *MultiplayerMenuScreen) Update() {
 
 	s.win.Draw(s.title)
 
-	for _, b := range s.buttons {
+	for _, b := range []*common.MenuButton{
+		s.join,
+		s.host,
+		s.back,
+	} {
 		s.win.Draw(b)
 		b.Update(s.win)
 	}

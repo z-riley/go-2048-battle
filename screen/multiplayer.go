@@ -17,10 +17,14 @@ type MultiplayerScreen struct {
 	win              *turdgl.Window
 	backgroundColour color.RGBA
 
+	// Shared widgets
+	title *turdgl.Text
+	timer *turdgl.Text
+
 	// Player's grid
 	newGame      *turdgl.Button
-	score        *common.GameUIBox
 	menu         *turdgl.Button
+	score        *common.GameUIBox
 	guide        *turdgl.Text
 	backend      *backend.Game
 	arena        *common.Arena
@@ -32,10 +36,6 @@ type MultiplayerScreen struct {
 	opponentArena   *common.Arena
 	opponentBackend *backend.Game
 
-	// Shared widgets
-	timer *turdgl.Text
-	title *turdgl.Text
-
 	// TODO: find a neater way of doing client/server polymorphism
 	// but don't forget to account for 1 server -> multiple clients
 	server *turdserve.Server
@@ -44,146 +44,153 @@ type MultiplayerScreen struct {
 
 // NewMultiplayerScreen constructs a new singleplayer menu screen.
 func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
-	s := MultiplayerScreen{
-		win: win,
-		title: turdgl.NewText("Head to Head", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-			SetColour(common.ArenaBackgroundColour).
-			SetAlignment(turdgl.AlignCentre).
-			SetSize(40),
-
-		backend:      backend.NewGame(&backend.Opts{SaveToDisk: false}),
-		arena:        common.NewArena(turdgl.Vec{X: 100, Y: 300}),
-		arenaInputCh: make(chan func(), 100),
-
-		opponentBackend: backend.NewGame(&backend.Opts{SaveToDisk: false}),
-		opponentArena:   common.NewArena(turdgl.Vec{X: 700, Y: 300}),
-
+	return &MultiplayerScreen{
+		win:              win,
 		backgroundColour: common.BackgroundColour,
 	}
-
-	// Everything is sized relative to the tile size
-	const unit = common.TileSizePx
-
-	// Player's grid:
-	{
-		// Everything is positioned relative to the arena grid
-		anchor := s.arena.Pos()
-
-		const widgetWidth = unit * 1.27
-		s.newGame = common.NewGameButton(
-			widgetWidth, 0.4*unit,
-			turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
-			func() {
-				s.arenaInputCh <- func() {
-					s.backend.Reset()
-					s.arena.Reset()
-				}
-			},
-		).SetLabelText("NEW")
-
-		s.menu = common.NewGameButton(
-			widgetWidth, 0.4*unit,
-			turdgl.Vec{X: anchor.X + s.arena.Width() - widgetWidth, Y: anchor.Y - 1.21*unit},
-			func() {
-				SetScreen(Multiplayer, nil)
-			},
-		).SetLabelText("MENU")
-
-		const wScore = 90
-		s.score = common.NewGameTextBox(
-			90, 90,
-			turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
-			common.ArenaBackgroundColour,
-		).SetHeading("SCORE")
-
-		s.guide = turdgl.NewText(
-			"Your grid",
-			turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.28*unit},
-			common.FontPathBold,
-		).SetSize(16).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopRight)
-
-		s.timer = common.NewGameText("",
-			turdgl.Vec{X: 600, Y: anchor.Y},
-		).SetAlignment(turdgl.AlignBottomRight)
-	}
-
-	// Opponent's grid:
-	{
-		// Everything is positioned relative to the arena grid
-		opponentAnchor := s.opponentArena.Pos()
-
-		s.opponentScore = common.NewGameTextBox(
-			90, 90,
-			turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 2.58*unit},
-			common.ArenaBackgroundColour,
-		).SetHeading("SCORE")
-
-		s.opponentGuide = turdgl.NewText(
-			"Opponent's grid", // TODO: use opponent's username instead
-			turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.28*unit},
-			common.FontPathBold,
-		).SetSize(16).SetColour(common.GreyTextColour)
-	}
-
-	return &s
 }
 
 // Init initialises the screen.
 func (s *MultiplayerScreen) Init(initData InitData) {
-	if server, ok := initData[serverKey]; ok {
-		// Host mode
-		s.server = server.(*turdserve.Server)
-		s.server.SetCallback(func(id int, b []byte) {
-			if err := s.handleOpponentData(b); err != nil {
-				fmt.Println("Failed to handle opponent data as server", err)
-			}
-		}).SetDisconnectCallback(func(id int) {
-			fmt.Println("Opponent has left the game")
-		})
-	} else if client, ok := initData[clientKey]; ok {
-		// Guest mode
-		s.client = client.(*turdserve.Client)
-		s.client.SetCallback(func(b []byte) {
-			if err := s.handleOpponentData(b); err != nil {
-				fmt.Println("Failed to handle opponent data as client", err)
-			}
-		})
-	} else {
-		panic("neither server or client was passed to MultiplayerScreen Init")
+	// UI widgets
+	{
+		s.arena = common.NewArena(turdgl.Vec{X: 100, Y: 300})
+		s.opponentArena = common.NewArena(turdgl.Vec{X: 700, Y: 300})
+
+		// Everything is positioned relative to the arena grid
+		anchor := s.arena.Pos()
+
+		// Everything is sized relative to the tile size
+		const unit = common.TileSizePx
+
+		s.title = turdgl.NewText("Head to Head", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
+			SetColour(common.ArenaBackgroundColour).
+			SetAlignment(turdgl.AlignCentre).
+			SetSize(40)
+
+		s.timer = common.NewGameText("",
+			turdgl.Vec{X: 600, Y: anchor.Y},
+		).SetAlignment(turdgl.AlignBottomRight)
+
+		// Player's grid
+		{
+			const widgetWidth = unit * 1.27
+			s.newGame = common.NewGameButton(
+				widgetWidth, 0.4*unit,
+				turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
+				func() {
+					s.arenaInputCh <- func() {
+						s.backend.Reset()
+						s.arena.Reset()
+					}
+				},
+			).SetLabelText("NEW")
+
+			s.menu = common.NewGameButton(
+				widgetWidth, 0.4*unit,
+				turdgl.Vec{X: anchor.X + s.arena.Width() - widgetWidth, Y: anchor.Y - 1.21*unit},
+				func() {
+					// TODO: reset grid
+				},
+			).SetLabelText("MENU")
+
+			const wScore = 90
+			s.score = common.NewGameTextBox(
+				90, 90,
+				turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
+				common.ArenaBackgroundColour,
+			).SetHeading("SCORE")
+
+			s.guide = turdgl.NewText(
+				"Your grid",
+				turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.28*unit},
+				common.FontPathBold,
+			).SetSize(16).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopRight)
+
+			s.backend = backend.NewGame(&backend.Opts{SaveToDisk: false})
+			s.arenaInputCh = make(chan func(), 100)
+		}
+
+		// Opponent's grid
+		{
+			// Everything is positioned relative to the arena grid
+			opponentAnchor := s.opponentArena.Pos()
+
+			s.opponentScore = common.NewGameTextBox(
+				90, 90,
+				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 2.58*unit},
+				common.ArenaBackgroundColour,
+			).SetHeading("SCORE")
+
+			s.opponentGuide = turdgl.NewText(
+				"Opponent's grid", // TODO: use opponent's username instead
+				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.28*unit},
+				common.FontPathBold,
+			).SetSize(16).SetColour(common.GreyTextColour)
+
+			s.opponentBackend = backend.NewGame(&backend.Opts{SaveToDisk: false})
+		}
+	}
+
+	// Initialise server/client
+	{
+		if server, ok := initData[serverKey]; ok {
+			// Host mode
+			s.server = server.(*turdserve.Server)
+			s.server.SetCallback(func(id int, b []byte) {
+				if err := s.handleOpponentData(b); err != nil {
+					fmt.Println("Failed to handle opponent data as server", err)
+				}
+			}).SetDisconnectCallback(func(id int) {
+				fmt.Println("Opponent has left the game")
+			})
+		} else if client, ok := initData[clientKey]; ok {
+			// Guest mode
+			s.client = client.(*turdserve.Client)
+			s.client.SetCallback(func(b []byte) {
+				if err := s.handleOpponentData(b); err != nil {
+					fmt.Println("Failed to handle opponent data as client", err)
+				}
+			})
+		} else {
+			panic("neither server or client was passed to MultiplayerScreen Init")
+		}
 	}
 
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
 	// finished animating the first one
-	s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.ExecuteMove(grid.DirUp)
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.ExecuteMove(grid.DirDown)
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.ExecuteMove(grid.DirLeft)
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.ExecuteMove(grid.DirRight)
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
-		s.arenaInputCh <- func() {
-			s.backend.Reset()
-			s.arena.Reset()
-		}
-	})
-	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
-		SetScreen(Title, nil)
-	})
+	{
+		s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.ExecuteMove(grid.DirUp)
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.ExecuteMove(grid.DirDown)
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.ExecuteMove(grid.DirLeft)
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.ExecuteMove(grid.DirRight)
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
+			s.arenaInputCh <- func() {
+				s.backend.Reset()
+				s.arena.Reset()
+			}
+		})
+		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
+			SetScreen(Title, nil)
+		})
+	}
 }
 
 // Deinit deinitialises the screen.

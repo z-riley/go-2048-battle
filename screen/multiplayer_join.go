@@ -49,7 +49,7 @@ func (s *MultiplayerJoinScreen) Init(_ InitData) {
 	s.nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Your name:")
 
 	s.nameEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
-
+	s.hostIsReady = make(chan bool)
 	s.join = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400},
 		func() {
 			if err := s.joinGame(); err != nil {
@@ -62,6 +62,9 @@ func (s *MultiplayerJoinScreen) Init(_ InitData) {
 			// Disable the button so user can't connect again
 			s.join.SetCallback(func(_ turdgl.MouseState) {})
 
+			// FIXME: This sometimes causes panics because the Multiplayer screen
+			// hasn't finished initialising by the time Update() is called on it
+			// after changing screen
 			go func() {
 				if <-s.hostIsReady {
 					SetScreen(Multiplayer, InitData{clientKey: s.client})
@@ -84,7 +87,6 @@ func (s *MultiplayerJoinScreen) Init(_ InitData) {
 	)
 
 	s.client = turdserve.NewClient()
-	s.hostIsReady = make(chan bool)
 
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
 		SetScreen(MultiplayerMenu, nil)
