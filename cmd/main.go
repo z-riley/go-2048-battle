@@ -46,8 +46,7 @@ func main() {
 
 	// Main game loop
 	for win.IsRunning() {
-		// Update screen
-		screen.CurrentScreen().Update()
+		screen.Update()
 
 		if config.Debug {
 			// Add debug overlay

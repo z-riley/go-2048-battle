@@ -62,9 +62,6 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 			// Disable the button so user can't connect again
 			s.join.SetCallback(func(_ turdgl.MouseState) {})
 
-			// FIXME: This sometimes causes panics because the Multiplayer screen
-			// hasn't finished initialising by the time Update() is called on it
-			// after changing screen
 			go func() {
 				if <-s.hostIsReady {
 					SetScreen(Multiplayer, InitData{clientKey: s.client})

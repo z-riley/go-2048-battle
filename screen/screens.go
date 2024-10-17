@@ -1,6 +1,21 @@
 package screen
 
-import "github.com/z-riley/turdgl"
+import (
+	"sync"
+
+	"github.com/z-riley/turdgl"
+)
+
+type ScreenManager struct {
+	*sync.Mutex
+	// currentScreen holds the game's current screen.
+	currentScreen ID
+}
+
+var screen = &ScreenManager{
+	&sync.Mutex{},
+	Title,
+}
 
 // InitData can be passed to screens' Init function to share data between screens.
 type InitData map[string]any
@@ -30,9 +45,6 @@ func (id ID) String() string {
 	return string(id)
 }
 
-// currentScreen holds the game's current screen.
-var currentScreen = Title
-
 // screens contains every screen.
 var screens map[ID]Screen
 
@@ -48,14 +60,37 @@ func Init(win *turdgl.Window) {
 	}
 }
 
+// screenChange contains data required to change the current screen.
+type screenChange struct {
+	id   ID
+	data InitData
+}
+
+// currentScreen holds the game's current screen.
+var currentScreen = Title
+
+// screenChangeChan executes the screen change sequence on receipt.
+var screenChangeChan = make(chan screenChange, 1)
+
+// Update updates the current screen.
+func Update() {
+	select {
+	case screen := <-screenChangeChan:
+		CurrentScreen().Exit()
+		currentScreen = screen.id
+		CurrentScreen().Enter(screen.data)
+
+	default:
+		CurrentScreen().Update()
+	}
+}
+
 // CurrentScreen returns the current screen.
 func CurrentScreen() Screen {
 	return screens[currentScreen]
 }
 
-// SetScreen changes the current screen to the given ID.
-func SetScreen(s ID, data InitData) {
-	CurrentScreen().Exit()
-	currentScreen = s
-	CurrentScreen().Enter(data)
+// SetScreen changes the current screen to the given ID next time Update is called.
+func SetScreen(id ID, data InitData) {
+	screenChangeChan <- screenChange{id, data}
 }
