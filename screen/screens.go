@@ -6,12 +6,12 @@ import "github.com/z-riley/turdgl"
 type InitData map[string]any
 
 type Screen interface {
-	// Init initialises the screen.
-	Init(InitData)
+	// Enter initialises the screen.
+	Enter(InitData)
 	// Update updates and draws the screen.
 	Update()
-	// Deinit deinitialises the screen.
-	Deinit()
+	// Exit deinitialises the screen.
+	Exit()
 }
 
 // ID is the unique identifier for a screen.
@@ -55,7 +55,7 @@ func CurrentScreen() Screen {
 
 // SetScreen changes the current screen to the given ID.
 func SetScreen(s ID, data InitData) {
-	CurrentScreen().Deinit()
+	CurrentScreen().Exit()
 	currentScreen = s
-	CurrentScreen().Init(data)
+	CurrentScreen().Enter(data)
 }

@@ -37,8 +37,8 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 	return &MultiplayerHostScreen{win: win}
 }
 
-// Init initialises the screen.
-func (s *MultiplayerHostScreen) Init(_ InitData) {
+// Enter initialises the screen.
+func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	s.title = turdgl.NewText("Host game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
 		SetColour(common.ArenaBackgroundColour).
 		SetAlignment(turdgl.AlignCentre).
@@ -102,8 +102,8 @@ func (s *MultiplayerHostScreen) Init(_ InitData) {
 	}
 }
 
-// Deinit deinitialises the screen.
-func (s *MultiplayerHostScreen) Deinit() {
+// Exit deinitialises the screen.
+func (s *MultiplayerHostScreen) Exit() {
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
 }
 

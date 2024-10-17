@@ -50,8 +50,8 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 	}
 }
 
-// Init initialises the screen.
-func (s *MultiplayerScreen) Init(initData InitData) {
+// Enter initialises the screen.
+func (s *MultiplayerScreen) Enter(initData InitData) {
 	// UI widgets
 	{
 		s.arena = common.NewArena(turdgl.Vec{X: 100, Y: 300})
@@ -193,8 +193,8 @@ func (s *MultiplayerScreen) Init(initData InitData) {
 	}
 }
 
-// Deinit deinitialises the screen.
-func (s *MultiplayerScreen) Deinit() {
+// Exit deinitialises the screen.
+func (s *MultiplayerScreen) Exit() {
 	s.backend.Timer.Pause()
 
 	if err := s.backend.Save(); err != nil {

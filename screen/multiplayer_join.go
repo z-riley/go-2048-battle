@@ -32,8 +32,8 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 	return &MultiplayerJoinScreen{win: win}
 }
 
-// Init initialises the screen.
-func (s *MultiplayerJoinScreen) Init(_ InitData) {
+// Enter initialises the screen.
+func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	s.title = turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
 		SetColour(common.ArenaBackgroundColour).
 		SetAlignment(turdgl.AlignCentre).
@@ -93,8 +93,8 @@ func (s *MultiplayerJoinScreen) Init(_ InitData) {
 	})
 }
 
-// Deinit deinitialises the screen.
-func (s *MultiplayerJoinScreen) Deinit() {
+// Exit deinitialises the screen.
+func (s *MultiplayerJoinScreen) Exit() {
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
 }
 

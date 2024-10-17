@@ -19,8 +19,8 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 	return &MultiplayerMenuScreen{win: win}
 }
 
-// Init initialises the screen.
-func (s *MultiplayerMenuScreen) Init(_ InitData) {
+// Enter initialises the screen.
+func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 	s.title = turdgl.NewText("Multiplayer", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
 		SetColour(common.ArenaBackgroundColour).
 		SetAlignment(turdgl.AlignCentre).
@@ -49,8 +49,8 @@ func (s *MultiplayerMenuScreen) Init(_ InitData) {
 	})
 }
 
-// Deinit deinitialises the screen.
-func (s *MultiplayerMenuScreen) Deinit() {
+// Exit deinitialises the screen.
+func (s *MultiplayerMenuScreen) Exit() {
 	s.win.UnregisterKeybind(turdgl.Key1, turdgl.KeyRelease)
 	s.win.UnregisterKeybind(turdgl.Key2, turdgl.KeyRelease)
 	s.win.UnregisterKeybind(turdgl.Key3, turdgl.KeyRelease)

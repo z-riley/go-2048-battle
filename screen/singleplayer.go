@@ -38,8 +38,8 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 	return &SingleplayerScreen{win: win}
 }
 
-// Init initialises the screen.
-func (s *SingleplayerScreen) Init(_ InitData) {
+// Enter initialises the screen.
+func (s *SingleplayerScreen) Enter(_ InitData) {
 	// Arena and supporting data structures
 	{
 		s.arena = common.NewArena(turdgl.Vec{X: 440, Y: 300})
@@ -167,8 +167,8 @@ func (s *SingleplayerScreen) Init(_ InitData) {
 	}
 }
 
-// Deinit deinitialises the screen.
-func (s *SingleplayerScreen) Deinit() {
+// Exit deinitialises the screen.
+func (s *SingleplayerScreen) Exit() {
 	s.backend.Timer.Pause()
 
 	if err := s.backend.Save(); err != nil {
