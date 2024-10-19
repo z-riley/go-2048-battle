@@ -7,19 +7,15 @@ import (
 )
 
 // EntryBox is a commonly used text box for the user to enter text.
-type EntryBox struct{ *turdgl.TextBox }
+type EntryBox turdgl.TextBox
 
 // NewEntryBox constructs a new text box with suitable defaults.
-func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
+func NewEntryBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
 	t := NewTextBox(width, height, pos)
-	t.SetSelectedCB(func() { t.SetTextColour(turdgl.White) })
-	t.SetDeselectedCB(func() { t.SetTextColour(LightFontColour) })
+	t.SetSelectedCB(func() { t.SetTextColour(turdgl.White) }).
+		SetDeselectedCB(func() { t.SetTextColour(LightFontColour) })
 
-	return &EntryBox{t}
-}
-
-func (t *EntryBox) Update(win *turdgl.Window) {
-	t.TextBox.Update(win)
+	return t
 }
 
 func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {

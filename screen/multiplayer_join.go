@@ -17,9 +17,9 @@ type MultiplayerJoinScreen struct {
 
 	title       *turdgl.Text
 	ipHeading   *common.MenuButton
-	ipEntry     *common.EntryBox
+	ipEntry     *turdgl.TextBox
 	nameHeading *common.MenuButton
-	nameEntry   *common.EntryBox
+	nameEntry   *turdgl.TextBox
 	join        *common.MenuButton
 	back        *common.MenuButton
 
@@ -111,7 +111,7 @@ func (s *MultiplayerJoinScreen) Update() {
 		s.win.Draw(b)
 	}
 
-	for _, e := range []*common.EntryBox{
+	for _, e := range []*turdgl.TextBox{
 		s.nameEntry,
 		s.ipEntry,
 	} {

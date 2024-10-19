@@ -24,7 +24,7 @@ type MultiplayerHostScreen struct {
 	ipHeading   *turdgl.TextBox
 	ipBody      *turdgl.TextBox
 	nameHeading *common.MenuButton
-	nameEntry   *common.EntryBox
+	nameEntry   *turdgl.TextBox
 	start       *common.MenuButton
 	back        *common.MenuButton
 	playerCards []*playerCard
@@ -236,7 +236,7 @@ type playerCard struct {
 	id    int
 	ready bool
 
-	name  *common.EntryBox
+	name  *turdgl.TextBox
 	light *turdgl.Circle
 }
 
