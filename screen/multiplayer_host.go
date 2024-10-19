@@ -92,7 +92,8 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		go func() {
 			for err := range errCh {
 				if err != nil {
-					panic("server crashed: " + err.Error())
+					// Exit the loop if the server dies
+					return
 				}
 			}
 		}()
@@ -104,6 +105,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 // Exit deinitialises the screen.
 func (s *MultiplayerHostScreen) Exit() {
+	s.server.Destroy()
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
 }
 
