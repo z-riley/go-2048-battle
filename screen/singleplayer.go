@@ -210,12 +210,12 @@ func (s *SingleplayerScreen) Update() {
 
 	// Check for win or lose
 	switch game.Grid.Outcome() {
-	case grid.None:
-		s.updateNormal(game)
 	case grid.Win:
 		s.updateWin(game)
 	case grid.Lose:
 		s.updateLose(game)
+	default:
+		s.updateNormal(game)
 	}
 
 	// Draw temporary debug grid
@@ -255,7 +255,9 @@ func (s *SingleplayerScreen) updateNormal(game backend.Game) {
 
 // updateWin updates and draws the singleplayer screen in a winning state.
 func (s *SingleplayerScreen) updateWin(game backend.Game) {
-	// No special win screen for now
+	s.guide.SetText(
+		fmt.Sprintf("Your next goal is to get to the %d tile!", game.Grid.HighestTile()*2),
+	)
 	s.updateNormal(game)
 }
 

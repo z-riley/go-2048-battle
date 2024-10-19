@@ -36,8 +36,7 @@ type MultiplayerScreen struct {
 	opponentArena   *common.Arena
 	opponentBackend *backend.Game
 
-	// TODO: find a neater way of doing client/server polymorphism
-	// but don't forget to account for 1 server -> multiple clients
+	// EITHER server or client will exist
 	server *turdserve.Server
 	client *turdserve.Client
 }

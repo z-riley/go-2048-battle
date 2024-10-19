@@ -114,8 +114,7 @@ func NewArena(pos turdgl.Vec) *Arena {
 }
 
 // Destroy tears down the arena.
-func (a *Arena) Destroy() {
-}
+func (a *Arena) Destroy() {}
 
 // Draw draws the arena.
 func (a *Arena) Draw(buf *turdgl.FrameBuffer) {

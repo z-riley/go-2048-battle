@@ -108,7 +108,7 @@ func (g *Grid) Outcome() Outcome {
 	switch {
 	case g.isLoss():
 		return Lose
-	case g.highestTile() >= 2048:
+	case g.HighestTile() >= 2048:
 		return Win
 	default:
 		return None
@@ -266,8 +266,8 @@ func (g *Grid) isLoss() bool {
 	return true
 }
 
-// highestTile returns the value of the highest tile on the grid.
-func (g *Grid) highestTile() int {
+// HighestTile returns the value of the highest tile on the grid.
+func (g *Grid) HighestTile() int {
 	highest := 0
 	for a := range gridHeight {
 		for b := range gridWidth {
