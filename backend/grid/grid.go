@@ -67,9 +67,8 @@ func (g *Grid) Reset() {
 		// Try again until they're unique
 		tile2 = pos{rand.Intn(gridWidth), rand.Intn(gridHeight)}
 	}
-	// FIXME: starting values of 4 should also be possible
-	g.Tiles[tile1.x][tile1.y].Val = 2
-	g.Tiles[tile2.x][tile2.y].Val = 2
+	g.Tiles[tile1.x][tile1.y].Val = newTileVal()
+	g.Tiles[tile2.x][tile2.y].Val = newTileVal()
 }
 
 // ClearCmbFlags clears the Cmb flag of every tile.
@@ -118,18 +117,13 @@ func (g *Grid) Outcome() Outcome {
 // spawnTile spawns a single new tile in a random location on the grid. The value of the
 // tile is either 2 (90% chance) or 4 (10% chance).
 func (g *Grid) spawnTile() {
-	val := 2
-	if rand.Float64() >= 0.9 {
-		val = 4
-	}
-
 	x, y := rand.Intn(gridWidth), rand.Intn(gridHeight)
 	for g.Tiles[x][y].Val != emptyTile {
 		// Try again until they're unique
 		x, y = rand.Intn(gridWidth), rand.Intn(gridHeight)
 	}
 
-	g.Tiles[x][y].Val = val
+	g.Tiles[x][y].Val = newTileVal()
 	g.Tiles[x][y].UUID = uuid.Must(uuid.NewV7())
 }
 
@@ -189,7 +183,7 @@ func moveStep(g [gridWidth]Tile, dir Direction) ([gridWidth]Tile, bool, int) {
 		reverse = true
 	}
 
-	iter := NewIter(len(g), reverse) // TODO: Use Go 1.23 iterators instead?
+	iter := NewIter(len(g), reverse)
 	for iter.HasNext() {
 		i := iter.Next()
 		// Calculate the hypothetical next position for the tile
@@ -371,4 +365,13 @@ func EqualGrid(g1, g2 [gridWidth][gridHeight]Tile) bool {
 		}
 	}
 	return true
+}
+
+// newTileVal generates the value of a new tile.
+func newTileVal() int {
+	if rand.Float64() >= 0.9 {
+		return 4
+	} else {
+		return 2
+	}
 }
