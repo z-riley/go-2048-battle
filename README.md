@@ -4,12 +4,18 @@
 
 ## Dependencies
 
-SDL2 - DirectMedia Layer
+### SDL2 - DirectMedia Layer
 
-Installation:
+Advanced Packaging Tool (Ubuntu):
 ```sh
 sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-image-dev
 ```
+
+Homebrew (MacOS):
+```sh
+brew install sdl2_image
+```
+
 ## How to run
 
 ```sh
