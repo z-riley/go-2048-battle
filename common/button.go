@@ -22,42 +22,43 @@ var buttonStylePressed = turdgl.Style{
 	Bloom:     5,
 }
 
-// MenuButton is a commonly used button for navigating menus.
-type MenuButton struct{ *turdgl.Button }
-
-// NewMenuButton constructs a new button with suitable defaults for a menu button.
-func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *MenuButton {
-	r := turdgl.NewRect(width, height, pos, turdgl.WithStyle(buttonStyleUnpressed))
-	b := turdgl.NewButton(r, FontPathMedium).
+// NewMenuButton constructs a new menu button with sensible defaults.
+func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
+	b := turdgl.NewButton(
+		turdgl.NewRect(width, height, pos, turdgl.WithStyle(buttonStyleUnpressed)),
+		FontPathMedium,
+	).
 		SetLabelSize(36).
-		SetLabelColour(LightFontColour)
-	b.Behaviour = turdgl.OnRelease
-	b.SetCallback(func(m turdgl.MouseState) { cb() })
+		SetLabelText("SET ME").
+		SetLabelColour(LightFontColour).
+		SetLabelAlignment(turdgl.AlignCustom).
+		SetLabelOffset(turdgl.Vec{X: 0, Y: 32})
 
-	return &MenuButton{b}
-}
-
-func (b *MenuButton) Update(win *turdgl.Window) {
-	// Adjust style if cursor hovering or button is pressed
-	if b.Shape.IsWithin(win.MouseLocation()) {
-		if win.MouseButtonState() == turdgl.LeftClick {
-			b.Label.SetColour(LighterFontColour)
-			b.Shape.SetStyle(buttonStylePressed)
-		} else {
+	b.SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
+		func() {
 			b.Label.SetColour(LighterFontColour)
 			b.Shape.SetStyle(buttonStyleHovering)
-		}
-	} else {
-		b.Label.SetColour(LightFontColour)
-		b.Shape.SetStyle(buttonStyleUnpressed)
-	}
+		},
+	).SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
+		func() {
+			b.Label.SetColour(LightFontColour)
+			b.Shape.SetStyle(buttonStyleUnpressed)
+		},
+	).SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnPress},
+		func() {
+			b.Label.SetColour(LighterFontColour)
+			b.Shape.SetStyle(buttonStylePressed)
+		},
+	).SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
+		cb,
+	)
 
-	// Call underlying button update function
-	b.Button.Update(win)
+	return b
 }
-
-// GameButton is a button that's used in the main game's UI.
-type GameButton turdgl.Button
 
 // NewGameButton constructs a new game button with sensible defaults.
 func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
@@ -69,9 +70,12 @@ func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		SetLabelSize(14).
 		SetLabelColour(WhiteFontColour).
 		SetLabelAlignment(turdgl.AlignCustom).
-		SetCallback(func(turdgl.MouseState) { cb() })
-	b.Behaviour = turdgl.OnRelease
-	b.Label.SetOffset(turdgl.Vec{X: width / 2, Y: height / 1.2})
+		SetLabelOffset(turdgl.Vec{X: width / 2, Y: height / 1.2}).
+		// TODO: add hover and press animations
+		SetCallback(
+			turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
+			cb,
+		)
 
 	return b
 }

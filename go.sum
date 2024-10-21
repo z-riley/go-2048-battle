@@ -20,6 +20,14 @@ github.com/veandco/go-sdl2 v0.4.40 h1:fZv6wC3zz1Xt167P09gazawnpa0KY5LM7JAvKpX9d/
 github.com/veandco/go-sdl2 v0.4.40/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
 github.com/z-riley/turdgl v0.0.0-20241010200905-70b7776935f4 h1:0zb+jC6JuP3uBneCjuAEkEDTBTLocxrpblm4unaIcXU=
 github.com/z-riley/turdgl v0.0.0-20241010200905-70b7776935f4/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241020141606-fbf610fdec06 h1:TAXyiYGguJj8IHDOw9otkkKVRPFr2uNY9ajK99o8cmQ=
+github.com/z-riley/turdgl v0.0.0-20241020141606-fbf610fdec06/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241021065243-0b2b1ab95537 h1:SlB89Jp1cXa8fvcVrH8rIIPTHo6UEuMX7RRPBex+qds=
+github.com/z-riley/turdgl v0.0.0-20241021065243-0b2b1ab95537/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241021072845-236a4005db3d h1:v1DfH/iEqo2qtIzw975YnPNe+Cd0rIaT7K/KQpxePWE=
+github.com/z-riley/turdgl v0.0.0-20241021072845-236a4005db3d/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241021073636-5639f5bbb473 h1:msavOiRMqt58S06zI/gAOLdbYwTkuW8AuGN0aY6IFaA=
+github.com/z-riley/turdgl v0.0.0-20241021073636-5639f5bbb473/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
 github.com/z-riley/turdserve v0.0.0-20241012214724-ac0a7bd77e0a h1:osSGToKmun666CuIm/2clKw/3F5KpThk9diQJ9h6IgE=
 github.com/z-riley/turdserve v0.0.0-20241012214724-ac0a7bd77e0a/go.mod h1:i9Dlhid4XYNAFdTC4L94dEpXujy8FsfEGlkV7VH4Wmk=
 github.com/z-riley/turdserve v0.0.0-20241013071742-f4b41cfd97b0 h1:lKSuct1fi5SW3Rgny2H5K/uLxrKjbtm3kGX2PZlrYyI=

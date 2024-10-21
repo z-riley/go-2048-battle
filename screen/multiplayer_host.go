@@ -23,10 +23,10 @@ type MultiplayerHostScreen struct {
 	title       *turdgl.Text
 	ipHeading   *turdgl.TextBox
 	ipBody      *turdgl.TextBox
-	nameHeading *common.MenuButton
+	nameHeading *turdgl.Button
 	nameEntry   *turdgl.TextBox
-	start       *common.MenuButton
-	back        *common.MenuButton
+	start       *turdgl.Button
+	back        *turdgl.Button
 	playerCards []*playerCard
 
 	server *turdserve.Server
@@ -50,21 +50,21 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).SetText(s.getIPAddr())
 
 	s.nameHeading = common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 200}, func() {})
-	s.nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Your name:")
+	s.nameHeading.SetLabelText("Your name:")
 	s.nameEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
-
-	s.start = common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 650}, func() {})
-	s.start.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Start game")
-	s.start.SetCallback(func(_ turdgl.MouseState) {
-		if err := s.startGame(); err != nil {
-			fmt.Println("Failed to start game:", err)
-		}
-	})
-
-	s.back = common.NewMenuButton(400, 60, turdgl.Vec{X: 600 + 20, Y: 650},
+	s.start = common.NewMenuButton(
+		400, 60, turdgl.Vec{X: 200 - 20, Y: 650},
+		func() {
+			if err := s.startGame(); err != nil {
+				fmt.Println("Failed to start game:", err)
+			}
+		},
+	).SetLabelText("Start game")
+	s.back = common.NewMenuButton(
+		400, 60,
+		turdgl.Vec{X: 600 + 20, Y: 650},
 		func() { SetScreen(MultiplayerMenu, nil) },
-	)
-	s.back.SetLabelAlignment(turdgl.AlignCustom).SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
+	).SetLabelText("Back")
 
 	s.playerCards = make([]*playerCard, maxPlayers-1)
 	for i := range s.playerCards {
@@ -122,7 +122,7 @@ func (s *MultiplayerHostScreen) Update() {
 		s.win.Draw(l)
 	}
 
-	for _, b := range []*common.MenuButton{
+	for _, b := range []*turdgl.Button{
 		s.nameHeading,
 		s.start,
 		s.back,

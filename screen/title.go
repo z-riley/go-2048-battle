@@ -9,9 +9,9 @@ type TitleScreen struct {
 	win *turdgl.Window
 
 	title        *turdgl.Text
-	singleplayer *common.MenuButton
-	multiplayer  *common.MenuButton
-	quit         *common.MenuButton
+	singleplayer *turdgl.Button
+	multiplayer  *turdgl.Button
+	quit         *turdgl.Button
 }
 
 // NewTitle Screen constructs a new title screen for the given window.
@@ -28,15 +28,20 @@ func (s *TitleScreen) Enter(_ InitData) {
 		SetSize(40)
 
 	// Menu buttons
-	s.singleplayer = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 300}, func() { SetScreen(Singleplayer, nil) })
-	s.singleplayer.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Singleplayer")
-	s.multiplayer = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400}, func() { SetScreen(MultiplayerMenu, nil) })
-	s.multiplayer.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Multiplayer")
-	s.quit = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, s.win.Quit)
-	s.quit.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Quit")
+	s.singleplayer = common.NewMenuButton(
+		400, 60,
+		turdgl.Vec{X: 400, Y: 300},
+		func() { SetScreen(Singleplayer, nil) },
+	).SetLabelText("Singleplayer")
+	s.multiplayer = common.NewMenuButton(
+		400, 60,
+		turdgl.Vec{X: 400, Y: 400},
+		func() { SetScreen(MultiplayerMenu, nil) },
+	).SetLabelText("Multiplayer")
+	s.quit = common.NewMenuButton(
+		400, 60, turdgl.Vec{X: 400, Y: 500},
+		s.win.Quit,
+	).SetLabelText("Quit")
 
 	// Keybinds
 	s.win.RegisterKeybind(turdgl.Key1, turdgl.KeyRelease, func() {
@@ -62,12 +67,12 @@ func (s *TitleScreen) Update() {
 
 	s.win.Draw(s.title)
 
-	for _, b := range []*common.MenuButton{
+	for _, b := range []*turdgl.Button{
 		s.singleplayer,
 		s.multiplayer,
 		s.quit,
 	} {
-		s.win.Draw(b)
 		b.Update(s.win)
+		s.win.Draw(b)
 	}
 }

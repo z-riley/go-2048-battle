@@ -16,12 +16,12 @@ type MultiplayerJoinScreen struct {
 	win *turdgl.Window
 
 	title       *turdgl.Text
-	ipHeading   *common.MenuButton
+	ipHeading   *turdgl.Button
 	ipEntry     *turdgl.TextBox
-	nameHeading *common.MenuButton
+	nameHeading *turdgl.Button
 	nameEntry   *turdgl.TextBox
-	join        *common.MenuButton
-	back        *common.MenuButton
+	join        *turdgl.Button
+	back        *turdgl.Button
 
 	hostIsReady chan bool
 	client      *turdserve.Client
@@ -39,18 +39,25 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 
-	s.ipHeading = common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 200}, func() {})
-	s.ipHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Host IP:")
+	s.ipHeading = common.NewMenuButton(
+		400, 60,
+		turdgl.Vec{X: 200 - 20, Y: 200},
+		func() {},
+	).SetLabelText("Host IP:")
 
 	s.ipEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
 	s.ipEntry.SetText("127.0.0.1") // temporary for local testing
 
-	s.nameHeading = common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}, func() {})
-	s.nameHeading.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Your name:")
+	s.nameHeading = common.NewMenuButton(
+		400, 60,
+		turdgl.Vec{X: 200 - 20, Y: 300}, func() {},
+	).SetLabelText("Your name:")
 
 	s.nameEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300})
 	s.hostIsReady = make(chan bool)
-	s.join = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 400},
+	s.join = common.NewMenuButton(
+		400, 60,
+		turdgl.Vec{X: 400, Y: 400},
 		func() {
 			if err := s.joinGame(); err != nil {
 				fmt.Println("Failed to join game:", err)
@@ -60,7 +67,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 			s.join.SetLabelText("Waiting for host")
 
 			// Disable the button so user can't connect again
-			s.join.SetCallback(func(_ turdgl.MouseState) {})
+			s.join.Disable()
 
 			go func() {
 				if <-s.hostIsReady {
@@ -69,19 +76,16 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 				}
 			}()
 		},
-	)
-	s.join.SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Join")
+	).SetLabelText("Join")
 
-	s.back = common.NewMenuButton(400, 60, turdgl.Vec{X: 400, Y: 500}, func() {})
-	s.back.SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 32}).SetLabelText("Back")
-	s.back.SetCallback(
-		func(_ turdgl.MouseState) {
+	s.back = common.NewMenuButton(
+		400, 60,
+		turdgl.Vec{X: 400, Y: 500},
+		func() {
 			s.join.SetLabelText("Join")
 			s.client.Destroy()
 			SetScreen(MultiplayerMenu, nil)
-		},
-	)
+		}).SetLabelText("Back")
 
 	s.client = turdserve.NewClient()
 
@@ -101,7 +105,7 @@ func (s *MultiplayerJoinScreen) Update() {
 
 	s.win.Draw(s.title)
 
-	for _, b := range []*common.MenuButton{
+	for _, b := range []*turdgl.Button{
 		s.ipHeading,
 		s.nameHeading,
 		s.join,
