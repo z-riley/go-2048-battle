@@ -10,7 +10,7 @@ import (
 var (
 	LighterFontColour = turdgl.RGB(251, 238, 231)
 
-	buttonColourUnpressed = tile32Colour
+	buttonColourUnpressed = tile16Colour
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
 )
 

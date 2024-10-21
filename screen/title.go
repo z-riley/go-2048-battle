@@ -8,10 +8,12 @@ import (
 type TitleScreen struct {
 	win *turdgl.Window
 
-	title        *turdgl.Text
-	singleplayer *turdgl.Button
-	multiplayer  *turdgl.Button
-	quit         *turdgl.Button
+	title *turdgl.Text
+
+	buttonBackground *turdgl.CurvedRect
+	singleplayer     *turdgl.Button
+	multiplayer      *turdgl.Button
+	quit             *turdgl.Button
 }
 
 // NewTitle Screen constructs a new title screen for the given window.
@@ -22,24 +24,36 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 // Enter initialises the screen.
 func (s *TitleScreen) Enter(_ InitData) {
 	// Main title
-	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.ArenaBackgroundColour).
+	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 220}, common.FontPathMedium).
+		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
-		SetSize(40)
+		SetSize(80)
+
+	// Background for buttons
+	const buttonSize = 180
+	var w float64 = 600
+	s.buttonBackground = turdgl.NewCurvedRect(
+		w, buttonSize+30, common.TileCornerRadius,
+		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 300},
+	)
+	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
 	// Menu buttons
 	s.singleplayer = common.NewMenuButton(
-		400, 60,
-		turdgl.Vec{X: 400, Y: 300},
+		buttonSize, buttonSize,
+		turdgl.Vec{X: s.buttonBackground.Pos.X + 15, Y: s.buttonBackground.Pos.X + 15},
 		func() { SetScreen(Singleplayer, nil) },
-	).SetLabelText("Singleplayer")
+	).SetLabelText("Solo")
+
 	s.multiplayer = common.NewMenuButton(
-		400, 60,
-		turdgl.Vec{X: 400, Y: 400},
+		buttonSize, buttonSize,
+		turdgl.Vec{X: 600 - buttonSize/2, Y: s.buttonBackground.Pos.X + 15},
 		func() { SetScreen(MultiplayerMenu, nil) },
-	).SetLabelText("Multiplayer")
+	).SetLabelText("Versus")
+
 	s.quit = common.NewMenuButton(
-		400, 60, turdgl.Vec{X: 400, Y: 500},
+		buttonSize, buttonSize,
+		turdgl.Vec{X: 900 - buttonSize - 15, Y: s.buttonBackground.Pos.X + 15},
 		s.win.Quit,
 	).SetLabelText("Quit")
 
@@ -66,6 +80,7 @@ func (s *TitleScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)
 
 	s.win.Draw(s.title)
+	s.win.Draw(s.buttonBackground)
 
 	for _, b := range []*turdgl.Button{
 		s.singleplayer,

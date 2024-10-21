@@ -15,16 +15,15 @@ import (
 
 // Adjustable settings
 const (
-	ArenaSizePx = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
-
 	TileSizePx        float64 = 72   // the width and height of a tile, in pixels
-	tileCornerRadius  float64 = 3    // the radius, in pixels, of the rounded corners of the tiles
+	TileCornerRadius  float64 = 3    // the radius, in pixels, of the rounded corners of the tiles
 	TileBoundryFactor float64 = 0.15 // the gap between tiles as a proportion of the tile size
 )
 
 // Derived constants
 const (
 	tileSpacingPx float64 = TileSizePx * (1 + TileBoundryFactor)
+	arenaSizePx           = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
 	tileFont              = FontPathBold
 	numTiles              = grid.GridLen
 )
@@ -40,7 +39,7 @@ type tile struct {
 func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
 	tile := tile{
 		tb: turdgl.NewTextBox(
-			turdgl.NewCurvedRect(sizePx, sizePx, tileCornerRadius, pos),
+			turdgl.NewCurvedRect(sizePx, sizePx, TileCornerRadius, pos),
 			tileFont).
 			SetTextSize(tileFontSize(val)).
 			SetTextAlignment(turdgl.AlignCustom).
@@ -78,7 +77,7 @@ func NewArena(pos turdgl.Vec) *Arena {
 	for i := range numTiles {
 		for j := range numTiles {
 			bgTiles[j][i] = turdgl.NewCurvedRect(
-				TileSizePx, TileSizePx, tileCornerRadius,
+				TileSizePx, TileSizePx, TileCornerRadius,
 				turdgl.Vec{
 					X: pos.X + float64(j)*tileSpacingPx,
 					Y: pos.Y + float64(i)*tileSpacingPx,
@@ -89,8 +88,8 @@ func NewArena(pos turdgl.Vec) *Arena {
 	}
 
 	arenaBG := turdgl.NewCurvedRect(
-		ArenaSizePx, ArenaSizePx,
-		tileCornerRadius,
+		arenaSizePx, arenaSizePx,
+		TileCornerRadius,
 		turdgl.Vec{
 			X: pos.X - TileSizePx*TileBoundryFactor,
 			Y: pos.Y - TileSizePx*TileBoundryFactor,
