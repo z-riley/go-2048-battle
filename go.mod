@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/brunoga/deep v1.2.4
 	github.com/google/uuid v1.6.0
-	github.com/z-riley/turdgl v0.0.0-20241021073636-5639f5bbb473
+	github.com/z-riley/turdgl v0.0.0-20241021181328-58a453ace9e6
 	github.com/z-riley/turdserve v0.0.0-20241013151207-e4418fc464c6
 	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa
 )

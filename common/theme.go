@@ -8,10 +8,9 @@ import (
 
 // Menu colours
 var (
-	LightFontColour   = turdgl.RGB(221, 208, 201)
 	LighterFontColour = turdgl.RGB(251, 238, 231)
 
-	buttonColourUnpressed = turdgl.RGB(143, 122, 101)
+	buttonColourUnpressed = tile32Colour
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
 )
 

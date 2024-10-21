@@ -25,12 +25,13 @@ var buttonStylePressed = turdgl.Style{
 // NewMenuButton constructs a new menu button with sensible defaults.
 func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
 	b := turdgl.NewButton(
-		turdgl.NewRect(width, height, pos, turdgl.WithStyle(buttonStyleUnpressed)),
+		turdgl.NewCurvedRect(width, height, tileCornerRadius, pos,
+			turdgl.WithStyle(buttonStyleUnpressed)),
 		FontPathMedium,
 	).
-		SetLabelSize(36).
 		SetLabelText("SET ME").
-		SetLabelColour(LightFontColour).
+		SetLabelSize(36).
+		SetLabelColour(LightGreyTextColour).
 		SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 32})
 
@@ -43,7 +44,7 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
-			b.Label.SetColour(LightFontColour)
+			b.Label.SetColour(LightGreyTextColour)
 			b.Shape.SetStyle(buttonStyleUnpressed)
 		},
 	).SetCallback(
@@ -62,15 +63,18 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 
 // NewGameButton constructs a new game button with sensible defaults.
 func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
-	r := turdgl.NewCurvedRect(width, height, 3, pos)
-	r.SetStyle(turdgl.Style{Colour: buttonOrangeColour})
 
-	b := turdgl.NewButton(r, FontPathBold).
+	b := turdgl.NewButton(
+		turdgl.NewCurvedRect(
+			width, height, tileCornerRadius, pos,
+			turdgl.WithStyle(turdgl.Style{Colour: buttonOrangeColour})),
+		FontPathBold,
+	).
 		SetLabelText("BUTTON").
 		SetLabelSize(14).
 		SetLabelColour(WhiteFontColour).
 		SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: width / 2, Y: height / 1.2}).
+		SetLabelOffset(turdgl.Vec{X: 0, Y: 12}).
 		// TODO: add hover and press animations
 		SetCallback(
 			turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},

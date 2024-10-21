@@ -13,7 +13,7 @@ type EntryBox turdgl.TextBox
 func NewEntryBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
 	t := NewTextBox(width, height, pos)
 	t.SetSelectedCB(func() { t.SetTextColour(turdgl.White) }).
-		SetDeselectedCB(func() { t.SetTextColour(LightFontColour) })
+		SetDeselectedCB(func() { t.SetTextColour(LightGreyTextColour) })
 
 	return t
 }
@@ -29,7 +29,7 @@ func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
 		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
 		SetText("Click to edit").
 		SetTextSize(36).
-		SetTextColour(LightFontColour)
+		SetTextColour(LightGreyTextColour)
 
 	return tb
 }
@@ -47,7 +47,7 @@ func NewGameTextBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *G
 		Y: pos.Y + 25,
 	}
 	heading := turdgl.NewText("Heading", headingPos, FontPathBold).
-		SetColour(LightFontColour).
+		SetColour(LightGreyTextColour).
 		SetSize(16).
 		SetAlignment(turdgl.AlignTopCentre)
 
