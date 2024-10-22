@@ -22,10 +22,10 @@ const (
 
 // Derived constants
 const (
-	tileSpacingPx float64 = TileSizePx * (1 + TileBoundryFactor)
-	arenaSizePx           = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
-	tileFont              = FontPathBold
-	numTiles              = grid.GridLen
+	tileSpacingPx = TileSizePx * (1 + TileBoundryFactor)
+	arenaSizePx   = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
+	tileFont      = FontPathBold
+	numTiles      = grid.GridLen
 )
 
 // tile is a visual representation of a game tile.

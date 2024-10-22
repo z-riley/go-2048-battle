@@ -24,36 +24,51 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 // Enter initialises the screen.
 func (s *TitleScreen) Enter(_ InitData) {
 	// Main title
-	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 220}, common.FontPathMedium).
+	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 310}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
-		SetSize(80)
+		SetSize(100)
+
+	// Adjustable settings for buttons
+	const (
+		TileSizePx        float64 = 170
+		TileCornerRadius  float64 = 6
+		TileBoundryFactor float64 = 0.15
+	)
 
 	// Background for buttons
-	const buttonSize = 180
-	var w float64 = 600
+	const w = TileSizePx * (3 + 4*TileBoundryFactor)
 	s.buttonBackground = turdgl.NewCurvedRect(
-		w, buttonSize+30, common.TileCornerRadius,
-		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 300},
+		w, TileSizePx*(1+2*TileBoundryFactor), TileCornerRadius,
+		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 400},
 	)
 	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
 	// Menu buttons
 	s.singleplayer = common.NewMenuButton(
-		buttonSize, buttonSize,
-		turdgl.Vec{X: s.buttonBackground.Pos.X + 15, Y: s.buttonBackground.Pos.X + 15},
+		TileSizePx, TileSizePx,
+		turdgl.Vec{
+			X: s.buttonBackground.Pos.X + TileSizePx*TileBoundryFactor,
+			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
+		}.Round(),
 		func() { SetScreen(Singleplayer, nil) },
 	).SetLabelText("Solo")
 
 	s.multiplayer = common.NewMenuButton(
-		buttonSize, buttonSize,
-		turdgl.Vec{X: 600 - buttonSize/2, Y: s.buttonBackground.Pos.X + 15},
+		TileSizePx, TileSizePx,
+		turdgl.Vec{
+			X: s.buttonBackground.Pos.X + TileSizePx*(1+2*TileBoundryFactor),
+			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
+		}.Round(),
 		func() { SetScreen(MultiplayerMenu, nil) },
 	).SetLabelText("Versus")
 
 	s.quit = common.NewMenuButton(
-		buttonSize, buttonSize,
-		turdgl.Vec{X: 900 - buttonSize - 15, Y: s.buttonBackground.Pos.X + 15},
+		TileSizePx, TileSizePx,
+		turdgl.Vec{
+			X: s.buttonBackground.Pos.X + TileSizePx*(2+3*TileBoundryFactor),
+			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
+		}.Round(),
 		s.win.Quit,
 	).SetLabelText("Quit")
 

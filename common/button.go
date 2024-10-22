@@ -4,33 +4,35 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
-var buttonStyleUnpressed = turdgl.Style{
-	Colour:    buttonColourUnpressed,
-	Thickness: 0,
-	Bloom:     0,
-}
+var (
+	buttonStyleUnpressed = turdgl.Style{
+		Colour:    buttonColourUnpressed,
+		Thickness: 0,
+		Bloom:     0,
+	}
 
-var buttonStyleHovering = turdgl.Style{
-	Colour:    buttonColourUnpressed,
-	Thickness: 0,
-	Bloom:     5,
-}
+	buttonStyleHovering = turdgl.Style{
+		Colour:    buttonColourUnpressed,
+		Thickness: 0,
+		Bloom:     8,
+	}
 
-var buttonStylePressed = turdgl.Style{
-	Colour:    buttonColourPressed,
-	Thickness: 0,
-	Bloom:     5,
-}
+	buttonStylePressed = turdgl.Style{
+		Colour:    buttonColourPressed,
+		Thickness: 0,
+		Bloom:     5,
+	}
+)
 
 // NewMenuButton constructs a new menu button with sensible defaults.
 func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
 	b := turdgl.NewButton(
-		turdgl.NewCurvedRect(width, height, TileCornerRadius, pos,
+		turdgl.NewCurvedRect(width, height, 6, pos,
 			turdgl.WithStyle(buttonStyleUnpressed)),
 		FontPathMedium,
 	).
 		SetLabelText("SET ME").
-		SetLabelSize(40).
+		SetLabelSize(36).
 		SetLabelColour(WhiteFontColour).
 		SetLabelAlignment(turdgl.AlignCustom).
 		SetLabelOffset(turdgl.Vec{X: 0, Y: 32})
@@ -38,7 +40,7 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 	b.SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
-			b.Label.SetColour(LighterFontColour)
+			b.Label.SetColour(WhiteFontColour)
 			b.Shape.SetStyle(buttonStyleHovering)
 		},
 	).SetCallback(
@@ -50,7 +52,7 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnPress},
 		func() {
-			b.Label.SetColour(LighterFontColour)
+			b.Label.SetColour(GreyTextColour)
 			b.Shape.SetStyle(buttonStylePressed)
 		},
 	).SetCallback(
