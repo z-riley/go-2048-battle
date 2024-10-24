@@ -9,9 +9,11 @@ type MultiplayerMenuScreen struct {
 	win *turdgl.Window
 
 	title *turdgl.Text
-	join  *turdgl.Button
-	host  *turdgl.Button
-	back  *turdgl.Button
+
+	buttonBackground *turdgl.CurvedRect
+	join             *turdgl.Button
+	host             *turdgl.Button
+	back             *turdgl.Button
 }
 
 // NewTitle Screen constructs a new multiplayer menu screen for the given window.
@@ -21,26 +23,50 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 
 // Enter initialises the screen.
 func (s *MultiplayerMenuScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Multiplayer", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.ArenaBackgroundColour).
+	s.title = turdgl.NewText("Versus", turdgl.Vec{X: 600, Y: 300}, common.FontPathMedium).
+		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
-		SetSize(40)
+		SetSize(100)
+
+	// Adjustable settings for buttons
+	const (
+		TileSizePx        float64 = 170
+		TileCornerRadius  float64 = 6
+		TileBoundryFactor float64 = 0.15
+	)
+
+	// Background for buttons
+	const w = TileSizePx * (3 + 4*TileBoundryFactor)
+	s.buttonBackground = turdgl.NewCurvedRect(
+		w, TileSizePx*(1+2*TileBoundryFactor), TileCornerRadius,
+		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 400},
+	)
+	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
 	s.join = common.NewMenuButton(
-		400, 60,
-		turdgl.Vec{X: 400, Y: 300},
-		func() { SetScreen(MultiplayerJoin, nil) },
-	).SetLabelText("Join game")
+		TileSizePx, TileSizePx,
+		turdgl.Vec{
+			X: s.buttonBackground.Pos.X + TileSizePx*TileBoundryFactor,
+			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
+		}.Round(),
+		func() { SetScreen(Singleplayer, nil) },
+	).SetLabelText("Join")
 
 	s.host = common.NewMenuButton(
-		400, 60,
-		turdgl.Vec{X: 400, Y: 400},
+		TileSizePx, TileSizePx,
+		turdgl.Vec{
+			X: s.buttonBackground.Pos.X + TileSizePx*(1+2*TileBoundryFactor),
+			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
+		}.Round(),
 		func() { SetScreen(MultiplayerHost, nil) },
-	).SetLabelText("Host game")
+	).SetLabelText("Host")
 
 	s.back = common.NewMenuButton(
-		400, 60,
-		turdgl.Vec{X: 400, Y: 500},
+		TileSizePx, TileSizePx,
+		turdgl.Vec{
+			X: s.buttonBackground.Pos.X + TileSizePx*(2+3*TileBoundryFactor),
+			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
+		}.Round(),
 		func() { SetScreen(Title, nil) },
 	).SetLabelText("Back")
 
@@ -71,6 +97,7 @@ func (s *MultiplayerMenuScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)
 
 	s.win.Draw(s.title)
+	s.win.Draw(s.buttonBackground)
 
 	for _, b := range []*turdgl.Button{
 		s.join,
