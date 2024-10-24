@@ -5,19 +5,19 @@ import (
 )
 
 var (
-	buttonStyleUnpressed = turdgl.Style{
+	ButtonStyleUnpressed = turdgl.Style{
 		Colour:    buttonColourUnpressed,
 		Thickness: 0,
 		Bloom:     0,
 	}
 
-	buttonStyleHovering = turdgl.Style{
+	ButtonStyleHovering = turdgl.Style{
 		Colour:    buttonColourUnpressed,
 		Thickness: 0,
 		Bloom:     8,
 	}
 
-	buttonStylePressed = turdgl.Style{
+	ButtonStylePressed = turdgl.Style{
 		Colour:    buttonColourPressed,
 		Thickness: 0,
 		Bloom:     5,
@@ -28,7 +28,7 @@ var (
 func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
 	b := turdgl.NewButton(
 		turdgl.NewCurvedRect(width, height, 6, pos.Round(),
-			turdgl.WithStyle(buttonStyleUnpressed)),
+			turdgl.WithStyle(ButtonStyleUnpressed)),
 		FontPathMedium,
 	).
 		SetLabelText("SET ME").
@@ -41,19 +41,19 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			b.Label.SetColour(WhiteFontColour)
-			b.Shape.SetStyle(buttonStyleHovering)
+			b.Shape.SetStyle(ButtonStyleHovering)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			b.Label.SetColour(WhiteFontColour)
-			b.Shape.SetStyle(buttonStyleUnpressed)
+			b.Shape.SetStyle(ButtonStyleUnpressed)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnPress},
 		func() {
 			b.Label.SetColour(GreyTextColour)
-			b.Shape.SetStyle(buttonStylePressed)
+			b.Shape.SetStyle(ButtonStylePressed)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
@@ -93,13 +93,13 @@ func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			b.Label.SetColour(WhiteFontColour)
-			b.Shape.SetStyle(buttonStyleUnpressed)
+			b.Shape.SetStyle(ButtonStyleUnpressed)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnPress},
 		func() {
 			b.Label.SetColour(GreyTextColour)
-			b.Shape.SetStyle(buttonStylePressed)
+			b.Shape.SetStyle(ButtonStylePressed)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},

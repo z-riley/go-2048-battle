@@ -10,6 +10,7 @@ type MultiplayerMenuScreen struct {
 
 	title *turdgl.Text
 
+	hint             *turdgl.Text
 	buttonBackground *turdgl.CurvedRect
 	join             *turdgl.Button
 	host             *turdgl.Button
@@ -27,6 +28,11 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
+
+	s.hint = turdgl.NewText("", turdgl.Vec{X: 600, Y: 380}, common.FontPathMedium).
+		SetColour(common.GreyTextColour).
+		SetAlignment(turdgl.AlignCentre).
+		SetSize(20)
 
 	// Adjustable settings for buttons
 	const (
@@ -51,6 +57,21 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 		}.Round(),
 		func() { SetScreen(MultiplayerJoin, nil) },
 	).SetLabelText("Join")
+	s.join.SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
+		func() {
+			s.join.Label.SetColour(common.WhiteFontColour)
+			s.join.Shape.SetStyle(common.ButtonStyleHovering)
+			s.hint.SetText("Join a LAN game")
+		},
+	).SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
+		func() {
+			s.join.Label.SetColour(common.WhiteFontColour)
+			s.join.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.hint.SetText("")
+		},
+	)
 
 	s.host = common.NewMenuButton(
 		TileSizePx, TileSizePx,
@@ -60,6 +81,21 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 		}.Round(),
 		func() { SetScreen(MultiplayerHost, nil) },
 	).SetLabelText("Host")
+	s.host.SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
+		func() {
+			s.host.Label.SetColour(common.WhiteFontColour)
+			s.host.Shape.SetStyle(common.ButtonStyleHovering)
+			s.hint.SetText("Host a LAN game")
+		},
+	).SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
+		func() {
+			s.host.Label.SetColour(common.WhiteFontColour)
+			s.host.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.hint.SetText("")
+		},
+	)
 
 	s.back = common.NewMenuButton(
 		TileSizePx, TileSizePx,
@@ -69,6 +105,21 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 		}.Round(),
 		func() { SetScreen(Title, nil) },
 	).SetLabelText("Back")
+	s.back.SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
+		func() {
+			s.back.Label.SetColour(common.WhiteFontColour)
+			s.back.Shape.SetStyle(common.ButtonStyleHovering)
+			s.hint.SetText("Go back to main menu")
+		},
+	).SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
+		func() {
+			s.back.Label.SetColour(common.WhiteFontColour)
+			s.back.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.hint.SetText("")
+		},
+	)
 
 	s.win.RegisterKeybind(turdgl.Key1, turdgl.KeyRelease, func() {
 		SetScreen(MultiplayerJoin, nil)
@@ -97,6 +148,7 @@ func (s *MultiplayerMenuScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)
 
 	s.win.Draw(s.title)
+	s.win.Draw(s.hint)
 	s.win.Draw(s.buttonBackground)
 
 	for _, b := range []*turdgl.Button{
