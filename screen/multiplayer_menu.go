@@ -49,7 +49,7 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 			X: s.buttonBackground.Pos.X + TileSizePx*TileBoundryFactor,
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
 		}.Round(),
-		func() { SetScreen(Singleplayer, nil) },
+		func() { SetScreen(MultiplayerJoin, nil) },
 	).SetLabelText("Join")
 
 	s.host = common.NewMenuButton(

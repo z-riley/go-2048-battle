@@ -50,7 +50,7 @@ func (s *TitleScreen) Enter(_ InitData) {
 		turdgl.Vec{
 			X: s.buttonBackground.Pos.X + TileSizePx*TileBoundryFactor,
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
-		}.Round(),
+		},
 		func() { SetScreen(Singleplayer, nil) },
 	).SetLabelText("Solo")
 
@@ -59,7 +59,7 @@ func (s *TitleScreen) Enter(_ InitData) {
 		turdgl.Vec{
 			X: s.buttonBackground.Pos.X + TileSizePx*(1+2*TileBoundryFactor),
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
-		}.Round(),
+		},
 		func() { SetScreen(MultiplayerMenu, nil) },
 	).SetLabelText("Versus")
 
@@ -68,7 +68,7 @@ func (s *TitleScreen) Enter(_ InitData) {
 		turdgl.Vec{
 			X: s.buttonBackground.Pos.X + TileSizePx*(2+3*TileBoundryFactor),
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
-		}.Round(),
+		},
 		s.win.Quit,
 	).SetLabelText("Quit")
 
