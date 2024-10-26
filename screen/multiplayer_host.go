@@ -20,14 +20,15 @@ const (
 type MultiplayerHostScreen struct {
 	win *turdgl.Window
 
-	title       *turdgl.Text
-	ipHeading   *turdgl.TextBox
-	ipBody      *turdgl.TextBox
-	nameHeading *turdgl.Button
-	nameEntry   *turdgl.TextBox
-	start       *turdgl.Button
-	back        *turdgl.Button
-	playerCards []*playerCard
+	title          *turdgl.Text
+	ipHeading      *turdgl.TextBox
+	ipBody         *turdgl.TextBox
+	nameHeading    *turdgl.Button
+	nameEntry      *turdgl.TextBox
+	opponentStatus *turdgl.Text
+	start          *turdgl.Button
+	back           *turdgl.Button
+	playerCards    []*playerCard
 
 	server *turdserve.Server
 }
@@ -47,11 +48,21 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	s.ipHeading = common.NewTextBox(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}).
 		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).SetText("Your IP:")
 	s.ipBody = common.NewTextBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300}).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).SetText(s.getIPAddr())
+		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).SetText(getIPAddr())
 
 	s.nameHeading = common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 200}, func() {})
 	s.nameHeading.SetLabelText("Your name:")
 	s.nameEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
+
+	s.opponentStatus = turdgl.NewText(
+		fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()),
+		turdgl.Vec{X: 600, Y: 560},
+		common.FontPathMedium,
+	).
+		SetColour(common.GreyTextColour).
+		SetAlignment(turdgl.AlignCentre).
+		SetSize(20)
+
 	s.start = common.NewMenuButton(
 		400, 60, turdgl.Vec{X: 200 - 20, Y: 650},
 		func() {
@@ -83,9 +94,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 				if err := s.handleClientData(id, b); err != nil {
 					fmt.Println("Failed to handle data from client:", err)
 				}
-			}).SetDisconnectCallback(func(id int) {
-			s.handleClientDisconnect(id)
-		})
+			}).SetDisconnectCallback(func(id int) { s.handleClientDisconnect(id) })
 
 		// Start server to allow other players to connect
 		errCh := make(chan error)
@@ -114,6 +123,7 @@ func (s *MultiplayerHostScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)
 
 	s.win.Draw(s.title)
+	s.win.Draw(s.opponentStatus)
 
 	for _, l := range []*turdgl.TextBox{
 		s.ipHeading,
@@ -168,17 +178,22 @@ func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) 
 		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
 	}
 
+	s.opponentStatus.SetText(
+		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", data.Username),
+	)
+
 	// Update player card with new data
 	s.playerCards[id].setReady(data.Username)
 	return nil
 }
 
 func (s *MultiplayerHostScreen) handleClientDisconnect(id int) {
+	s.opponentStatus.SetText(fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()))
 	s.playerCards[id].setNotReady()
 }
 
 // getIPAddr returns the IP address of the host.
-func (s *MultiplayerHostScreen) getIPAddr() string {
+func getIPAddr() string {
 	if comms.IsWSL() {
 		// If using WSL, the host IP address must be used
 		return "check WSL host"
