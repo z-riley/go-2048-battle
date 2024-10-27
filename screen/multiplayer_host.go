@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"image/color"
 
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
@@ -254,69 +253,4 @@ func (s *MultiplayerHostScreen) startGame() error {
 	// Pass server to next screen
 	SetScreen(Multiplayer, InitData{serverKey: s.server})
 	return nil
-}
-
-// Styles for playerCards.
-var (
-	styleNotReady = turdgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 2}
-	styleReady    = turdgl.Style{Colour: color.RGBA{0, 255, 0, 255}, Thickness: 0, Bloom: 10}
-)
-
-// playerCard displays a player in the lobby.
-type playerCard struct {
-	id    int
-	ready bool
-
-	name  *turdgl.TextBox
-	light *turdgl.Circle
-}
-
-// newPlayerCard constructs a new player card. The ID must be unique.
-func newPlayerCard(pos turdgl.Vec, id int) *playerCard {
-	const (
-		width  = 400
-		height = 60
-	)
-
-	name := common.NewEntryBox(width, height, pos)
-	name.SetTextAlignment(turdgl.AlignCustom).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
-		SetTextSize(30).
-		SetTextColour(common.GreyTextColour).
-		SetText(fmt.Sprintf("Waiting for player %d", id+2))
-
-	lightPos := turdgl.Vec{X: pos.X + width + 40, Y: pos.Y + height/2}
-	light := turdgl.NewCircle(height*0.8, lightPos, turdgl.WithStyle(styleNotReady))
-
-	return &playerCard{
-		id:    id,
-		ready: false,
-		name:  name,
-		light: light,
-	}
-}
-
-// Draw draws a player card to the supplied framebuffer.
-func (p *playerCard) Draw(buf *turdgl.FrameBuffer) {
-	p.name.Draw(buf)
-	p.light.Draw(buf)
-}
-
-// setReady sets a player's card to ready.
-func (p *playerCard) setReady(username string) {
-	p.ready = true
-	p.name.Text.SetText(username)
-	p.light.SetStyle(styleReady)
-}
-
-// setNotReady removes player data from card and sets the status to not connected.
-func (p *playerCard) setNotReady() {
-	p.ready = false
-	p.name.Text.SetText(fmt.Sprintf("Waiting for player %d", p.id+2))
-	p.light.SetStyle(styleNotReady)
-}
-
-// isReady returns whether the player is ready.
-func (p *playerCard) isReady() bool {
-	return p.ready
 }
