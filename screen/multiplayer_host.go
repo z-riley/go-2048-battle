@@ -52,7 +52,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(30)
 
-	s.nameEntry = common.NewEntryBox2(
+	s.nameEntry = common.NewEntryBox(
 		400, 60,
 		turdgl.Vec{X: 600 - 400/2, Y: 340},
 	)

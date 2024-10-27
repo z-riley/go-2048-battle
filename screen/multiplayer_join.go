@@ -17,9 +17,9 @@ type MultiplayerJoinScreen struct {
 
 	title       *turdgl.Text
 	ipHeading   *turdgl.Button
-	ipEntry     *turdgl.TextBox
+	ipEntry     *common.EntryBox
 	nameHeading *turdgl.Button
-	nameEntry   *turdgl.TextBox
+	nameEntry   *common.EntryBox
 	join        *turdgl.Button
 	back        *turdgl.Button
 
@@ -46,7 +46,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	).SetLabelText("Host IP:")
 
 	s.ipEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
-	s.ipEntry.SetText("127.0.0.1") // temporary for local testing
+	s.ipEntry.TextBox.SetText("127.0.0.1") // temporary for local testing
 
 	s.nameHeading = common.NewMenuButton(
 		400, 60,
@@ -115,12 +115,12 @@ func (s *MultiplayerJoinScreen) Update() {
 		s.win.Draw(b)
 	}
 
-	for _, e := range []*turdgl.TextBox{
+	for _, e := range []*common.EntryBox{
 		s.nameEntry,
 		s.ipEntry,
 	} {
-		s.win.Draw(e)
 		e.Update(s.win)
+		s.win.Draw(e)
 	}
 
 }
@@ -132,7 +132,7 @@ const clientKey = "client"
 func (s *MultiplayerJoinScreen) joinGame() error {
 
 	// Connect using the user-specified IP address
-	ip := s.ipEntry.Text.Text()
+	ip := s.ipEntry.TextBox.Text.Text()
 	errCh := make(chan error)
 	go func() {
 		for err := range errCh {
@@ -153,7 +153,7 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 	})
 
 	// Construct message containing player data
-	username := s.nameEntry.Text.Text()
+	username := s.nameEntry.TextBox.Text.Text()
 	playerData, err := json.Marshal(comms.PlayerData{
 		Version:  config.Version,
 		Username: username,

@@ -6,22 +6,14 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
-// NewEntryBox constructs a new text box with suitable defaults.
-func NewEntryBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
-	t := NewTextBox(width, height, pos)
-	t.SetSelectedCB(func() { t.SetTextColour(turdgl.White) }).
-		SetDeselectedCB(func() { t.SetTextColour(LightGreyTextColour) })
-
-	return t
-}
-
+// Entrybox is an interactive text box for data entry.
 type EntryBox struct {
-	tb    *turdgl.TextBox
-	bloom *turdgl.CurvedRect
+	TextBox *turdgl.TextBox
+	bloom   *turdgl.CurvedRect
 }
 
 // NewEntryBox constructs a new text box with suitable defaults.
-func NewEntryBox2(width, height float64, pos turdgl.Vec) *EntryBox {
+func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
 	var (
 		styleUnselected = turdgl.Style{
 			Colour:    turdgl.LightGrey,
@@ -49,13 +41,15 @@ func NewEntryBox2(width, height float64, pos turdgl.Vec) *EntryBox {
 	return &EntryBox{tb, bloom}
 }
 
+// Draw draws an entry box to the frame buffer.
 func (e *EntryBox) Draw(buf *turdgl.FrameBuffer) {
 	e.bloom.Draw(buf)
-	e.tb.Draw(buf)
+	e.TextBox.Draw(buf)
 }
 
+// Update updates the entry box so it's interactive.
 func (e *EntryBox) Update(win *turdgl.Window) {
-	e.tb.Update(win)
+	e.TextBox.Update(win)
 }
 
 func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
