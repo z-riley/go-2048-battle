@@ -22,7 +22,7 @@ type MultiplayerHostScreen struct {
 
 	title            *turdgl.Text
 	nameHeading      *turdgl.Text
-	nameEntry        *turdgl.TextBox
+	nameEntry        *common.EntryBox
 	opponentStatus   *turdgl.Text
 	start            *turdgl.Button
 	back             *turdgl.Button
@@ -39,30 +39,33 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 
 // Enter initialises the screen.
 func (s *MultiplayerHostScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Host game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
+	s.title = turdgl.NewText("Host Game", turdgl.Vec{X: 600, Y: 200}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
-		SetSize(40)
+		SetSize(100)
 
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: 200 - 20, Y: 200},
+		turdgl.Vec{X: 600, Y: 330},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
-		SetSize(40)
+		SetSize(30)
 
-	s.nameEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
+	s.nameEntry = common.NewEntryBox2(
+		400, 60,
+		turdgl.Vec{X: 600 - 400/2, Y: 340},
+	)
 
 	s.opponentStatus = turdgl.NewText(
 		fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()),
-		turdgl.Vec{X: 600, Y: 560},
+		turdgl.Vec{X: 600, Y: 530},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
-		SetSize(20)
+		SetSize(24)
 
 	// Adjustable settings for buttons
 	const (
@@ -75,7 +78,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	const w = TileSizePx * (2 + 3*TileBoundryFactor)
 	s.buttonBackground = turdgl.NewCurvedRect(
 		w, TileSizePx*(1+2*TileBoundryFactor), TileCornerRadius,
-		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 600},
+		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 560},
 	)
 	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
@@ -113,7 +116,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 				if err := s.handleClientData(id, b); err != nil {
 					fmt.Println("Failed to handle data from client:", err)
 				}
-			}).SetDisconnectCallback(func(id int) { s.handleClientDisconnect(id) })
+			}).SetDisconnectCallback(func(_ int) { s.handleOpponentDisconnect() })
 
 		// Start server to allow other players to connect
 		errCh := make(chan error)
@@ -186,7 +189,7 @@ func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
 }
 
 // handlePlayerData handles incoming player data.
-func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) error {
+func (s *MultiplayerHostScreen) handlePlayerData(_ int, data comms.PlayerData) error {
 	// Make sure versions are compatible
 	if data.Version != config.Version {
 		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
@@ -200,7 +203,7 @@ func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) 
 	return nil
 }
 
-func (s *MultiplayerHostScreen) handleClientDisconnect(id int) {
+func (s *MultiplayerHostScreen) handleOpponentDisconnect() {
 	s.opponentStatus.SetText(fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()))
 	s.opponentIsReady = false
 }

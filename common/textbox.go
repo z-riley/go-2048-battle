@@ -6,9 +6,6 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
-// EntryBox is a commonly used text box for the user to enter text.
-type EntryBox turdgl.TextBox
-
 // NewEntryBox constructs a new text box with suitable defaults.
 func NewEntryBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
 	t := NewTextBox(width, height, pos)
@@ -18,9 +15,52 @@ func NewEntryBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
 	return t
 }
 
+type EntryBox struct {
+	tb    *turdgl.TextBox
+	bloom *turdgl.CurvedRect
+}
+
+// NewEntryBox constructs a new text box with suitable defaults.
+func NewEntryBox2(width, height float64, pos turdgl.Vec) *EntryBox {
+	var (
+		styleUnselected = turdgl.Style{
+			Colour:    turdgl.LightGrey,
+			Thickness: 1,
+			Bloom:     0,
+		}
+		styleSelected = turdgl.Style{
+			Colour:    turdgl.LightGrey,
+			Thickness: 1,
+			Bloom:     10,
+		}
+	)
+
+	bloom := turdgl.NewCurvedRect(width, height, 6, pos, turdgl.WithStyle(styleUnselected))
+
+	tb := NewTextBox(width, height, pos)
+	tb.SetSelectedCB(func() {
+		tb.SetTextColour(turdgl.White)
+		bloom.SetStyle(styleSelected)
+	}).SetDeselectedCB(func() {
+		tb.SetTextColour(LightGreyTextColour)
+		bloom.SetStyle(styleUnselected)
+	})
+
+	return &EntryBox{tb, bloom}
+}
+
+func (e *EntryBox) Draw(buf *turdgl.FrameBuffer) {
+	e.bloom.Draw(buf)
+	e.tb.Draw(buf)
+}
+
+func (e *EntryBox) Update(win *turdgl.Window) {
+	e.tb.Update(win)
+}
+
 func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
-	r := turdgl.NewRect(
-		width, height, pos,
+	r := turdgl.NewCurvedRect(
+		width, height, 6, pos,
 		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
 	)
 	r.SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
