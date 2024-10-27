@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
@@ -27,8 +28,8 @@ type MultiplayerHostScreen struct {
 	back             *turdgl.Button
 	buttonBackground *turdgl.CurvedRect
 
-	server          *turdserve.Server
-	opponentIsReady bool
+	server              *turdserve.Server
+	opponentIsConnected bool
 }
 
 // NewMultiplayerHostScreen constructs an uninitialised multiplayer host screen.
@@ -88,6 +89,21 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
 		},
 		func() {
+			if !s.opponentIsConnected {
+
+				// Make the opponent status text briefly change colour
+				s.opponentStatus.SetColour(common.Tile64Colour)
+				go func() {
+					timer := time.NewTimer(200 * time.Millisecond)
+					select {
+					case <-timer.C:
+						s.opponentStatus.SetColour(common.GreyTextColour)
+					}
+				}()
+
+				return
+			}
+
 			if err := s.startGame(); err != nil {
 				fmt.Println("Failed to start game:", err)
 			}
@@ -197,14 +213,14 @@ func (s *MultiplayerHostScreen) handlePlayerData(_ int, data comms.PlayerData) e
 	s.opponentStatus.SetText(
 		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", data.Username),
 	)
-	s.opponentIsReady = true
+	s.opponentIsConnected = true
 
 	return nil
 }
 
 func (s *MultiplayerHostScreen) handleOpponentDisconnect() {
 	s.opponentStatus.SetText(fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()))
-	s.opponentIsReady = false
+	s.opponentIsConnected = false
 }
 
 // getIPAddr returns the IP address of the host.
@@ -226,8 +242,8 @@ const serverKey = "server"
 // startGame attempts to start a multiplayer game.
 func (s *MultiplayerHostScreen) startGame() error {
 	// Check opponent is connected
-	if !s.opponentIsReady {
-		return errors.New("opponent is not ready")
+	if !s.opponentIsConnected {
+		return errors.New("opponent is not connected")
 	}
 
 	// Inform other players that game is starting

@@ -10,7 +10,7 @@ import (
 var (
 	LighterFontColour = turdgl.RGB(251, 238, 231)
 
-	buttonColourUnpressed = tile16Colour
+	buttonColourUnpressed = Tile16Colour
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
 )
 
@@ -32,19 +32,19 @@ var (
 
 // Tile colours
 var (
-	tile2Colour    = turdgl.RGB(239, 229, 218) // official colour
-	tile4Colour    = turdgl.RGB(236, 224, 198) // official colour
-	tile8Colour    = turdgl.RGB(242, 176, 121) // official colour
-	tile16Colour   = turdgl.RGB(235, 140, 83)  // official colour
-	tile32Colour   = turdgl.RGB(245, 123, 93)  // official colour
-	tile64Colour   = turdgl.RGB(233, 89, 55)   // official colour
-	tile128Colour  = turdgl.RGB(242, 217, 107) // official colour
-	tile256Colour  = turdgl.RGB(241, 208, 76)  // official colour
-	tile512Colour  = turdgl.RGB(229, 192, 43)  // official colour
-	tile1024Colour = turdgl.RGB(224, 192, 65)
+	Tile2Colour    = turdgl.RGB(239, 229, 218) // official colour
+	Tile4Colour    = turdgl.RGB(236, 224, 198) // official colour
+	Tile8Colour    = turdgl.RGB(242, 176, 121) // official colour
+	Tile16Colour   = turdgl.RGB(235, 140, 83)  // official colour
+	Tile32Colour   = turdgl.RGB(245, 123, 93)  // official colour
+	Tile64Colour   = turdgl.RGB(233, 89, 55)   // official colour
+	Tile128Colour  = turdgl.RGB(242, 217, 107) // official colour
+	Tile256Colour  = turdgl.RGB(241, 208, 76)  // official colour
+	Tile512Colour  = turdgl.RGB(229, 192, 43)  // official colour
+	Tile1024Colour = turdgl.RGB(224, 192, 65)
 	Tile2048Colour = turdgl.RGB(235, 196, 2) // official colour
-	tile4096Colour = turdgl.RGB(255, 59, 59)
-	tile8192Colour = turdgl.RGB(255, 32, 33)
+	Tile4096Colour = turdgl.RGB(255, 59, 59)
+	Tile8192Colour = turdgl.RGB(255, 32, 33)
 )
 
 const (
@@ -56,31 +56,31 @@ const (
 func tileColour(val int) color.Color {
 	switch val {
 	case 2:
-		return tile2Colour
+		return Tile2Colour
 	case 4:
-		return tile4Colour
+		return Tile4Colour
 	case 8:
-		return tile8Colour
+		return Tile8Colour
 	case 16:
-		return tile16Colour
+		return Tile16Colour
 	case 32:
-		return tile32Colour
+		return Tile32Colour
 	case 64:
-		return tile64Colour
+		return Tile64Colour
 	case 128:
-		return tile128Colour
+		return Tile128Colour
 	case 256:
-		return tile256Colour
+		return Tile256Colour
 	case 512:
-		return tile512Colour
+		return Tile512Colour
 	case 1024:
-		return tile1024Colour
+		return Tile1024Colour
 	case 2048:
 		return Tile2048Colour
 	case 4096:
-		return tile4096Colour
+		return Tile4096Colour
 	case 8192:
-		return tile8192Colour
+		return Tile8192Colour
 	default:
 		return turdgl.RGB(255, 0, 0)
 	}
