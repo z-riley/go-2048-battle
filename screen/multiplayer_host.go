@@ -2,7 +2,6 @@ package screen
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"image/color"
 
@@ -14,6 +13,7 @@ import (
 )
 
 const (
+	maxPlayers = 2
 	serverPort = 8080
 )
 
@@ -27,9 +27,9 @@ type MultiplayerHostScreen struct {
 	start            *turdgl.Button
 	back             *turdgl.Button
 	buttonBackground *turdgl.CurvedRect
+	playerCards      []*playerCard
 
-	server          *turdserve.Server
-	opponentIsReady bool
+	server *turdserve.Server
 }
 
 // NewMultiplayerHostScreen constructs an uninitialised multiplayer host screen.
@@ -101,14 +101,19 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		func() { SetScreen(MultiplayerMenu, nil) },
 	).SetLabelText("Back")
 
+	s.playerCards = make([]*playerCard, maxPlayers-1)
+	for i := range s.playerCards {
+		pos := turdgl.Vec{X: 300, Y: 450 + float64(i)*80}
+		s.playerCards[i] = newPlayerCard(pos, i)
+	}
+
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
 		SetScreen(MultiplayerMenu, nil)
 	})
 
 	// Set up server
 	{
-		const maxClients = 1
-		s.server = turdserve.NewServer(maxClients).
+		s.server = turdserve.NewServer(maxPlayers - 1).
 			SetCallback(func(id int, b []byte) {
 				if err := s.handleClientData(id, b); err != nil {
 					fmt.Println("Failed to handle data from client:", err)
@@ -161,6 +166,10 @@ func (s *MultiplayerHostScreen) Update() {
 
 	s.win.Draw(s.nameEntry)
 	s.nameEntry.Update(s.win)
+
+	for _, p := range s.playerCards {
+		s.win.Draw(p)
+	}
 }
 
 // handleClientData handles all data received from a client.
@@ -195,14 +204,15 @@ func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) 
 	s.opponentStatus.SetText(
 		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", data.Username),
 	)
-	s.opponentIsReady = true
 
+	// Update player card with new data
+	s.playerCards[id].setReady(data.Username)
 	return nil
 }
 
 func (s *MultiplayerHostScreen) handleClientDisconnect(id int) {
 	s.opponentStatus.SetText(fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()))
-	s.opponentIsReady = false
+	s.playerCards[id].setNotReady()
 }
 
 // getIPAddr returns the IP address of the host.
@@ -223,9 +233,11 @@ const serverKey = "server"
 
 // startGame attempts to start a multiplayer game.
 func (s *MultiplayerHostScreen) startGame() error {
-	// Check opponent is connected
-	if !s.opponentIsReady {
-		return errors.New("opponent is not ready")
+	// Check all players are connected
+	for i := range maxPlayers - 1 {
+		if !s.playerCards[i].isReady() {
+			return fmt.Errorf("player %d not ready", i)
+		}
 	}
 
 	// Inform other players that game is starting
