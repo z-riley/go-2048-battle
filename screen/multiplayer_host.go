@@ -20,15 +20,14 @@ const (
 type MultiplayerHostScreen struct {
 	win *turdgl.Window
 
-	title          *turdgl.Text
-	ipHeading      *turdgl.TextBox
-	ipBody         *turdgl.TextBox
-	nameHeading    *turdgl.Button
-	nameEntry      *turdgl.TextBox
-	opponentStatus *turdgl.Text
-	start          *turdgl.Button
-	back           *turdgl.Button
-	playerCards    []*playerCard
+	title            *turdgl.Text
+	nameHeading      *turdgl.Text
+	nameEntry        *turdgl.TextBox
+	opponentStatus   *turdgl.Text
+	start            *turdgl.Button
+	back             *turdgl.Button
+	buttonBackground *turdgl.CurvedRect
+	playerCards      []*playerCard
 
 	server *turdserve.Server
 }
@@ -41,17 +40,19 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 // Enter initialises the screen.
 func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	s.title = turdgl.NewText("Host game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-		SetColour(common.ArenaBackgroundColour).
+		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
 
-	s.ipHeading = common.NewTextBox(400, 60, turdgl.Vec{X: 200 - 20, Y: 300}).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).SetText("Your IP:")
-	s.ipBody = common.NewTextBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 300}).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).SetText(getIPAddr())
+	s.nameHeading = turdgl.NewText(
+		"Your name:",
+		turdgl.Vec{X: 200 - 20, Y: 200},
+		common.FontPathMedium,
+	).
+		SetColour(common.GreyTextColour).
+		SetAlignment(turdgl.AlignCentre).
+		SetSize(40)
 
-	s.nameHeading = common.NewMenuButton(400, 60, turdgl.Vec{X: 200 - 20, Y: 200}, func() {})
-	s.nameHeading.SetLabelText("Your name:")
 	s.nameEntry = common.NewEntryBox(400, 60, turdgl.Vec{X: 600 + 20, Y: 200})
 
 	s.opponentStatus = turdgl.NewText(
@@ -63,17 +64,40 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(20)
 
+	// Adjustable settings for buttons
+	const (
+		TileSizePx        float64 = 120
+		TileCornerRadius  float64 = 6
+		TileBoundryFactor float64 = 0.15
+	)
+
+	// Background for buttons
+	const w = TileSizePx * (2 + 3*TileBoundryFactor)
+	s.buttonBackground = turdgl.NewCurvedRect(
+		w, TileSizePx*(1+2*TileBoundryFactor), TileCornerRadius,
+		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 600},
+	)
+	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
+
 	s.start = common.NewMenuButton(
-		400, 60, turdgl.Vec{X: 200 - 20, Y: 650},
+		TileSizePx, TileSizePx,
+		turdgl.Vec{
+			X: s.buttonBackground.Pos.X + TileSizePx*TileBoundryFactor,
+			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
+		},
 		func() {
 			if err := s.startGame(); err != nil {
 				fmt.Println("Failed to start game:", err)
 			}
 		},
-	).SetLabelText("Start game")
+	).SetLabelText("Start")
+
 	s.back = common.NewMenuButton(
-		400, 60,
-		turdgl.Vec{X: 600 + 20, Y: 650},
+		TileSizePx, TileSizePx,
+		turdgl.Vec{
+			X: s.buttonBackground.Pos.X + TileSizePx*(1+2*TileBoundryFactor),
+			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
+		},
 		func() { SetScreen(MultiplayerMenu, nil) },
 	).SetLabelText("Back")
 
@@ -123,17 +147,16 @@ func (s *MultiplayerHostScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)
 
 	s.win.Draw(s.title)
-	s.win.Draw(s.opponentStatus)
+	s.win.Draw(s.buttonBackground)
 
-	for _, l := range []*turdgl.TextBox{
-		s.ipHeading,
-		s.ipBody,
+	for _, l := range []*turdgl.Text{
+		s.opponentStatus,
+		s.nameHeading,
 	} {
 		s.win.Draw(l)
 	}
 
 	for _, b := range []*turdgl.Button{
-		s.nameHeading,
 		s.start,
 		s.back,
 	} {
