@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/moby/moby/pkg/namesgenerator"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
 	"github.com/z-riley/go-2048-battle/config"
@@ -56,7 +57,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	s.nameEntry = common.NewEntryBox(
 		400, 60,
 		turdgl.Vec{X: 600 - 400/2, Y: 330},
-	)
+	).SetText(namesgenerator.GetRandomName(0))
 
 	s.opponentStatus = turdgl.NewText(
 		fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()),

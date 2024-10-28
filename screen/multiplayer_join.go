@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/moby/moby/pkg/namesgenerator"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
 	"github.com/z-riley/go-2048-battle/config"
@@ -53,7 +54,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	s.nameEntry = common.NewEntryBox(
 		400, 60,
 		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 10},
-	)
+	).SetText(namesgenerator.GetRandomName(0))
 
 	s.opponentStatus = turdgl.NewText(
 		"Click join......",

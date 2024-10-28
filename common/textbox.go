@@ -57,6 +57,12 @@ func (e *EntryBox) Text() string {
 	return e.TextBox.Text.Text()
 }
 
+// Text returns the text content of the entry box.
+func (e *EntryBox) SetText(text string) *EntryBox {
+	e.TextBox.SetText(text)
+	return e
+}
+
 func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
 	r := turdgl.NewCurvedRect(
 		width, height, 6, pos,
