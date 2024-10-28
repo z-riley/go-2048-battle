@@ -46,7 +46,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: 600, Y: 330},
+		turdgl.Vec{X: 600, Y: 320},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -55,7 +55,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 	s.nameEntry = common.NewEntryBox(
 		400, 60,
-		turdgl.Vec{X: 600 - 400/2, Y: 340},
+		turdgl.Vec{X: 600 - 400/2, Y: 330},
 	)
 
 	s.opponentStatus = turdgl.NewText(
@@ -204,7 +204,7 @@ func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
 }
 
 // handlePlayerData handles incoming player data.
-func (s *MultiplayerHostScreen) handlePlayerData(_ int, data comms.PlayerData) error {
+func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) error {
 	// Make sure versions are compatible
 	if data.Version != config.Version {
 		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
@@ -214,6 +214,30 @@ func (s *MultiplayerHostScreen) handlePlayerData(_ int, data comms.PlayerData) e
 		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", data.Username),
 	)
 	s.opponentIsConnected = true
+
+	// Send host player data to the client
+	username := s.nameEntry.Text()
+	playerData, err := json.Marshal(
+		comms.PlayerData{
+			Version:  config.Version,
+			Username: username,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal player data: %w", err)
+	}
+	msg, err := json.Marshal(
+		comms.Message{
+			Type:    comms.TypePlayerData,
+			Content: playerData,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal joining message: %w", err)
+	}
+
+	// Send data to client
+	if err := s.server.WriteToClient(id, msg); err != nil {
+		return fmt.Errorf("failed to send message to server: %w", err)
+	}
 
 	return nil
 }
