@@ -117,42 +117,43 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 			X: s.buttonBackground.Pos.X + TileSizePx*(1+2*TileBoundryFactor),
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
 		},
-		func() { SetScreen(MultiplayerMenu, nil) },
+		func() {
+			s.server.Destroy()
+			SetScreen(MultiplayerMenu, nil)
+		},
 	).SetLabelText("Back")
 
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+		s.server.Destroy()
 		SetScreen(MultiplayerMenu, nil)
 	})
 
 	// Set up server
-	{
-		const maxClients = 1
-		s.server = turdserve.NewServer(maxClients).
-			SetCallback(func(id int, b []byte) {
-				if err := s.handleClientData(id, b); err != nil {
-					fmt.Println("Failed to handle data from client:", err)
-				}
-			}).SetDisconnectCallback(func(_ int) { s.handleOpponentDisconnect() })
-
-		// Start server to allow other players to connect
-		errCh := make(chan error)
-		go func() {
-			for err := range errCh {
-				if err != nil {
-					// Exit the loop if the server dies
-					return
-				}
+	const maxClients = 1
+	s.server = turdserve.NewServer(maxClients).
+		SetCallback(func(id int, b []byte) {
+			if err := s.handleClientData(id, b); err != nil {
+				fmt.Println("Failed to handle data from client:", err)
 			}
-		}()
-		if err := s.server.Start("0.0.0.0", serverPort, errCh); err != nil {
-			panic(err)
+		}).SetDisconnectCallback(func(_ int) { s.handleOpponentDisconnect() })
+
+	// Start server to allow other players to connect
+	errCh := make(chan error)
+	go func() {
+		for err := range errCh {
+			if err != nil {
+				// Exit the loop if the server dies
+				return
+			}
 		}
+	}()
+	if err := s.server.Start("0.0.0.0", serverPort, errCh); err != nil {
+		panic(err)
 	}
 }
 
 // Exit deinitialises the screen.
 func (s *MultiplayerHostScreen) Exit() {
-	s.server.Destroy()
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
 }
 

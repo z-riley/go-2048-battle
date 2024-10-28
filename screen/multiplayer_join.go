@@ -95,6 +95,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	)
 	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
+	// Set up client
 	s.hostIsReady = make(chan bool)
 	s.join = common.NewMenuButton(
 		TileSizePx, TileSizePx,
