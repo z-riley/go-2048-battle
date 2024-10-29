@@ -44,7 +44,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: 600, Y: 260},
+		turdgl.Vec{X: 600, Y: 250},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -56,18 +56,9 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 10},
 	).SetText(namesgenerator.GetRandomName(0))
 
-	s.opponentStatus = turdgl.NewText(
-		"Click join......",
-		turdgl.Vec{X: 600, Y: 530},
-		common.FontPathMedium,
-	).
-		SetColour(common.GreyTextColour).
-		SetAlignment(turdgl.AlignCentre).
-		SetSize(24)
-
 	s.ipHeading = turdgl.NewText(
 		"Host IP:",
-		turdgl.Vec{X: 600, Y: 420},
+		turdgl.Vec{X: 600, Y: 380},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -79,6 +70,15 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 		turdgl.Vec{X: 600 - 400/2, Y: s.ipHeading.Pos().Y + 10},
 	)
 	s.ipEntry.TextBox.SetText("127.0.0.1") // temporary for local testing
+
+	s.opponentStatus = turdgl.NewText(
+		"",
+		turdgl.Vec{X: 600, Y: 530},
+		common.FontPathMedium,
+	).
+		SetColour(common.GreyTextColour).
+		SetAlignment(turdgl.AlignCentre).
+		SetSize(24)
 
 	// Adjustable settings for buttons
 	const (

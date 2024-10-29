@@ -145,7 +145,7 @@ func (a *Arena) Height() float64 {
 	return a.background.Height()
 }
 
-// Load updates the arena to match the backend game data.
+// Load updates the arena to match the backend game data without animating it.
 func (a *Arena) Load(g backend.Game) {
 	var newTiles []*tile
 	for i := range numTiles {
@@ -212,12 +212,6 @@ func (a *Arena) Update(game backend.Game) {
 // handleAnimations executes animations from the animation channel.
 func (a *Arena) handleAnimations() {
 	for animationState := range a.animationCh {
-
-		// fmt.Print("Animations:")
-		// for _, a := range animationState.animations {
-		// 	fmt.Printf(" %+v,", a.String())
-		// }
-		// fmt.Print("\n")
 
 		// Listen to errors being produced by animations
 		errCh := make(chan error, numTiles*numTiles)
