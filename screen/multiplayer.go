@@ -92,7 +92,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				widgetWidth, 0.4*unit,
 				turdgl.Vec{X: anchor.X + s.arena.Width() - widgetWidth, Y: anchor.Y - 1.21*unit},
 				func() {
-					// TODO: reset grid
+					SetScreen(MultiplayerMenu, nil)
 				},
 			).SetLabelText("MENU")
 
