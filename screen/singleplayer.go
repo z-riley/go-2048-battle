@@ -68,7 +68,7 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 		).SetSize(20).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
 
 		s.logo2048 = common.NewLogoBox(
-			1.36*unit, 1.36*unit,
+			1.36*unit,
 			turdgl.Vec{X: anchor.X, Y: anchor.Y - 2.58*unit},
 			"2048",
 		)

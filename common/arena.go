@@ -22,8 +22,8 @@ const (
 
 // Derived constants
 const (
+	ArenaSizePx   = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
 	tileSpacingPx = TileSizePx * (1 + TileBoundryFactor)
-	arenaSizePx   = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
 	tileFont      = FontPathBold
 	numTiles      = grid.GridLen
 )
@@ -88,7 +88,7 @@ func NewArena(pos turdgl.Vec) *Arena {
 	}
 
 	arenaBG := turdgl.NewCurvedRect(
-		arenaSizePx, arenaSizePx,
+		ArenaSizePx, ArenaSizePx,
 		TileCornerRadius,
 		turdgl.Vec{
 			X: pos.X - TileSizePx*TileBoundryFactor,

@@ -16,16 +16,14 @@ import (
 type MultiplayerScreen struct {
 	win              *turdgl.Window
 	backgroundColour color.RGBA
-
-	// Shared widgets
-	title *turdgl.Text
-	timer *turdgl.Text
+	logo2048         *turdgl.TextBox
 
 	// Player's grid
 	newGame      *turdgl.Button
 	menu         *turdgl.Button
 	score        *common.GameUIBox
 	guide        *turdgl.Text
+	timer        *turdgl.Text
 	backend      *backend.Game
 	arena        *common.Arena
 	arenaInputCh chan func()
@@ -60,23 +58,26 @@ const (
 func (s *MultiplayerScreen) Enter(initData InitData) {
 	// UI widgets
 	{
-		s.arena = common.NewArena(turdgl.Vec{X: 100, Y: 300})
-		s.opponentArena = common.NewArena(turdgl.Vec{X: 700, Y: 300})
 
-		// Everything is positioned relative to the arena grid
-		anchor := s.arena.Pos()
+		const offset = 100
+		s.arena = common.NewArena(
+			turdgl.Vec{X: float64(s.win.Width())/3 - common.ArenaSizePx/2 - offset, Y: 300},
+		)
+		s.opponentArena = common.NewArena(
+			turdgl.Vec{X: float64(s.win.Width())*2/3 - common.ArenaSizePx/2 + offset, Y: 300},
+		)
 
 		// Everything is sized relative to the tile size
 		const unit = common.TileSizePx
 
-		s.title = turdgl.NewText("Head to Head", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
-			SetColour(common.ArenaBackgroundColour).
-			SetAlignment(turdgl.AlignCentre).
-			SetSize(40)
+		anchor := s.arena.Pos()
 
-		s.timer = common.NewGameText("",
-			turdgl.Vec{X: 600, Y: anchor.Y},
-		).SetAlignment(turdgl.AlignBottomRight)
+		const logoSize = 1.36 * unit
+		s.logo2048 = common.NewLogoBox(
+			logoSize,
+			turdgl.Vec{X: (float64(s.win.Width()) - logoSize) / 2, Y: anchor.Y - 2.58*unit},
+			"2048",
+		)
 
 		// Player's grid
 		{
@@ -107,17 +108,20 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				common.ArenaBackgroundColour,
 			).SetHeading("SCORE")
 
-			s.guide = turdgl.NewText(
+			s.guide = common.NewGameText(
 				"Your grid",
 				turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.28*unit},
-				common.FontPathBold,
-			).SetSize(16).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopRight)
+			).SetAlignment(turdgl.AlignTopRight)
 
 			s.backend = backend.NewGame(&backend.Opts{
 				SaveToDisk: false,
 				ResetKey:   initData[usernameKey].(string),
 			})
 			s.arenaInputCh = make(chan func(), 100)
+
+			s.timer = common.NewGameText("",
+				turdgl.Vec{X: 600, Y: anchor.Y},
+			).SetAlignment(turdgl.AlignBottomCentre)
 		}
 
 		// Opponent's grid
@@ -131,11 +135,10 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				common.ArenaBackgroundColour,
 			).SetHeading("SCORE")
 
-			s.opponentGuide = turdgl.NewText(
+			s.opponentGuide = common.NewGameText(
 				fmt.Sprintf("%s's grid", initData[opponentUsernameKey].(string)),
 				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.28*unit},
-				common.FontPathBold,
-			).SetSize(16).SetColour(common.GreyTextColour)
+			)
 
 			s.opponentBackend = backend.NewGame(&backend.Opts{
 				SaveToDisk: false,
@@ -265,7 +268,7 @@ func (s *MultiplayerScreen) Update() {
 	s.opponentArena.Update(*s.opponentBackend)
 
 	for _, d := range []turdgl.Drawable{
-		s.title,
+		s.logo2048,
 		s.guide,
 		s.opponentGuide,
 		s.menu,
