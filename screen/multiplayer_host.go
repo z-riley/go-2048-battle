@@ -24,6 +24,7 @@ type MultiplayerHostScreen struct {
 	title            *turdgl.Text
 	nameHeading      *turdgl.Text
 	nameEntry        *common.EntryBox
+	opponentName     string
 	opponentStatus   *turdgl.Text
 	start            *turdgl.Button
 	back             *turdgl.Button
@@ -212,8 +213,9 @@ func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) 
 		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
 	}
 
+	s.opponentName = data.Username
 	s.opponentStatus.SetText(
-		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", data.Username),
+		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", s.opponentName),
 	)
 	s.opponentIsConnected = true
 
@@ -294,8 +296,9 @@ func (s *MultiplayerHostScreen) startGame() error {
 
 	// Pass server to next screen
 	SetScreen(Multiplayer, InitData{
-		serverKey:   s.server,
-		usernameKey: s.nameEntry.Text(),
+		serverKey:           s.server,
+		usernameKey:         s.nameEntry.Text(),
+		opponentUsernameKey: s.opponentName,
 	})
 	return nil
 }

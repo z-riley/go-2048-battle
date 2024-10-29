@@ -21,6 +21,7 @@ type MultiplayerJoinScreen struct {
 	nameEntry        *common.EntryBox
 	ipHeading        *turdgl.Text
 	ipEntry          *common.EntryBox
+	opponentName     string
 	opponentStatus   *turdgl.Text
 	join             *turdgl.Button
 	back             *turdgl.Button
@@ -118,8 +119,9 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 			go func() {
 				if <-s.hostIsReady {
 					SetScreen(Multiplayer, InitData{
-						clientKey:   s.client,
-						usernameKey: s.nameEntry.Text(),
+						clientKey:           s.client,
+						usernameKey:         s.nameEntry.Text(),
+						opponentUsernameKey: s.opponentName,
 					})
 					return
 				}
@@ -273,7 +275,8 @@ func (s *MultiplayerJoinScreen) handlePlayerData(data comms.PlayerData) error {
 		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
 	}
 
-	s.opponentStatus.SetText(fmt.Sprintf("Waiting for \"%s\" to start the game", data.Username))
+	s.opponentName = data.Username
+	s.opponentStatus.SetText(fmt.Sprintf("Waiting for \"%s\" to start the game", s.opponentName))
 
 	return nil
 }

@@ -49,8 +49,12 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 	}
 }
 
-// serverKey is used for indentifying the opponent's username in InitData.
-const usernameKey = "username"
+const (
+	// usernameKey is used for indentifying the player's username in InitData.
+	usernameKey = "username"
+	// usernameKey is used for indentifying the opponent's username in InitData.
+	opponentUsernameKey = "opponentUsername"
+)
 
 // Enter initialises the screen.
 func (s *MultiplayerScreen) Enter(initData InitData) {
@@ -109,7 +113,10 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				common.FontPathBold,
 			).SetSize(16).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopRight)
 
-			s.backend = backend.NewGame(&backend.Opts{SaveToDisk: false})
+			s.backend = backend.NewGame(&backend.Opts{
+				SaveToDisk: false,
+				ResetKey:   initData[usernameKey].(string),
+			})
 			s.arenaInputCh = make(chan func(), 100)
 		}
 
@@ -125,12 +132,15 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			).SetHeading("SCORE")
 
 			s.opponentGuide = turdgl.NewText(
-				fmt.Sprintf("%s's grid", initData[usernameKey].(string)),
+				fmt.Sprintf("%s's grid", initData[opponentUsernameKey].(string)),
 				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.28*unit},
 				common.FontPathBold,
 			).SetSize(16).SetColour(common.GreyTextColour)
 
-			s.opponentBackend = backend.NewGame(&backend.Opts{SaveToDisk: false})
+			s.opponentBackend = backend.NewGame(&backend.Opts{
+				SaveToDisk: false,
+				ResetKey:   initData[opponentUsernameKey].(string),
+			})
 		}
 	}
 

@@ -20,6 +20,7 @@ type Game struct {
 // ops contains configuration for the game.
 type Opts struct {
 	SaveToDisk bool
+	ResetKey   string
 }
 
 // NewGame returns the top-level struct for the game. If opts are nil, the
@@ -28,6 +29,7 @@ func NewGame(opts *Opts) *Game {
 	if opts == nil {
 		opts = &Opts{
 			SaveToDisk: true,
+			ResetKey:   "",
 		}
 	}
 
@@ -36,6 +38,11 @@ func NewGame(opts *Opts) *Game {
 		Score: NewScore(),
 		Timer: NewTimer(),
 		opts:  opts,
+	}
+
+	// Use pseudo random grid reset (for multiplayer synchronisation) if key provided
+	if opts.ResetKey != "" {
+		g.Grid.PseudoRandomReset(opts.ResetKey)
 	}
 
 	if g.opts.SaveToDisk {
@@ -51,11 +58,19 @@ func NewGame(opts *Opts) *Game {
 	return g
 }
 
+func (g *Game) PseudoRandomReset(seed string) *Game {
+	g.Grid.PseudoRandomReset(seed)
+	g.Score.Reset()
+	g.Timer.Reset().Pause()
+	return g
+}
+
 // Reset resets the game.
-func (g *Game) Reset() {
+func (g *Game) Reset() *Game {
 	g.Grid.Reset()
 	g.Score.Reset()
 	g.Timer.Reset().Pause()
+	return g
 }
 
 // ExecuteMove carries out a move in the given direction.
