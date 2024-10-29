@@ -293,6 +293,9 @@ func (s *MultiplayerHostScreen) startGame() error {
 	}
 
 	// Pass server to next screen
-	SetScreen(Multiplayer, InitData{serverKey: s.server})
+	SetScreen(Multiplayer, InitData{
+		serverKey:   s.server,
+		usernameKey: s.nameEntry.Text(),
+	})
 	return nil
 }

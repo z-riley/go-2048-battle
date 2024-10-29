@@ -117,7 +117,10 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 			go func() {
 				if <-s.hostIsReady {
-					SetScreen(Multiplayer, InitData{clientKey: s.client})
+					SetScreen(Multiplayer, InitData{
+						clientKey:   s.client,
+						usernameKey: s.nameEntry.Text(),
+					})
 					return
 				}
 			}()

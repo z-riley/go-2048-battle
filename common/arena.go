@@ -145,7 +145,7 @@ func (a *Arena) Height() float64 {
 	return a.background.Height()
 }
 
-// Load updates the arena to match the backend game data without animating it.
+// Load updates the arena to match the backend game data.
 func (a *Arena) Load(g backend.Game) {
 	var newTiles []*tile
 	for i := range numTiles {

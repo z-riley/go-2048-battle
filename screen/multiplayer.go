@@ -49,6 +49,9 @@ func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
 	}
 }
 
+// serverKey is used for indentifying the opponent's username in InitData.
+const usernameKey = "username"
+
 // Enter initialises the screen.
 func (s *MultiplayerScreen) Enter(initData InitData) {
 	// UI widgets
@@ -122,7 +125,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			).SetHeading("SCORE")
 
 			s.opponentGuide = turdgl.NewText(
-				"Opponent's grid", // TODO: use opponent's username instead
+				fmt.Sprintf("%s's grid", initData[usernameKey].(string)),
 				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.28*unit},
 				common.FontPathBold,
 			).SetSize(16).SetColour(common.GreyTextColour)
