@@ -58,13 +58,11 @@ const (
 func (s *MultiplayerScreen) Enter(initData InitData) {
 	// UI widgets
 	{
-
-		const offset = 100
 		s.arena = common.NewArena(
-			turdgl.Vec{X: float64(s.win.Width())/3 - common.ArenaSizePx/2 - offset, Y: 300},
+			turdgl.Vec{X: float64(s.win.Width())/3 - 249, Y: 300},
 		)
 		s.opponentArena = common.NewArena(
-			turdgl.Vec{X: float64(s.win.Width())*2/3 - common.ArenaSizePx/2 + offset, Y: 300},
+			turdgl.Vec{X: float64(s.win.Width())*2/3 - 71, Y: 300},
 		)
 
 		// Everything is sized relative to the tile size
