@@ -186,8 +186,6 @@ func (s *MultiplayerHostScreen) Update() {
 
 // handleClientData handles all data received from a client.
 func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
-	fmt.Println("Received from client", id, ":", string(b))
-
 	var msg comms.Message
 	if err := json.Unmarshal(b, &msg); err != nil {
 		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)

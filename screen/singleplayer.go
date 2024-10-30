@@ -204,7 +204,7 @@ func (s *SingleplayerScreen) Update() {
 		// No user input; continue
 	}
 
-	// Deep copy so front has time to animate itself whilst allowing the back
+	// Deep copy so front-end hastime to animate itself whilst allowing the back
 	// end to update
 	game := deep.MustCopy(*s.backend)
 

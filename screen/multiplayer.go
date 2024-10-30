@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/brunoga/deep"
 	"github.com/z-riley/go-2048-battle/backend"
 	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/go-2048-battle/common"
@@ -262,8 +263,10 @@ func (s *MultiplayerScreen) Update() {
 	s.newGame.Update(s.win)
 	s.timer.SetText(s.backend.Timer.Time.String())
 
-	s.arena.Update(*s.backend)
-	s.opponentArena.Update(*s.opponentBackend)
+	// Deep copy so front-end has time to animate itself whilst allowing the back
+	// end to update
+	s.arena.Update(deep.MustCopy(*s.backend))
+	s.opponentArena.Update(deep.MustCopy(*s.opponentBackend))
 
 	for _, d := range []turdgl.Drawable{
 		s.logo2048,
@@ -341,9 +344,6 @@ func (s *MultiplayerScreen) handleOpponentData(b []byte) error {
 
 // handlePlayerData handles incoming game data from the opponent.
 func (s *MultiplayerScreen) handleGameData(data comms.GameData) error {
-	fmt.Println("Received new data from opponent: ", data)
-
 	s.opponentBackend = &data.Game
-
 	return nil
 }

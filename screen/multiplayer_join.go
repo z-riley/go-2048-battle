@@ -235,8 +235,6 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 
 // handleServerData handles all data received from the server.
 func (s *MultiplayerJoinScreen) handleServerData(b []byte) error {
-	fmt.Println("Received from server:", string(b))
-
 	var msg comms.Message
 	if err := json.Unmarshal(b, &msg); err != nil {
 		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)
