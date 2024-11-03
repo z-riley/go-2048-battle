@@ -163,7 +163,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 	// Initialise server/client
 	{
 		if server, ok := initData[serverKey]; ok {
-			// Host mode
+			// Host mode - initialise server
 			s.server = server.(*turdserve.Server)
 			s.server.SetCallback(func(id int, b []byte) {
 				if err := s.handleOpponentData(b); err != nil {
@@ -173,7 +173,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				fmt.Println("Opponent has left the game")
 			})
 		} else if client, ok := initData[clientKey]; ok {
-			// Guest mode
+			// Guest mode - initialise client
 			s.client = client.(*turdserve.Client)
 			s.client.SetCallback(func(b []byte) {
 				if err := s.handleOpponentData(b); err != nil {
@@ -182,6 +182,13 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			})
 		} else {
 			panic("neither server or client was passed to MultiplayerScreen Init")
+		}
+
+		// Tell the opponent that the local server/client is ready to receive data
+		if err := s.sendScreenLoadedEvent(); err != nil {
+			if config.Debug {
+				fmt.Println("Failed to send game update", err)
+			}
 		}
 	}
 
@@ -263,7 +270,7 @@ func (s *MultiplayerScreen) Update() {
 	select {
 	case inputFunc := <-s.arenaInputCh:
 		inputFunc()
-		if err := s.sendGameUpdate(); err != nil {
+		if err := s.sendGameData(); err != nil {
 			fmt.Println("Failed to send game update:", err)
 		}
 
@@ -305,49 +312,27 @@ func (s *MultiplayerScreen) Update() {
 	}
 }
 
-// sendGameUpdate sends the local game state to the opponent.
-func (s *MultiplayerScreen) sendGameUpdate() error {
-	// Send game data update to opponent
-	gameData, err := json.Marshal(comms.GameData{
-		Game: *s.backend,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to marshal player data: %w", err)
-	}
-	msg, err := json.Marshal(
-		comms.Message{
-			Type:    comms.TypeGameData,
-			Content: gameData,
-		})
-	if err != nil {
-		return fmt.Errorf("failed to marshal joining message: %w", err)
-	}
-
-	// Send data to opponent
+// sendToOpponent sends bytes to the opponent.
+func (s *MultiplayerScreen) sendToOpponent(b []byte) error {
 	if s.server != nil {
 		for _, id := range s.server.GetClientIDs() {
-			if err := s.server.WriteToClient(id, msg); err != nil {
+			if err := s.server.WriteToClient(id, b); err != nil {
 				return fmt.Errorf("failed to send message to server: %w", err)
 			}
 		}
 	} else {
-		if err := s.client.Write(msg); err != nil {
-			return fmt.Errorf("failed to send message to server: %w", err)
+		if err := s.client.Write(b); err != nil {
+			return fmt.Errorf("failed to send message to client: %w", err)
 		}
 	}
-
 	return nil
 }
 
 // handleOpponentData handles data from the opponent.
-func (s *MultiplayerScreen) handleOpponentData(b []byte) error {
-	// Note: in matches with 3 or more players, the server would need to forward
-	// the incoming client data to the other clients. However, with 2 players, this
-	// isn't necessary
-
+func (s *MultiplayerScreen) handleOpponentData(data []byte) error {
 	var msg comms.Message
-	if err := json.Unmarshal(b, &msg); err != nil {
-		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)
+	if err := json.Unmarshal(data, &msg); err != nil {
+		return fmt.Errorf("failed to unmarshal message: %w", err)
 	}
 
 	switch msg.Type {
@@ -356,15 +341,125 @@ func (s *MultiplayerScreen) handleOpponentData(b []byte) error {
 		if err := json.Unmarshal(msg.Content, &data); err != nil {
 			return fmt.Errorf("failed to unmarshal game data: %w", err)
 		}
-		s.handleGameData(data)
-		return nil
+		return s.handleGameData(data)
+
+	case comms.TypeEventData:
+		var data comms.EventData
+		if err := json.Unmarshal(msg.Content, &data); err != nil {
+			return fmt.Errorf("failed to unmarshal event data: %w", err)
+		}
+		return s.handleEventData(data)
+
+	case comms.TypeRequest:
+		var data comms.RequestData
+		if err := json.Unmarshal(msg.Content, &data); err != nil {
+			return fmt.Errorf("failed to unmarshal request data: %w", err)
+		}
+		return s.handleRequest(data)
 
 	default:
 		return fmt.Errorf("unsupported message type \"%s\"", msg.Type)
 	}
 }
 
-// handlePlayerData handles incoming game data from the opponent.
-func (s *MultiplayerScreen) handleGameData(data comms.GameData) {
+// sendGameData sends the local game state to the opponent.
+func (s *MultiplayerScreen) sendGameData() error {
+	gameData, err := json.Marshal(
+		comms.GameData{
+			Game: *s.backend,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal game data: %w", err)
+	}
+	msg, err := json.Marshal(
+		comms.Message{
+			Type:    comms.TypeGameData,
+			Content: gameData,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal message: %w", err)
+	}
+
+	return s.sendToOpponent(msg)
+}
+
+// handleGameData handles incoming game data from the opponent.
+func (s *MultiplayerScreen) handleGameData(data comms.GameData) error {
 	s.opponentBackend = &data.Game
+	return nil
+}
+
+// sendScreenLoadedEvent sends the screen loaded event to the opponent.
+func (s *MultiplayerScreen) sendScreenLoadedEvent() error {
+	eventData, err := json.Marshal(
+		comms.EventData{
+			Event: comms.EventScreenLoaded,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal event data: %w", err)
+	}
+	msg, err := json.Marshal(
+		comms.Message{
+			Type:    comms.TypeEventData,
+			Content: eventData,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal message: %w", err)
+	}
+
+	return s.sendToOpponent(msg)
+}
+
+// handleEventData handles incoming game data from the opponent.
+func (s *MultiplayerScreen) handleEventData(data comms.EventData) error {
+	switch data.Event {
+	case comms.EventScreenLoaded:
+		// Send game data to opponent
+		if err := s.sendGameData(); err != nil {
+			return fmt.Errorf("failed to send game data: %w", err)
+		}
+
+		// Request for opponent to send their game data
+		if err := s.requestOpponentGameData(); err != nil {
+			return fmt.Errorf("failed to request opponent's game data: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// requestOpponentData sends a request for the opponent to send their game data.
+func (s *MultiplayerScreen) requestOpponentGameData() error {
+	request, err := json.Marshal(
+		comms.RequestData{
+			Request: comms.TypeGameData,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal event data: %w", err)
+	}
+	msg, err := json.Marshal(
+		comms.Message{
+			Type:    comms.TypeRequest,
+			Content: request,
+		})
+	if err != nil {
+		return fmt.Errorf("failed to marshal message: %w", err)
+	}
+
+	if err := s.sendToOpponent(msg); err != nil {
+		return fmt.Errorf("failed to send data to opponent: %w", err)
+	}
+
+	return nil
+}
+
+// handleRequest handles an incoming request for data.
+func (s *MultiplayerScreen) handleRequest(data comms.RequestData) error {
+	switch data.Request {
+	case comms.TypeGameData:
+		if err := s.sendGameData(); err != nil {
+			return fmt.Errorf("failed to send game data: %w", err)
+		}
+	}
+	return nil
 }

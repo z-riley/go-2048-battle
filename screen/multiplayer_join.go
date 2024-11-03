@@ -222,7 +222,7 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 
 	s.client.SetCallback(func(b []byte) {
 		if err := s.handleServerData(b); err != nil {
-			fmt.Println("Failed to handle data from server:", err)
+			fmt.Println("Join screen failed to handle data from server:", err)
 		}
 	})
 

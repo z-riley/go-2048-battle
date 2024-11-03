@@ -139,9 +139,9 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	// Set up server
 	const maxClients = 1
 	s.server = turdserve.NewServer(maxClients).
-		SetCallback(func(id int, b []byte) {
-			if err := s.handleClientData(id, b); err != nil {
-				fmt.Println("Failed to handle data from client:", err)
+		SetCallback(func(_ int, b []byte) {
+			if err := s.handleClientData(b); err != nil {
+				fmt.Println("Host screen failed to handle data from client:", err)
 			}
 		}).SetDisconnectCallback(func(_ int) { s.handleOpponentDisconnect() })
 
@@ -192,7 +192,7 @@ func (s *MultiplayerHostScreen) Update() {
 }
 
 // handleClientData handles all data received from a client.
-func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
+func (s *MultiplayerHostScreen) handleClientData(b []byte) error {
 	var msg comms.Message
 	if err := json.Unmarshal(b, &msg); err != nil {
 		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)
@@ -204,11 +204,10 @@ func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
 		if err := json.Unmarshal(msg.Content, &data); err != nil {
 			return fmt.Errorf("failed to unmarshal player data: %w", err)
 		}
-		return s.handlePlayerData(id, data)
-
-	default:
-		return fmt.Errorf("unsupported message type \"%s\"", msg.Type)
+		return s.handlePlayerData(data)
 	}
+
+	return nil
 }
 
 // sendPlayerData sends the player data to all connected guests.
@@ -241,7 +240,7 @@ func (s *MultiplayerHostScreen) sendPlayerData() error {
 }
 
 // handlePlayerData handles incoming player data.
-func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) error {
+func (s *MultiplayerHostScreen) handlePlayerData(data comms.PlayerData) error {
 	// Make sure versions are compatible
 	if data.Version != config.Version {
 		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
