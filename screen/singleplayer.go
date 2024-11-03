@@ -28,9 +28,9 @@ type SingleplayerScreen struct {
 	guide      *turdgl.Text
 	timer      *turdgl.Text
 
-	debugGridText  *turdgl.Text
-	debugTimeText  *turdgl.Text
-	debugScoreText *turdgl.Text
+	debugGrid  *turdgl.Text
+	debugTime  *turdgl.Text
+	debugScore *turdgl.Text
 }
 
 // NewSingleplayerScreen constructs an uninitialised new singleplayer menu screen.
@@ -118,11 +118,11 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 
 	// Debug UI
 	if config.Debug {
-		s.debugGridText = turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium).
+		s.debugGrid = turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium).
 			SetText(s.backend.Grid.Debug())
-		s.debugTimeText = turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
+		s.debugTime = turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
 			SetText(s.backend.Timer.Time.String())
-		s.debugScoreText = turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium).
+		s.debugScore = turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium).
 			SetText(fmt.Sprint(s.backend.Score.Current))
 	}
 
@@ -133,25 +133,25 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 		s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirUp)
-				s.debugGridText.SetText(s.backend.Grid.Debug())
+				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
 		s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirDown)
-				s.debugGridText.SetText(s.backend.Grid.Debug())
+				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
 		s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirLeft)
-				s.debugGridText.SetText(s.backend.Grid.Debug())
+				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
 		s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirRight)
-				s.debugGridText.SetText(s.backend.Grid.Debug())
+				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
 		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
@@ -187,9 +187,9 @@ func (s *SingleplayerScreen) Exit() {
 func (s *SingleplayerScreen) Update() {
 	// Temporary debug text
 	if config.Debug {
-		s.debugGridText.SetText(s.backend.Grid.Debug())
-		s.debugTimeText.SetText(s.backend.Timer.Time.String())
-		s.debugScoreText.SetText(
+		s.debugGrid.SetText(s.backend.Grid.Debug())
+		s.debugTime.SetText(s.backend.Timer.Time.String())
+		s.debugScore.SetText(
 			fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
 		)
 	}
@@ -219,9 +219,9 @@ func (s *SingleplayerScreen) Update() {
 
 	// Draw temporary debug grid
 	if config.Debug {
-		s.win.Draw(s.debugGridText)
-		s.win.Draw(s.debugTimeText)
-		s.win.Draw(s.debugScoreText)
+		s.win.Draw(s.debugGrid)
+		s.win.Draw(s.debugTime)
+		s.win.Draw(s.debugScore)
 	}
 }
 

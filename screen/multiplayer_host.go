@@ -301,7 +301,6 @@ func (s *MultiplayerHostScreen) startGame() error {
 		return fmt.Errorf("failed to marshal event message: %w", err)
 	}
 	for _, id := range s.server.GetClientIDs() {
-		fmt.Println("Writing to client ID", id)
 		if err := s.server.WriteToClient(id, msg); err != nil {
 			return fmt.Errorf("failed to send message to server: %w", err)
 		}

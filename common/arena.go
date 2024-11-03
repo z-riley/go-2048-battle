@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/z-riley/go-2048-battle/backend"
 	"github.com/z-riley/go-2048-battle/backend/grid"
+	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/turdgl"
 	"golang.org/x/exp/constraints"
 )
@@ -268,7 +269,9 @@ func (a *Arena) handleAnimations() {
 		uiTiles := len(a.tiles)
 		backendTiles := animationState.gameState.Grid.NumTiles()
 		if uiTiles != backendTiles {
-			fmt.Println("Found tile count mismatch. Reloading grid")
+			if config.Debug {
+				fmt.Println("Found tile count mismatch. Reloading grid")
+			}
 			a.Load(animationState.gameState)
 		}
 

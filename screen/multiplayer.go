@@ -10,6 +10,7 @@ import (
 	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
+	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/turdgl"
 	"github.com/z-riley/turdserve"
 )
@@ -28,12 +29,14 @@ type MultiplayerScreen struct {
 	backend      *backend.Game
 	arena        *common.Arena
 	arenaInputCh chan func()
+	debugGrid    *turdgl.Text
 
 	// Opponent's grid
-	opponentScore   *common.ScoreBox
-	opponentGuide   *turdgl.Text
-	opponentArena   *common.Arena
-	opponentBackend *backend.Game
+	opponentScore     *common.ScoreBox
+	opponentGuide     *turdgl.Text
+	opponentArena     *common.Arena
+	opponentBackend   *backend.Game
+	opponentDebugGrid *turdgl.Text
 
 	// EITHER server or client will exist
 	server *turdserve.Server
@@ -120,6 +123,12 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			s.timer = common.NewGameText("",
 				turdgl.Vec{X: 600, Y: anchor.Y - 0.53*unit},
 			).SetAlignment(turdgl.AlignTopCentre)
+
+			s.debugGrid = turdgl.NewText(
+				s.backend.Grid.Debug(),
+				turdgl.Vec{X: 100, Y: 50},
+				common.FontPathMedium,
+			)
 		}
 
 		// Opponent's grid
@@ -142,6 +151,12 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				SaveToDisk: false,
 				ResetKey:   initData[opponentUsernameKey].(string),
 			})
+
+			s.opponentDebugGrid = turdgl.NewText(
+				s.opponentBackend.Grid.Debug(),
+				turdgl.Vec{X: 850, Y: 50},
+				common.FontPathMedium,
+			)
 		}
 	}
 
@@ -281,6 +296,13 @@ func (s *MultiplayerScreen) Update() {
 	} {
 		s.win.Draw(d)
 	}
+
+	if config.Debug {
+		s.debugGrid.SetText(s.backend.Grid.Debug())
+		s.opponentDebugGrid.SetText(s.opponentBackend.Grid.Debug())
+		s.win.Draw(s.debugGrid)
+		s.win.Draw(s.opponentDebugGrid)
+	}
 }
 
 // sendGameUpdate sends the local game state to the opponent.
@@ -334,7 +356,8 @@ func (s *MultiplayerScreen) handleOpponentData(b []byte) error {
 		if err := json.Unmarshal(msg.Content, &data); err != nil {
 			return fmt.Errorf("failed to unmarshal game data: %w", err)
 		}
-		return s.handleGameData(data)
+		s.handleGameData(data)
+		return nil
 
 	default:
 		return fmt.Errorf("unsupported message type \"%s\"", msg.Type)
@@ -342,7 +365,6 @@ func (s *MultiplayerScreen) handleOpponentData(b []byte) error {
 }
 
 // handlePlayerData handles incoming game data from the opponent.
-func (s *MultiplayerScreen) handleGameData(data comms.GameData) error {
+func (s *MultiplayerScreen) handleGameData(data comms.GameData) {
 	s.opponentBackend = &data.Game
-	return nil
 }
