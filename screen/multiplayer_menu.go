@@ -24,14 +24,14 @@ func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
 
 // Enter initialises the screen.
 func (s *MultiplayerMenuScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Versus", turdgl.Vec{X: 600, Y: 300}, common.FontPathMedium).
+	s.title = turdgl.NewText("Versus", turdgl.Vec{X: 600, Y: 260}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
 
-	s.hint = turdgl.NewText("", turdgl.Vec{X: 600, Y: 380}, common.FontPathMedium).
+	s.hint = turdgl.NewText("", turdgl.Vec{X: 600, Y: 375}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
-		SetAlignment(turdgl.AlignCentre).
+		SetAlignment(turdgl.AlignBottomCentre).
 		SetSize(20)
 
 	// Adjustable settings for buttons

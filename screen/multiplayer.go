@@ -22,7 +22,7 @@ type MultiplayerScreen struct {
 	// Player's grid
 	newGame      *turdgl.Button
 	menu         *turdgl.Button
-	score        *common.GameUIBox
+	score        *common.ScoreBox
 	guide        *turdgl.Text
 	timer        *turdgl.Text
 	backend      *backend.Game
@@ -30,7 +30,7 @@ type MultiplayerScreen struct {
 	arenaInputCh chan func()
 
 	// Opponent's grid
-	opponentScore   *common.GameUIBox
+	opponentScore   *common.ScoreBox
 	opponentGuide   *turdgl.Text
 	opponentArena   *common.Arena
 	opponentBackend *backend.Game
@@ -101,7 +101,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			).SetLabelText("MENU")
 
 			const wScore = 90
-			s.score = common.NewGameTextBox(
+			s.score = common.NewScoreBox(
 				90, 90,
 				turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
 				common.ArenaBackgroundColour,
@@ -109,7 +109,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 
 			s.guide = common.NewGameText(
 				"Your grid",
-				turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.28*unit},
+				turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.53*unit},
 			).SetAlignment(turdgl.AlignTopRight)
 
 			s.backend = backend.NewGame(&backend.Opts{
@@ -119,8 +119,8 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			s.arenaInputCh = make(chan func(), 100)
 
 			s.timer = common.NewGameText("",
-				turdgl.Vec{X: 600, Y: anchor.Y},
-			).SetAlignment(turdgl.AlignBottomCentre)
+				turdgl.Vec{X: 600, Y: anchor.Y - 0.53*unit},
+			).SetAlignment(turdgl.AlignTopCentre)
 		}
 
 		// Opponent's grid
@@ -128,7 +128,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			// Everything is positioned relative to the arena grid
 			opponentAnchor := s.opponentArena.Pos()
 
-			s.opponentScore = common.NewGameTextBox(
+			s.opponentScore = common.NewScoreBox(
 				90, 90,
 				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 2.58*unit},
 				common.ArenaBackgroundColour,
@@ -136,7 +136,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 
 			s.opponentGuide = common.NewGameText(
 				fmt.Sprintf("%s's grid", initData[opponentUsernameKey].(string)),
-				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.28*unit},
+				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.53*unit},
 			)
 
 			s.opponentBackend = backend.NewGame(&backend.Opts{

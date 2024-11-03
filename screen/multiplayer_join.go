@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/moby/moby/pkg/namesgenerator"
 	"github.com/z-riley/go-2048-battle/common"
@@ -38,14 +39,14 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 
 // Enter initialises the screen.
 func (s *MultiplayerJoinScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 200}, common.FontPathMedium).
+	s.title = turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
 
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: 600, Y: 250},
+		turdgl.Vec{X: 600, Y: 230},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -54,12 +55,12 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.nameEntry = common.NewEntryBox(
 		400, 60,
-		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 10},
+		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 15},
 	).SetText(namesgenerator.GetRandomName(0))
 
 	s.ipHeading = turdgl.NewText(
 		"Host IP:",
-		turdgl.Vec{X: 600, Y: 380},
+		turdgl.Vec{X: 600, Y: 370},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -68,7 +69,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.ipEntry = common.NewEntryBox(
 		400, 60,
-		turdgl.Vec{X: 600 - 400/2, Y: s.ipHeading.Pos().Y + 10},
+		turdgl.Vec{X: 600 - 400/2, Y: s.ipHeading.Pos().Y + 15},
 	)
 	s.ipEntry.TextBox.SetText("127.0.0.1") // temporary for local testing
 
@@ -106,7 +107,14 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 		},
 		func() {
 			if err := s.joinGame(); err != nil {
-				fmt.Println("Failed to join game:", err)
+				s.opponentStatus.SetText("Failed to connect to host")
+				go func() {
+					time.Sleep(time.Second)
+					s.opponentStatus.SetText("")
+				}()
+				if config.Debug {
+					fmt.Println("Failed to join game:", err)
+				}
 				return
 			}
 

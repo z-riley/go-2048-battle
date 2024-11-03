@@ -47,7 +47,7 @@ func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
 			SetTextColour(tileTextColour(val)),
 		pos: posIdx,
 	}
-	tile.tb.Text.SetOffset(turdgl.Vec{X: 0, Y: 28})
+	tile.tb.Text.SetOffset(turdgl.Vec{X: 0, Y: 15})
 	tile.tb.Shape.SetStyle(turdgl.Style{Colour: tileColour(val)})
 
 	return &tile

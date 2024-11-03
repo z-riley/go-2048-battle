@@ -35,7 +35,7 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		SetLabelSize(36).
 		SetLabelColour(WhiteFontColour).
 		SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 32})
+		SetLabelOffset(turdgl.Vec{X: 0, Y: 15})
 
 	b.SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
@@ -81,7 +81,7 @@ func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		SetLabelSize(14).
 		SetLabelColour(WhiteFontColour).
 		SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 12})
+		SetLabelOffset(turdgl.Vec{X: 0, Y: 7})
 
 	b.SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},

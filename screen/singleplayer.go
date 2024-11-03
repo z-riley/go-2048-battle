@@ -21,8 +21,8 @@ type SingleplayerScreen struct {
 	heading    *turdgl.Text
 	loseDialog *turdgl.Text
 	logo2048   *turdgl.TextBox
-	score      *common.GameUIBox
-	highScore  *common.GameUIBox
+	score      *common.ScoreBox
+	highScore  *common.ScoreBox
 	menu       *turdgl.Button
 	newGame    *turdgl.Button
 	guide      *turdgl.Text
@@ -74,13 +74,13 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 		)
 
 		const wScore = 90
-		s.score = common.NewGameTextBox(
+		s.score = common.NewScoreBox(
 			wScore, wScore,
 			turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 2.58*unit},
 			common.ArenaBackgroundColour,
 		).SetHeading("SCORE")
 
-		s.highScore = common.NewGameTextBox(
+		s.highScore = common.NewScoreBox(
 			wScore, wScore,
 			turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
 			common.ArenaBackgroundColour,
@@ -108,12 +108,12 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 
 		s.guide = turdgl.NewText(
 			"Join the numbers and get to the 2048 tile!",
-			turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.28*unit},
+			turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.53*unit},
 			common.FontPathBold,
 		).SetSize(16).SetColour(common.GreyTextColour)
 
 		s.timer = common.NewGameText("",
-			turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.13},
+			turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.1},
 		).SetSize(16).SetAlignment(turdgl.AlignBottomRight)
 	}
 

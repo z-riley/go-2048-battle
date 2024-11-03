@@ -22,6 +22,10 @@ github.com/veandco/go-sdl2 v0.4.40 h1:fZv6wC3zz1Xt167P09gazawnpa0KY5LM7JAvKpX9d/
 github.com/veandco/go-sdl2 v0.4.40/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
 github.com/z-riley/turdgl v0.0.0-20241022193232-da642434df34 h1:lyv9DurfA8RC4/YiHPpi5LFr3BzNOr+af1JLB5j8LV0=
 github.com/z-riley/turdgl v0.0.0-20241022193232-da642434df34/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241103110229-59de3711cb95 h1:K3+NWGDDy2oz675QLmib7/SX1pKXVMYZhPIjQsNE7DA=
+github.com/z-riley/turdgl v0.0.0-20241103110229-59de3711cb95/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241103111552-ef883b958e49 h1:K7b4KtYxkp1BW47OCcbSJJhol6k8rWc/C7+xa9NSQm0=
+github.com/z-riley/turdgl v0.0.0-20241103111552-ef883b958e49/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
 github.com/z-riley/turdserve v0.0.0-20241013151207-e4418fc464c6 h1:Rq3Zyz2d86mTflPBf5aestaRAvtt/Uszp1Zk4jaiv/g=
 github.com/z-riley/turdserve v0.0.0-20241013151207-e4418fc464c6/go.mod h1:i9Dlhid4XYNAFdTC4L94dEpXujy8FsfEGlkV7VH4Wmk=
 golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa h1:ELnwvuAXPNtPk1TJRuGkI9fDTwym6AYBu0qzT8AcHdI=

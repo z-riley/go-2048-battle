@@ -41,14 +41,14 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 
 // Enter initialises the screen.
 func (s *MultiplayerHostScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Host Game", turdgl.Vec{X: 600, Y: 200}, common.FontPathMedium).
+	s.title = turdgl.NewText("Host Game", turdgl.Vec{X: 600, Y: 150}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
 
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: 600, Y: 320},
+		turdgl.Vec{X: 600, Y: 290},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -57,12 +57,12 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 	s.nameEntry = common.NewEntryBox(
 		400, 60,
-		turdgl.Vec{X: 600 - 400/2, Y: 330},
+		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 20},
 	).SetText(namesgenerator.GetRandomName(0))
 
 	s.opponentStatus = turdgl.NewText(
 		fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()),
-		turdgl.Vec{X: 600, Y: 530},
+		turdgl.Vec{X: 600, Y: 510},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).

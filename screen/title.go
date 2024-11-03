@@ -24,14 +24,14 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 
 // Enter initialises the screen.
 func (s *TitleScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 310}, common.FontPathMedium).
+	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 260}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
 
-	s.hint = turdgl.NewText("", turdgl.Vec{X: 600, Y: 380}, common.FontPathMedium).
+	s.hint = turdgl.NewText("", turdgl.Vec{X: 600, Y: 375}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
-		SetAlignment(turdgl.AlignCentre).
+		SetAlignment(turdgl.AlignBottomCentre).
 		SetSize(20)
 
 	// Adjustable settings for buttons

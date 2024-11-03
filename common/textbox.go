@@ -71,7 +71,7 @@ func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
 	r.SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
 
 	tb := turdgl.NewTextBox(r, FontPathMedium).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
+		SetTextOffset(turdgl.Vec{X: 0, Y: 15}).
 		SetText("Click to edit").
 		SetTextSize(36).
 		SetTextColour(LightGreyTextColour)
@@ -79,14 +79,14 @@ func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
 	return tb
 }
 
-// GameUIBox is a commonly used text box for displaying scores.
-type GameUIBox struct {
+// ScoreBox is a commonly used text box for displaying scores.
+type ScoreBox struct {
 	heading *turdgl.Text
 	body    *turdgl.TextBox
 }
 
-// NewGameTextBox constructs a new text box for the game's UI.
-func NewGameTextBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *GameUIBox {
+// NewScoreBox constructs a new text box for displaying a score.
+func NewScoreBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *ScoreBox {
 	headingPos := turdgl.Vec{
 		X: pos.X + width/2,
 		Y: pos.Y + 25,
@@ -94,37 +94,36 @@ func NewGameTextBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *G
 	heading := turdgl.NewText("Heading", headingPos, FontPathBold).
 		SetColour(LightGreyTextColour).
 		SetSize(16).
-		SetAlignment(turdgl.AlignTopCentre)
+		SetOffset(turdgl.Vec{Y: 3})
 
 	r := turdgl.NewCurvedRect(
-		width, height,
-		3,
+		width, height, 3,
 		pos,
 		turdgl.WithStyle(turdgl.Style{Colour: colour}),
 	)
 
 	body := turdgl.NewTextBox(r, FontPathBold).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 32}).
+		SetTextOffset(turdgl.Vec{X: 0, Y: 18}).
 		SetTextSize(26).
 		SetTextColour(WhiteFontColour)
 
-	return &GameUIBox{heading, body}
+	return &ScoreBox{heading, body}
 }
 
 // Draw draws the UI box to the window.
-func (g *GameUIBox) Draw(buf *turdgl.FrameBuffer) {
+func (g *ScoreBox) Draw(buf *turdgl.FrameBuffer) {
 	g.body.Draw(buf)
 	g.heading.Draw(buf)
 }
 
 // SetHeading sets the heading text of the UI box.
-func (g *GameUIBox) SetHeading(s string) *GameUIBox {
+func (g *ScoreBox) SetHeading(s string) *ScoreBox {
 	g.heading.SetText(s)
 	return g
 }
 
 // SetBody sets the body text of the UI box.
-func (g *GameUIBox) SetBody(s string) *GameUIBox {
+func (g *ScoreBox) SetBody(s string) *ScoreBox {
 	g.body.SetText(s)
 	return g
 }
@@ -136,7 +135,7 @@ func NewGameText(body string, pos turdgl.Vec) *turdgl.Text {
 		SetSize(17)
 }
 
-// NewLogoBox constructs a new "2048" tile logo.
+// NewLogoBox constructs a "2048" tile logo.
 func NewLogoBox(size float64, pos turdgl.Vec, txt string) *turdgl.TextBox {
 	logo := turdgl.NewTextBox(
 		turdgl.NewCurvedRect(size, size, 3, pos),
@@ -146,7 +145,7 @@ func NewLogoBox(size float64, pos turdgl.Vec, txt string) *turdgl.TextBox {
 		SetTextSize(32).
 		SetTextColour(WhiteFontColour)
 
-	logo.Text.SetAlignment(turdgl.AlignCustom).SetOffset(turdgl.Vec{Y: 27})
+	logo.Text.SetAlignment(turdgl.AlignCustom).SetOffset(turdgl.Vec{Y: 15})
 	logo.Shape.SetStyle(turdgl.Style{Colour: Tile2048Colour})
 
 	return logo
