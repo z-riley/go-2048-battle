@@ -40,10 +40,11 @@ func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
 	tile := tile{
 		tb: turdgl.NewTextBox(
 			turdgl.NewCurvedRect(sizePx, sizePx, TileCornerRadius, pos),
-			tileFont).
+			fmt.Sprint(val),
+			tileFont,
+		).
 			SetTextSize(tileFontSize(val)).
 			SetTextAlignment(turdgl.AlignCustom).
-			SetText(fmt.Sprint(val)).
 			SetTextColour(tileTextColour(val)),
 		pos: posIdx,
 	}

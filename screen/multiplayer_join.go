@@ -56,7 +56,18 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	s.nameEntry = common.NewEntryBox(
 		400, 60,
 		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 15},
-	).SetText(namesgenerator.GetRandomName(0))
+		namesgenerator.GetRandomName(0),
+	).
+		SetModifiedCB(func() {
+			// Update host with new username
+			if s.client != nil {
+				if err := s.sendPlayerData(); err != nil {
+					if config.Debug {
+						fmt.Println("Failed to send username update to host:", err)
+					}
+				}
+			}
+		})
 
 	s.ipHeading = turdgl.NewText(
 		"Host IP:",
@@ -70,8 +81,8 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	s.ipEntry = common.NewEntryBox(
 		400, 60,
 		turdgl.Vec{X: 600 - 400/2, Y: s.ipHeading.Pos().Y + 15},
+		"127.0.0.1", // temporary for local testing
 	)
-	s.ipEntry.TextBox.SetText("127.0.0.1") // temporary for local testing
 
 	s.opponentStatus = turdgl.NewText(
 		"",
@@ -215,27 +226,9 @@ func (s *MultiplayerJoinScreen) joinGame() error {
 		}
 	})
 
-	// Construct message containing player data
-	username := s.nameEntry.Text()
-	playerData, err := json.Marshal(
-		comms.PlayerData{
-			Version:  config.Version,
-			Username: username,
-		})
-	if err != nil {
-		return fmt.Errorf("failed to marshal player data: %w", err)
-	}
-	msg, err := json.Marshal(comms.Message{
-		Type:    comms.TypePlayerData,
-		Content: playerData,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to marshal joining message: %w", err)
-	}
-
-	// Send data to host
-	if err := s.client.Write(msg); err != nil {
-		return fmt.Errorf("failed to send message to server: %w", err)
+	// Send player data to host
+	if err := s.sendPlayerData(); err != nil {
+		return fmt.Errorf("failed to send player data: %w", err)
 	}
 
 	return nil
@@ -272,6 +265,28 @@ func (s *MultiplayerJoinScreen) handleEventData(data comms.EventData) {
 	if data.Event == comms.EventHostStartGame {
 		s.hostIsReady <- true
 	}
+}
+
+// sendPlayerData sends the player data to the host.
+func (s *MultiplayerJoinScreen) sendPlayerData() error {
+	// Construct message containing player data
+	playerData, err := json.Marshal(comms.PlayerData{
+		Version:  config.Version,
+		Username: s.nameEntry.Text(),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal player data: %w", err)
+	}
+	msg, err := json.Marshal(comms.Message{
+		Type:    comms.TypePlayerData,
+		Content: playerData,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to marshal joining message: %w", err)
+	}
+
+	// Send data to host
+	return s.client.Write(msg)
 }
 
 // handleEventData handles incoming player data.

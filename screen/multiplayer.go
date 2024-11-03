@@ -75,7 +75,6 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 		s.logo2048 = common.NewLogoBox(
 			logoSize,
 			turdgl.Vec{X: (float64(s.win.Width()) - logoSize) / 2, Y: anchor.Y - 2.58*unit},
-			"2048",
 		)
 
 		// Player's grid

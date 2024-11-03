@@ -70,7 +70,6 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 		s.logo2048 = common.NewLogoBox(
 			1.36*unit,
 			turdgl.Vec{X: anchor.X, Y: anchor.Y - 2.58*unit},
-			"2048",
 		)
 
 		const wScore = 90

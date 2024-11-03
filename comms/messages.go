@@ -35,7 +35,7 @@ type EventData struct {
 	Event Event `json:"event"`
 }
 
-// Event is a type of stand-alone occurred.
+// Event is a stand-alone occurrence.
 type Event string
 
 const (

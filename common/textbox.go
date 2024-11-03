@@ -13,7 +13,7 @@ type EntryBox struct {
 }
 
 // NewEntryBox constructs a new text box with suitable defaults.
-func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
+func NewEntryBox(width, height float64, pos turdgl.Vec, txt string) *EntryBox {
 	var (
 		styleUnselected = turdgl.Style{
 			Colour:    turdgl.LightGrey,
@@ -29,7 +29,7 @@ func NewEntryBox(width, height float64, pos turdgl.Vec) *EntryBox {
 
 	bloom := turdgl.NewCurvedRect(width, height, 6, pos, turdgl.WithStyle(styleUnselected))
 
-	tb := NewTextBox(width, height, pos)
+	tb := NewTextBox(width, height, pos, txt)
 	tb.SetSelectedCB(func() {
 		tb.SetTextColour(turdgl.White)
 		bloom.SetStyle(styleSelected)
@@ -63,16 +63,22 @@ func (e *EntryBox) SetText(text string) *EntryBox {
 	return e
 }
 
-func NewTextBox(width, height float64, pos turdgl.Vec) *turdgl.TextBox {
+// SetModifiedCB sets a callback which is executed when the text in the entry
+// box is modified.
+func (e *EntryBox) SetModifiedCB(callback func()) *EntryBox {
+	e.TextBox.SetCallback(callback)
+	return e
+}
+
+func NewTextBox(width, height float64, pos turdgl.Vec, txt string) *turdgl.TextBox {
 	r := turdgl.NewCurvedRect(
 		width, height, 6, pos,
 		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
 	)
 	r.SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
 
-	tb := turdgl.NewTextBox(r, FontPathMedium).
+	tb := turdgl.NewTextBox(r, txt, FontPathMedium).
 		SetTextOffset(turdgl.Vec{X: 0, Y: 15}).
-		SetText("Click to edit").
 		SetTextSize(36).
 		SetTextColour(LightGreyTextColour)
 
@@ -102,7 +108,7 @@ func NewScoreBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *Scor
 		turdgl.WithStyle(turdgl.Style{Colour: colour}),
 	)
 
-	body := turdgl.NewTextBox(r, FontPathBold).
+	body := turdgl.NewTextBox(r, "", FontPathBold).
 		SetTextOffset(turdgl.Vec{X: 0, Y: 18}).
 		SetTextSize(26).
 		SetTextColour(WhiteFontColour)
@@ -136,12 +142,12 @@ func NewGameText(body string, pos turdgl.Vec) *turdgl.Text {
 }
 
 // NewLogoBox constructs a "2048" tile logo.
-func NewLogoBox(size float64, pos turdgl.Vec, txt string) *turdgl.TextBox {
+func NewLogoBox(size float64, pos turdgl.Vec) *turdgl.TextBox {
 	logo := turdgl.NewTextBox(
 		turdgl.NewCurvedRect(size, size, 3, pos),
+		"2048",
 		FontPathBold,
 	).
-		SetText(txt).
 		SetTextSize(32).
 		SetTextColour(WhiteFontColour)
 

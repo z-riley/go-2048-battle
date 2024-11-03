@@ -58,7 +58,14 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	s.nameEntry = common.NewEntryBox(
 		400, 60,
 		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 20},
-	).SetText(namesgenerator.GetRandomName(0))
+		namesgenerator.GetRandomName(0),
+	).
+		SetModifiedCB(func() {
+			// Update guest with new username
+			if err := s.sendPlayerData(); err != nil {
+				fmt.Println("Failed to send username update to guests:", err)
+			}
+		})
 
 	s.opponentStatus = turdgl.NewText(
 		fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()),
@@ -204,25 +211,12 @@ func (s *MultiplayerHostScreen) handleClientData(id int, b []byte) error {
 	}
 }
 
-// handlePlayerData handles incoming player data.
-func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) error {
-	// Make sure versions are compatible
-	if data.Version != config.Version {
-		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
-	}
-
-	s.opponentName = data.Username
-	s.opponentStatus.SetText(
-		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", s.opponentName),
-	)
-	s.opponentIsConnected = true
-
-	// Send host player data to the client
-	username := s.nameEntry.Text()
+// sendPlayerData sends the player data to all connected guests.
+func (s *MultiplayerHostScreen) sendPlayerData() error {
 	playerData, err := json.Marshal(
 		comms.PlayerData{
 			Version:  config.Version,
-			Username: username,
+			Username: s.nameEntry.Text(),
 		})
 	if err != nil {
 		return fmt.Errorf("failed to marshal player data: %w", err)
@@ -237,9 +231,30 @@ func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) 
 	}
 
 	// Send data to client
-	if err := s.server.WriteToClient(id, msg); err != nil {
-		return fmt.Errorf("failed to send message to server: %w", err)
+	for _, id := range s.server.GetClientIDs() {
+		if err := s.server.WriteToClient(id, msg); err != nil {
+			return fmt.Errorf("failed to send message to server: %w", err)
+		}
 	}
+
+	return nil
+}
+
+// handlePlayerData handles incoming player data.
+func (s *MultiplayerHostScreen) handlePlayerData(id int, data comms.PlayerData) error {
+	// Make sure versions are compatible
+	if data.Version != config.Version {
+		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
+	}
+
+	s.opponentName = data.Username
+	s.opponentStatus.SetText(
+		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", s.opponentName),
+	)
+	s.opponentIsConnected = true
+
+	// Send host player data to client
+	s.sendPlayerData()
 
 	return nil
 }
