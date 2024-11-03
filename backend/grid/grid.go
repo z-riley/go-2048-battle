@@ -2,7 +2,6 @@ package grid
 
 import (
 	"fmt"
-	"hash/fnv"
 	"math/rand"
 	"reflect"
 	"sync"
@@ -70,33 +69,6 @@ func (g *Grid) Reset() {
 	}
 	g.Tiles[tile1.x][tile1.y].Val = newTileVal()
 	g.Tiles[tile2.x][tile2.y].Val = newTileVal()
-}
-
-// PseudoRandomReset resets the grid to a start-of-game state, spawning two '2' tiles in
-// locations determined by the provided key. If this function is called twice with the same
-// seed, the resulting grid would be the same.
-func (g *Grid) PseudoRandomReset(seed string) {
-	g.Tiles = NewTiles()
-
-	// Hash the seed into a uint32
-	hasher := fnv.New32a()
-	if _, err := hasher.Write([]byte(seed)); err != nil {
-		panic(err)
-	}
-	hash := hasher.Sum32()
-
-	// Place two '2' tiles in random positions
-	type pos struct{ x, y uint32 }
-	tile1 := pos{(hash >> 0) & 0b11, (hash >> 2) & 0b11}
-	tile2 := pos{(hash >> 4) & 0b11, (hash >> 6) & 0b11}
-
-	// Ensure pos1 and pos2 are different
-	if (tile1.x == tile2.x) && (tile1.y == tile2.y) {
-		tile1.x = (tile1.x + 1) & 0b11 // wrap around with 0b11 to ensure it's in range 0-3
-	}
-
-	g.Tiles[tile1.x][tile1.y].Val = 2
-	g.Tiles[tile2.x][tile2.y].Val = 2
 }
 
 // ClearCmbFlags clears the Cmb flag of every tile.

@@ -116,7 +116,6 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 
 			s.backend = backend.NewGame(&backend.Opts{
 				SaveToDisk: false,
-				ResetKey:   initData[usernameKey].(string),
 			})
 			s.arenaInputCh = make(chan func(), 100)
 
@@ -149,7 +148,6 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 
 			s.opponentBackend = backend.NewGame(&backend.Opts{
 				SaveToDisk: false,
-				ResetKey:   initData[opponentUsernameKey].(string),
 			})
 
 			s.opponentDebugGrid = turdgl.NewText(
