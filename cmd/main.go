@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 
 	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/go-2048-battle/debug"
+	"github.com/z-riley/go-2048-battle/log"
 	"github.com/z-riley/go-2048-battle/screen"
 	"github.com/z-riley/turdgl"
 )

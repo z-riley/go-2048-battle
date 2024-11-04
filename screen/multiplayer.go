@@ -10,6 +10,7 @@ import (
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
 	"github.com/z-riley/go-2048-battle/config"
+	"github.com/z-riley/go-2048-battle/log"
 	"github.com/z-riley/turdgl"
 	"github.com/z-riley/turdserve"
 )
@@ -164,17 +165,17 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			s.server = server.(*turdserve.Server)
 			s.server.SetCallback(func(id int, b []byte) {
 				if err := s.handleOpponentData(b); err != nil {
-					fmt.Println("Failed to handle opponent data as server", err)
+					log.Println("Failed to handle opponent data as server", err)
 				}
 			}).SetDisconnectCallback(func(id int) {
-				fmt.Println("Opponent has left the game")
+				log.Println("Opponent has left the game")
 			})
 		} else if client, ok := initData[clientKey]; ok {
 			// Guest mode - initialise client
 			s.client = client.(*turdserve.Client)
 			s.client.SetCallback(func(b []byte) {
 				if err := s.handleOpponentData(b); err != nil {
-					fmt.Println("Failed to handle opponent data as client", err)
+					log.Println("Failed to handle opponent data as client", err)
 				}
 			})
 		} else {
@@ -183,9 +184,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 
 		// Tell the opponent that the local server/client is ready to receive data
 		if err := s.sendScreenLoadedEvent(); err != nil {
-			if config.Debug {
-				fmt.Println("Failed to send game update", err)
-			}
+			log.Println("Failed to send game update", err)
 		}
 	}
 
@@ -268,7 +267,7 @@ func (s *MultiplayerScreen) Update() {
 	case inputFunc := <-s.arenaInputCh:
 		inputFunc()
 		if err := s.sendGameData(); err != nil {
-			fmt.Println("Failed to send game update:", err)
+			log.Println("Failed to send game update:", err)
 		}
 
 	default:

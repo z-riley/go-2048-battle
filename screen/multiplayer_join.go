@@ -9,6 +9,7 @@ import (
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
 	"github.com/z-riley/go-2048-battle/config"
+	"github.com/z-riley/go-2048-battle/log"
 	"github.com/z-riley/turdgl"
 	"github.com/z-riley/turdserve"
 )
@@ -61,9 +62,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 			// Update host with new username
 			if s.client != nil {
 				if err := s.sendPlayerData(); err != nil {
-					if config.Debug {
-						fmt.Println("Failed to send username update to host:", err)
-					}
+					log.Println("Failed to send username update to host:", err)
 				}
 			}
 		})
@@ -180,9 +179,7 @@ func (s *MultiplayerJoinScreen) joinButtonHandler() {
 	go func() {
 		for err := range errCh {
 			if err != nil {
-				if config.Debug {
-					fmt.Println(fmt.Errorf("client error: %w", err).Error())
-				}
+				log.Println("Client error: %w", err)
 
 				// Re-enable button
 				s.join.SetCallback(
@@ -209,9 +206,7 @@ func (s *MultiplayerJoinScreen) joinButtonHandler() {
 			time.Sleep(time.Second)
 			s.opponentStatus.SetText("")
 		}()
-		if config.Debug {
-			fmt.Println("Failed to join game:", err)
-		}
+		log.Println("Failed to join game:", err)
 		return
 	}
 
@@ -243,7 +238,7 @@ func (s *MultiplayerJoinScreen) joinGame(errCh chan error) error {
 
 	s.client.SetCallback(func(b []byte) {
 		if err := s.handleServerData(b); err != nil {
-			fmt.Println("Join screen failed to handle data from server:", err)
+			log.Println("Join screen failed to handle data from server:", err)
 		}
 	})
 

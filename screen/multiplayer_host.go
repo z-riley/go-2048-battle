@@ -9,6 +9,7 @@ import (
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
 	"github.com/z-riley/go-2048-battle/config"
+	"github.com/z-riley/go-2048-battle/log"
 	"github.com/z-riley/turdgl"
 	"github.com/z-riley/turdserve"
 )
@@ -62,7 +63,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		SetModifiedCB(func() {
 			// Update guest with new username
 			if err := s.sendPlayerData(); err != nil {
-				fmt.Println("Failed to send username update to guests:", err)
+				log.Println("Failed to send username update to guests:", err)
 			}
 		})
 
@@ -113,7 +114,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 			}
 
 			if err := s.startGame(); err != nil {
-				fmt.Println("Failed to start game:", err)
+				log.Println("Failed to start game:", err)
 			}
 		},
 	).SetLabelText("Start")
@@ -140,7 +141,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	s.server = turdserve.NewServer(maxClients).
 		SetCallback(func(_ int, b []byte) {
 			if err := s.handleClientData(b); err != nil {
-				fmt.Println("Host screen failed to handle data from client:", err)
+				log.Println("Host screen failed to handle data from client:", err)
 			}
 		}).SetDisconnectCallback(func(_ int) { s.handleOpponentDisconnect() })
 
@@ -204,6 +205,7 @@ func (s *MultiplayerHostScreen) handleClientData(data []byte) error {
 			return fmt.Errorf("failed to parse player data: %w", err)
 		}
 		return s.handlePlayerData(data)
+
 	default:
 		// Ignore other message type - don't return error
 		return nil

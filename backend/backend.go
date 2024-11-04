@@ -2,10 +2,10 @@ package backend
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/go-2048-battle/backend/store"
+	"github.com/z-riley/go-2048-battle/log"
 )
 
 // Game contains all reuquired data for a 2048 game.
@@ -41,7 +41,7 @@ func NewGame(opts *Opts) *Game {
 	if g.opts.SaveToDisk {
 		err := g.Load()
 		if err != nil {
-			fmt.Println("No save file found. Creating new one")
+			log.Println("No save file found. Creating new one")
 			if err := g.Save(); err != nil {
 				panic(err)
 			}
