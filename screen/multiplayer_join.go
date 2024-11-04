@@ -257,36 +257,38 @@ func (s *MultiplayerJoinScreen) joinGame(errCh chan error) error {
 }
 
 // handleServerData handles all data received from the server.
-func (s *MultiplayerJoinScreen) handleServerData(b []byte) error {
-	var msg comms.Message
-	if err := json.Unmarshal(b, &msg); err != nil {
-		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)
+func (s *MultiplayerJoinScreen) handleServerData(data []byte) error {
+	msg, err := comms.ParseMessage(data)
+	if err != nil {
+		return fmt.Errorf("failed to parse message: %w", err)
 	}
 
 	switch msg.Type {
 	case comms.TypeEventData:
-		var data comms.EventData
-		if err := json.Unmarshal(msg.Content, &data); err != nil {
-			return fmt.Errorf("failed to unmarshal event data: %w", err)
+		eventData, err := comms.ParseEventData(msg.Content)
+		if err != nil {
+			return fmt.Errorf("failed to parse event data: %w", err)
 		}
-		s.handleEventData(data)
-		return nil
+		return s.handleEventData(eventData)
+
 	case comms.TypePlayerData:
-		var data comms.PlayerData
-		if err := json.Unmarshal(msg.Content, &data); err != nil {
-			return fmt.Errorf("failed to unmarshal player data: %w", err)
+		playerData, err := comms.ParsePlayerData(msg.Content)
+		if err != nil {
+			return fmt.Errorf("failed to parse player data: %w", err)
 		}
-		return s.handlePlayerData(data)
+		return s.handlePlayerData(playerData)
+
 	default:
 		return fmt.Errorf("unsupported message type \"%s\"", msg.Type)
 	}
 }
 
 // handleEventData handles incoming event data.
-func (s *MultiplayerJoinScreen) handleEventData(data comms.EventData) {
+func (s *MultiplayerJoinScreen) handleEventData(data comms.EventData) error {
 	if data.Event == comms.EventHostStartGame {
 		s.hostIsReady <- true
 	}
+	return nil
 }
 
 // sendPlayerData sends the player data to the host.

@@ -192,22 +192,23 @@ func (s *MultiplayerHostScreen) Update() {
 }
 
 // handleClientData handles all data received from a client.
-func (s *MultiplayerHostScreen) handleClientData(b []byte) error {
-	var msg comms.Message
-	if err := json.Unmarshal(b, &msg); err != nil {
-		return fmt.Errorf("failed to unmarshal bytes from client: %w", err)
+func (s *MultiplayerHostScreen) handleClientData(data []byte) error {
+	msg, err := comms.ParseMessage(data)
+	if err != nil {
+		return fmt.Errorf("failed to parse message: %w", err)
 	}
 
 	switch msg.Type {
 	case comms.TypePlayerData:
-		var data comms.PlayerData
-		if err := json.Unmarshal(msg.Content, &data); err != nil {
-			return fmt.Errorf("failed to unmarshal player data: %w", err)
+		data, err := comms.ParsePlayerData(msg.Content)
+		if err != nil {
+			return fmt.Errorf("failed to parse player data: %w", err)
 		}
 		return s.handlePlayerData(data)
+	default:
+		// Ignore other message types - don't return error
+		return nil
 	}
-
-	return nil
 }
 
 // sendPlayerData sends the player data to all connected guests.

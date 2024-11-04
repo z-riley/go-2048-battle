@@ -328,32 +328,32 @@ func (s *MultiplayerScreen) sendToOpponent(b []byte) error {
 
 // handleOpponentData handles data from the opponent.
 func (s *MultiplayerScreen) handleOpponentData(data []byte) error {
-	var msg comms.Message
-	if err := json.Unmarshal(data, &msg); err != nil {
-		return fmt.Errorf("failed to unmarshal message: %w", err)
+	msg, err := comms.ParseMessage(data)
+	if err != nil {
+		return fmt.Errorf("failed to parse message: %w", err)
 	}
 
 	switch msg.Type {
 	case comms.TypeGameData:
-		var data comms.GameData
-		if err := json.Unmarshal(msg.Content, &data); err != nil {
-			return fmt.Errorf("failed to unmarshal game data: %w", err)
+		gameData, err := comms.ParseGameData(msg.Content)
+		if err != nil {
+			return fmt.Errorf("failed to parse game data: %w", err)
 		}
-		return s.handleGameData(data)
+		return s.handleGameData(gameData)
 
 	case comms.TypeEventData:
-		var data comms.EventData
-		if err := json.Unmarshal(msg.Content, &data); err != nil {
-			return fmt.Errorf("failed to unmarshal event data: %w", err)
+		eventData, err := comms.ParseEventData(msg.Content)
+		if err != nil {
+			return fmt.Errorf("failed to parse event data: %w", err)
 		}
-		return s.handleEventData(data)
+		return s.handleEventData(eventData)
 
 	case comms.TypeRequest:
-		var data comms.RequestData
-		if err := json.Unmarshal(msg.Content, &data); err != nil {
-			return fmt.Errorf("failed to unmarshal request data: %w", err)
+		requestData, err := comms.ParseRequestData(msg.Content)
+		if err != nil {
+			return fmt.Errorf("failed to parse request data: %w", err)
 		}
-		return s.handleRequest(data)
+		return s.handleRequest(requestData)
 
 	default:
 		return fmt.Errorf("unsupported message type \"%s\"", msg.Type)
