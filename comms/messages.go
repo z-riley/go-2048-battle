@@ -15,20 +15,19 @@ type Message struct {
 }
 
 // ParseMessage returns a message from a byte slice.
-func ParseMessage(b []byte) (Message, error) {
-	var msg Message
-	err := json.Unmarshal(b, &msg)
-	return msg, err
+func ParseMessage(b []byte) (m Message, err error) {
+	err = json.Unmarshal(b, &m)
+	return m, err
 }
 
 // MessageType defines the type of message.
 type MessageType string
 
 const (
-	TypePlayerData MessageType = "playerData"
-	TypeGameData               = "gameData"
-	TypeEventData              = "eventData"
-	TypeRequest                = "request"
+	TypePlayerData  MessageType = "playerData"
+	TypeGameData                = "gameData"
+	TypeEventData               = "eventData"
+	TypeRequestData             = "request"
 )
 
 // PlayerData contains data about a player.
@@ -38,10 +37,18 @@ type PlayerData struct {
 }
 
 // ParsePlayerData returns player data from a byte slice.
-func ParsePlayerData(b []byte) (PlayerData, error) {
-	var data PlayerData
-	err := json.Unmarshal(b, &data)
-	return data, err
+func ParsePlayerData(b []byte) (d PlayerData, err error) {
+	err = json.Unmarshal(b, &d)
+	return d, err
+}
+
+// Serialise converts player data into a byte slice.
+func (d PlayerData) Serialise() ([]byte, error) {
+	b, err := json.Marshal(d)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(Message{TypePlayerData, b})
 }
 
 // GameData contains a game's current state.
@@ -50,10 +57,18 @@ type GameData struct {
 }
 
 // ParseGameData returns game data from a byte slice.
-func ParseGameData(b []byte) (GameData, error) {
-	var data GameData
-	err := json.Unmarshal(b, &data)
-	return data, err
+func ParseGameData(b []byte) (d GameData, err error) {
+	err = json.Unmarshal(b, &d)
+	return d, err
+}
+
+// Serialise converts game data into a byte slice.
+func (d GameData) Serialise() ([]byte, error) {
+	b, err := json.Marshal(d)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(Message{TypeGameData, b})
 }
 
 // EventData contains an event which has occurred.
@@ -72,10 +87,18 @@ const (
 )
 
 // ParseEventData returns event data from a byte slice.
-func ParseEventData(b []byte) (EventData, error) {
-	var data EventData
-	err := json.Unmarshal(b, &data)
-	return data, err
+func ParseEventData(b []byte) (d EventData, err error) {
+	err = json.Unmarshal(b, &d)
+	return d, err
+}
+
+// Serialise converts event data into a byte slice.
+func (d EventData) Serialise() ([]byte, error) {
+	b, err := json.Marshal(d)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(Message{TypeEventData, b})
 }
 
 // RequestData contains a request for data of a certain type.
@@ -84,8 +107,16 @@ type RequestData struct {
 }
 
 // ParseRequestData returns request data from a byte slice.
-func ParseRequestData(b []byte) (RequestData, error) {
-	var data RequestData
-	err := json.Unmarshal(b, &data)
-	return data, err
+func ParseRequestData(b []byte) (d RequestData, err error) {
+	err = json.Unmarshal(b, &d)
+	return d, err
+}
+
+// Serialise converts request data into a byte slice.
+func (d RequestData) Serialise() ([]byte, error) {
+	b, err := json.Marshal(d)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(Message{TypeRequestData, b})
 }

@@ -2,7 +2,6 @@ package screen
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -293,23 +292,14 @@ func (s *MultiplayerJoinScreen) handleEventData(data comms.EventData) error {
 
 // sendPlayerData sends the player data to the host.
 func (s *MultiplayerJoinScreen) sendPlayerData() error {
-	// Construct message containing player data
-	playerData, err := json.Marshal(comms.PlayerData{
+	msg, err := comms.PlayerData{
 		Version:  config.Version,
 		Username: s.nameEntry.Text(),
-	})
+	}.Serialise()
 	if err != nil {
-		return fmt.Errorf("failed to marshal player data: %w", err)
-	}
-	msg, err := json.Marshal(comms.Message{
-		Type:    comms.TypePlayerData,
-		Content: playerData,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to marshal joining message: %w", err)
+		return fmt.Errorf("failed to serialise player data: %w", err)
 	}
 
-	// Send data to host
 	return s.client.Write(msg)
 }
 

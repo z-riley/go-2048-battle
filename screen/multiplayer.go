@@ -1,7 +1,6 @@
 package screen
 
 import (
-	"encoding/json"
 	"fmt"
 	"image/color"
 
@@ -348,7 +347,7 @@ func (s *MultiplayerScreen) handleOpponentData(data []byte) error {
 		}
 		return s.handleEventData(eventData)
 
-	case comms.TypeRequest:
+	case comms.TypeRequestData:
 		requestData, err := comms.ParseRequestData(msg.Content)
 		if err != nil {
 			return fmt.Errorf("failed to parse request data: %w", err)
@@ -362,20 +361,11 @@ func (s *MultiplayerScreen) handleOpponentData(data []byte) error {
 
 // sendGameData sends the local game state to the opponent.
 func (s *MultiplayerScreen) sendGameData() error {
-	gameData, err := json.Marshal(
-		comms.GameData{
-			Game: *s.backend,
-		})
+	msg, err := comms.GameData{
+		Game: *s.backend,
+	}.Serialise()
 	if err != nil {
-		return fmt.Errorf("failed to marshal game data: %w", err)
-	}
-	msg, err := json.Marshal(
-		comms.Message{
-			Type:    comms.TypeGameData,
-			Content: gameData,
-		})
-	if err != nil {
-		return fmt.Errorf("failed to marshal message: %w", err)
+		return fmt.Errorf("failed to serialise game data: %w", err)
 	}
 
 	return s.sendToOpponent(msg)
@@ -389,20 +379,11 @@ func (s *MultiplayerScreen) handleGameData(data comms.GameData) error {
 
 // sendScreenLoadedEvent sends the screen loaded event to the opponent.
 func (s *MultiplayerScreen) sendScreenLoadedEvent() error {
-	eventData, err := json.Marshal(
-		comms.EventData{
-			Event: comms.EventScreenLoaded,
-		})
+	msg, err := comms.EventData{
+		Event: comms.EventScreenLoaded,
+	}.Serialise()
 	if err != nil {
-		return fmt.Errorf("failed to marshal event data: %w", err)
-	}
-	msg, err := json.Marshal(
-		comms.Message{
-			Type:    comms.TypeEventData,
-			Content: eventData,
-		})
-	if err != nil {
-		return fmt.Errorf("failed to marshal message: %w", err)
+		return fmt.Errorf("failed to serialise event data: %w", err)
 	}
 
 	return s.sendToOpponent(msg)
@@ -428,20 +409,11 @@ func (s *MultiplayerScreen) handleEventData(data comms.EventData) error {
 
 // requestOpponentData sends a request for the opponent to send their game data.
 func (s *MultiplayerScreen) requestOpponentGameData() error {
-	request, err := json.Marshal(
-		comms.RequestData{
-			Request: comms.TypeGameData,
-		})
+	msg, err := comms.RequestData{
+		Request: comms.TypeGameData,
+	}.Serialise()
 	if err != nil {
-		return fmt.Errorf("failed to marshal event data: %w", err)
-	}
-	msg, err := json.Marshal(
-		comms.Message{
-			Type:    comms.TypeRequest,
-			Content: request,
-		})
-	if err != nil {
-		return fmt.Errorf("failed to marshal message: %w", err)
+		return fmt.Errorf("failed to serialise request data: %w", err)
 	}
 
 	if err := s.sendToOpponent(msg); err != nil {

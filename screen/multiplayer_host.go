@@ -1,7 +1,6 @@
 package screen
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -206,34 +205,25 @@ func (s *MultiplayerHostScreen) handleClientData(data []byte) error {
 		}
 		return s.handlePlayerData(data)
 	default:
-		// Ignore other message types - don't return error
+		// Ignore other message type - don't return error
 		return nil
 	}
 }
 
 // sendPlayerData sends the player data to all connected guests.
 func (s *MultiplayerHostScreen) sendPlayerData() error {
-	playerData, err := json.Marshal(
-		comms.PlayerData{
-			Version:  config.Version,
-			Username: s.nameEntry.Text(),
-		})
+	msg, err := comms.PlayerData{
+		Version:  config.Version,
+		Username: s.nameEntry.Text(),
+	}.Serialise()
 	if err != nil {
-		return fmt.Errorf("failed to marshal player data: %w", err)
-	}
-	msg, err := json.Marshal(
-		comms.Message{
-			Type:    comms.TypePlayerData,
-			Content: playerData,
-		})
-	if err != nil {
-		return fmt.Errorf("failed to marshal joining message: %w", err)
+		return fmt.Errorf("failed to serialise player data: %w", err)
 	}
 
 	// Send data to client
 	for _, id := range s.server.GetClientIDs() {
 		if err := s.server.WriteToClient(id, msg); err != nil {
-			return fmt.Errorf("failed to send message to server: %w", err)
+			return fmt.Errorf("failed to send message to client: %w", err)
 		}
 	}
 
@@ -288,17 +278,11 @@ func (s *MultiplayerHostScreen) startGame() error {
 	}
 
 	// Inform other players that game is starting
-	eventData, err := json.Marshal(comms.EventData{Event: comms.EventHostStartGame})
+	msg, err := comms.EventData{
+		Event: comms.EventHostStartGame,
+	}.Serialise()
 	if err != nil {
-		return fmt.Errorf("failed to marshal event data: %w", err)
-	}
-	msg, err := json.Marshal(
-		comms.Message{
-			Type:    comms.TypeEventData,
-			Content: eventData,
-		})
-	if err != nil {
-		return fmt.Errorf("failed to marshal event message: %w", err)
+		return fmt.Errorf("failed to serialise event data: %w", err)
 	}
 	for _, id := range s.server.GetClientIDs() {
 		if err := s.server.WriteToClient(id, msg); err != nil {
