@@ -116,36 +116,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 			X: s.buttonBackground.Pos.X + TileSizePx*TileBoundryFactor,
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
 		},
-		func() {
-			if err := s.joinGame(); err != nil {
-				s.opponentStatus.SetText("Failed to connect to host")
-				go func() {
-					time.Sleep(time.Second)
-					s.opponentStatus.SetText("")
-				}()
-				if config.Debug {
-					fmt.Println("Failed to join game:", err)
-				}
-				return
-			}
-
-			// Disable the button so user can't connect again
-			s.join.SetCallback(
-				turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
-				func() {},
-			)
-
-			go func() {
-				if <-s.hostIsReady {
-					SetScreen(Multiplayer, InitData{
-						clientKey:           s.client,
-						usernameKey:         s.nameEntry.Text(),
-						opponentUsernameKey: s.opponentName,
-					})
-					return
-				}
-			}()
-		},
+		s.joinButtonHandler,
 	).SetLabelText("Join")
 
 	s.back = common.NewMenuButton(
@@ -202,21 +173,72 @@ func (s *MultiplayerJoinScreen) Update() {
 // clientKey is used for indentifying the server in InitData.
 const clientKey = "client"
 
-// joinGame attempts to join a multiplayer game.
-func (s *MultiplayerJoinScreen) joinGame() error {
+// joinButtonHandler handles presses of the join button.
+func (s *MultiplayerJoinScreen) joinButtonHandler() {
 
-	// Connect using the user-specified IP address
-	ip := s.ipEntry.Text()
+	// Handle asynchronous errors from client
 	errCh := make(chan error)
 	go func() {
 		for err := range errCh {
 			if err != nil {
-				fmt.Println(fmt.Errorf("client error: %w", err).Error())
-				s.client.Destroy()
+				if config.Debug {
+					fmt.Println(fmt.Errorf("client error: %w", err).Error())
+				}
+
+				// Re-enable button
+				s.join.SetCallback(
+					turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
+					s.joinButtonHandler,
+				)
+
+				// Display error to user
+				s.opponentStatus.SetText("Lost connection with host")
+				go func() {
+					timer := time.NewTimer(2 * time.Second)
+					<-timer.C
+					s.opponentStatus.SetText("")
+				}()
+
 			}
 		}
 	}()
-	if err := s.client.Connect(context.Background(), ip, serverPort, errCh); err != nil {
+
+	err := s.joinGame(errCh)
+	if err != nil {
+		s.opponentStatus.SetText("Failed to connect to host")
+		go func() {
+			time.Sleep(time.Second)
+			s.opponentStatus.SetText("")
+		}()
+		if config.Debug {
+			fmt.Println("Failed to join game:", err)
+		}
+		return
+	}
+
+	// Disable the button so user can't connect again
+	s.join.SetCallback(
+		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
+		func() {},
+	)
+
+	go func() {
+		if <-s.hostIsReady {
+			SetScreen(Multiplayer, InitData{
+				clientKey:           s.client,
+				usernameKey:         s.nameEntry.Text(),
+				opponentUsernameKey: s.opponentName,
+			})
+			return
+		}
+	}()
+}
+
+// joinGame attempts to join a multiplayer game.
+func (s *MultiplayerJoinScreen) joinGame(errCh chan error) error {
+
+	// Connect using the user-specified IP address
+	if err := s.client.Connect(context.Background(), s.ipEntry.Text(), serverPort, errCh); err != nil {
 		return fmt.Errorf("failed to connect to server: %w", err)
 	}
 

@@ -8,14 +8,8 @@ github.com/netgusto/poly2tri-go v0.0.0-20170716161910-d102ad91854f h1:FZS+KQHU5M
 github.com/netgusto/poly2tri-go v0.0.0-20170716161910-d102ad91854f/go.mod h1:8LfVyyP2+2/DB4O1uPRecaaumn7HaYB9zA1LLkcdq9E=
 github.com/veandco/go-sdl2 v0.4.40 h1:fZv6wC3zz1Xt167P09gazawnpa0KY5LM7JAvKpX9d/U=
 github.com/veandco/go-sdl2 v0.4.40/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
-github.com/z-riley/turdgl v0.0.0-20241103111552-ef883b958e49 h1:K7b4KtYxkp1BW47OCcbSJJhol6k8rWc/C7+xa9NSQm0=
-github.com/z-riley/turdgl v0.0.0-20241103111552-ef883b958e49/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
-github.com/z-riley/turdgl v0.0.0-20241103154043-2a6b3b72654a h1:EXwwnymFJqVMTm5TxFG6jxl9dJpYeFNXNb0RttgXzW8=
-github.com/z-riley/turdgl v0.0.0-20241103154043-2a6b3b72654a/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
-github.com/z-riley/turdserve v0.0.0-20241103122123-370e591c0f5f h1:AVtzY0DVaHKOW4+qtrI2U5SVTEIyw3Z+eq7R6dTVOj4=
-github.com/z-riley/turdserve v0.0.0-20241103122123-370e591c0f5f/go.mod h1:D5VroZVlQvt0vUtZ2xHL8aQOlCumE/9LFEH1BBLE468=
-github.com/z-riley/turdserve v0.0.0-20241103151819-66054e8d6494 h1:szdvIRaCDBz/IPCqOnh8L2g8Kz/4cdZgRVVeKIWgfvA=
-github.com/z-riley/turdserve v0.0.0-20241103151819-66054e8d6494/go.mod h1:D5VroZVlQvt0vUtZ2xHL8aQOlCumE/9LFEH1BBLE468=
+github.com/z-riley/turdgl v0.0.0-20241103202229-f47b8b5d8d90 h1:m8g+TQSdHx2iv8Eggix74ze3/YfsoYtHT0NdT1xycpY=
+github.com/z-riley/turdgl v0.0.0-20241103202229-f47b8b5d8d90/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
 github.com/z-riley/turdserve v0.0.0-20241103172943-200ed8c9c094 h1:9ldkpBMZ5+BV8GOGH+4QhrBgevotAprFgMVCasm+td0=
 github.com/z-riley/turdserve v0.0.0-20241103172943-200ed8c9c094/go.mod h1:D5VroZVlQvt0vUtZ2xHL8aQOlCumE/9LFEH1BBLE468=
 golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa h1:ELnwvuAXPNtPk1TJRuGkI9fDTwym6AYBu0qzT8AcHdI=
