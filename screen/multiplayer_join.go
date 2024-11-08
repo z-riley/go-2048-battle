@@ -81,7 +81,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	s.ipStore = store.NewStore(".ip.bruh")
 	b, err := s.ipStore.ReadBytes()
 	if err != nil {
-		log.Println("Failed to read IP store:", err)
+		log.Println("Failed to read IP address store:", err)
 		b = []byte("Enter IP address")
 	}
 
@@ -90,7 +90,9 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 		turdgl.Vec{X: 600 - 400/2, Y: s.ipHeading.Pos().Y + 15},
 		string(b),
 	).SetModifiedCB(func() {
-		s.ipStore.SaveBytes([]byte(s.ipEntry.Text()))
+		if err := s.ipStore.SaveBytes([]byte(s.ipEntry.Text())); err != nil {
+			log.Println("Failed to save IP address to store")
+		}
 	})
 
 	s.opponentStatus = turdgl.NewText(
