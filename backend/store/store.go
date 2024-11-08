@@ -6,17 +6,28 @@ import (
 	"sync"
 )
 
-const filename = ".save.bruh"
+// Store can store bytes to the disk with gob encoding.
+type Store struct {
+	mu       *sync.Mutex
+	filename string
+}
 
-var mu = new(sync.Mutex)
+// NewStore constructs a new store under a specified filename. If the file already
+// exists, its current contents are used.
+func NewStore(filename string) *Store {
+	return &Store{
+		mu:       new(sync.Mutex),
+		filename: filename,
+	}
+}
 
-// SaveBytes saves bytes to the save file.
-func SaveBytes(b []byte) error {
-	mu.Lock()
-	defer mu.Unlock()
+// SaveBytes saves bytes to the store.
+func (s *Store) SaveBytes(b []byte) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// Create save file if it doesn't exist
-	file, err := os.Create(filename)
+	file, err := os.Create(s.filename)
 	if err != nil {
 		return err
 	}
@@ -30,9 +41,9 @@ func SaveBytes(b []byte) error {
 	return nil
 }
 
-// ReadBytes reads bytes from the save file.
-func ReadBytes() ([]byte, error) {
-	file, err := os.Open(filename)
+// ReadBytes reads bytes from the store.
+func (s *Store) ReadBytes() ([]byte, error) {
+	file, err := os.Open(s.filename)
 	if err != nil {
 		return nil, err
 	}

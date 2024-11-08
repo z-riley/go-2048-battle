@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -20,19 +21,25 @@ func (g *TestStruct) LoadFromJSON(j []byte) error {
 }
 
 func TestSaveBytesReadBytes(t *testing.T) {
+	const filename = ".test.bruh"
+	s := NewStore(filename)
+	defer func() {
+		_ = os.Remove(s.filename)
+	}()
+
 	// Save some data
 	myStruct := TestStruct{I: 12, S: "hello"}
 	expected, err := myStruct.JSON()
 	if err != nil {
 		t.Error(err)
 	}
-	err = SaveBytes(expected)
+	err = s.SaveBytes(expected)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// Read the old state from the disk
-	got, err := ReadBytes()
+	got, err := s.ReadBytes()
 	if err != nil {
 		t.Error(err)
 	}

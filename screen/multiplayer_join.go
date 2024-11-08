@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/moby/moby/pkg/namesgenerator"
+	"github.com/z-riley/go-2048-battle/backend/store"
 	"github.com/z-riley/go-2048-battle/common"
 	"github.com/z-riley/go-2048-battle/comms"
 	"github.com/z-riley/go-2048-battle/config"
@@ -21,6 +22,7 @@ type MultiplayerJoinScreen struct {
 	nameHeading      *turdgl.Text
 	nameEntry        *common.EntryBox
 	ipHeading        *turdgl.Text
+	ipStore          *store.Store
 	ipEntry          *common.EntryBox
 	opponentName     string
 	opponentStatus   *turdgl.Text
@@ -76,11 +78,20 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(30)
 
+	s.ipStore = store.NewStore(".ip.bruh")
+	b, err := s.ipStore.ReadBytes()
+	if err != nil {
+		log.Println("Failed to read IP store:", err)
+		b = []byte("Enter IP address")
+	}
+
 	s.ipEntry = common.NewEntryBox(
 		400, 60,
 		turdgl.Vec{X: 600 - 400/2, Y: s.ipHeading.Pos().Y + 15},
-		"127.0.0.1", // temporary for local testing
-	)
+		string(b),
+	).SetModifiedCB(func() {
+		s.ipStore.SaveBytes([]byte(s.ipEntry.Text()))
+	})
 
 	s.opponentStatus = turdgl.NewText(
 		"",
@@ -179,7 +190,7 @@ func (s *MultiplayerJoinScreen) joinButtonHandler() {
 	go func() {
 		for err := range errCh {
 			if err != nil {
-				log.Println("Client error: %w", err)
+				log.Println("Client error:", err)
 
 				// Re-enable button
 				s.join.SetCallback(

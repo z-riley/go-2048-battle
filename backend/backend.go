@@ -14,7 +14,8 @@ type Game struct {
 	Score *Score     `json:"currentScore"`
 	Timer *Timer     `json:"time"`
 
-	opts *Opts
+	store *store.Store
+	opts  *Opts
 }
 
 // ops contains configuration for the game.
@@ -35,6 +36,7 @@ func NewGame(opts *Opts) *Game {
 		Grid:  grid.NewGrid(),
 		Score: NewScore(),
 		Timer: NewTimer(),
+		store: store.NewStore(".save.bruh"),
 		opts:  opts,
 	}
 
@@ -96,12 +98,12 @@ func (g Game) Save() error {
 	if err != nil {
 		return err
 	}
-	return store.SaveBytes(j)
+	return g.store.SaveBytes(j)
 }
 
 // Load loads the game state from the save file.
 func (g *Game) Load() error {
-	b, err := store.ReadBytes()
+	b, err := g.store.ReadBytes()
 	if err != nil {
 		return err
 	}

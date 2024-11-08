@@ -24,4 +24,4 @@ go.work.sum
 .DS_Store
 
 # 2048 battle save file
-*.bruh
+**.bruh
