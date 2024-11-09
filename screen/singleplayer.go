@@ -203,8 +203,8 @@ func (s *SingleplayerScreen) Update() {
 		// No user input; continue
 	}
 
-	// Deep copy so front-end hastime to animate itself whilst allowing the back
-	// end to update
+	// Deep copy so front-end has time to animate itself whilst allowing the
+	// back-end to update
 	game := deep.MustCopy(*s.backend)
 
 	// Check for win or lose
@@ -225,7 +225,7 @@ func (s *SingleplayerScreen) Update() {
 	}
 }
 
-// Update updates and draws the singleplayer screen in a normal state.
+// Update updates and draws the singleplayer screen.
 func (s *SingleplayerScreen) updateNormal(game backend.Game) {
 	s.win.SetBackground(common.BackgroundColour)
 

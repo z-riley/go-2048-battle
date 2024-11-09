@@ -20,19 +20,19 @@ type MultiplayerScreen struct {
 	backgroundColour color.RGBA
 	logo2048         *turdgl.TextBox
 
-	// Player's grid
-	newGame      *turdgl.Button
-	menu         *turdgl.Button
-	score        *common.ScoreBox
-	guide        *turdgl.Text
-	timer        *turdgl.Text
-	backend      *backend.Game
-	arena        *common.Arena
-	arenaInputCh chan func()
-	debugGrid    *turdgl.Text
+	newGame       *turdgl.Button
+	menu          *turdgl.Button
+	score         *common.ScoreBox
+	guide         *turdgl.Text
+	timer         *turdgl.Text
+	backend       *backend.Game
+	arena         *common.Arena
+	arenaInputCh  chan func()
+	endGameDialog *turdgl.Text
+	debugGrid     *turdgl.Text
 
-	// Opponent's grid
 	opponentScore     *common.ScoreBox
+	opponentName      string
 	opponentGuide     *turdgl.Text
 	opponentArena     *common.Arena
 	opponentBackend   *backend.Game
@@ -69,9 +69,8 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			turdgl.Vec{X: float64(s.win.Width())*2/3 - 71, Y: 300},
 		)
 
-		// Everything is sized relative to the tile size
+		// Everything is sized relative to the tile size and arena position
 		const unit = common.TileSizePx
-
 		anchor := s.arena.Pos()
 
 		const logoSize = 1.36 * unit
@@ -79,6 +78,11 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			logoSize,
 			turdgl.Vec{X: (float64(s.win.Width()) - logoSize) / 2, Y: anchor.Y - 2.58*unit},
 		)
+
+		s.endGameDialog = common.NewGameText(
+			"Press MENU to\nplay again",
+			turdgl.Vec{X: float64(s.win.Width() / 2), Y: anchor.Y - 2.5*unit},
+		).SetAlignment(turdgl.AlignTopCentre).SetSize(25)
 
 		// Player's grid
 		{
@@ -123,11 +127,6 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				turdgl.Vec{X: 600, Y: anchor.Y - 0.53*unit},
 			).SetAlignment(turdgl.AlignTopCentre)
 
-			s.debugGrid = turdgl.NewText(
-				s.backend.Grid.Debug(),
-				turdgl.Vec{X: 100, Y: 50},
-				common.FontPathMedium,
-			)
 		}
 
 		// Opponent's grid
@@ -141,14 +140,24 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				common.ArenaBackgroundColour,
 			).SetHeading("SCORE")
 
+			s.opponentName = initData[opponentUsernameKey].(string)
 			s.opponentGuide = common.NewGameText(
-				fmt.Sprintf("%s's grid", initData[opponentUsernameKey].(string)),
+				fmt.Sprintf("%s's grid", s.opponentName),
 				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.53*unit},
 			)
 
 			s.opponentBackend = backend.NewGame(&backend.Opts{
 				SaveToDisk: false,
 			})
+		}
+
+		// Debug widgets
+		if config.Debug {
+			s.debugGrid = turdgl.NewText(
+				s.backend.Grid.Debug(),
+				turdgl.Vec{X: 100, Y: 50},
+				common.FontPathMedium,
+			)
 
 			s.opponentDebugGrid = turdgl.NewText(
 				s.opponentBackend.Grid.Debug(),
@@ -247,18 +256,8 @@ func (s *MultiplayerScreen) Exit() {
 	s.arena.Destroy()
 }
 
-// Update updates and draws the singleplayer screen.
+// Update updates and draws the multiplayer screen.
 func (s *MultiplayerScreen) Update() {
-	// Check for win or lose
-	switch s.backend.Grid.Outcome() {
-	case grid.None:
-		s.backgroundColour = common.BackgroundColour
-	case grid.Win:
-		s.backgroundColour = common.BackgroundColourWin
-	case grid.Lose:
-		s.backgroundColour = common.BackgroundColourLose
-	}
-
 	s.win.SetBackground(s.backgroundColour)
 
 	// Handle user inputs from user. Only 1 input must be sent per update cycle,
@@ -269,35 +268,25 @@ func (s *MultiplayerScreen) Update() {
 		if err := s.sendGameData(); err != nil {
 			log.Println("Failed to send game update:", err)
 		}
-
 	default:
 		// No user input; continue
 	}
-
-	s.menu.Update(s.win)
-	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))
-	s.opponentScore.SetBody(fmt.Sprint(s.opponentBackend.Score.CurrentScore()))
-	s.newGame.Update(s.win)
-	s.timer.SetText(s.backend.Timer.Time.String())
 
 	// Deep copy so front-end has time to animate itself whilst allowing the back
 	// end to update
 	s.arena.Update(deep.MustCopy(*s.backend))
 	s.opponentArena.Update(deep.MustCopy(*s.opponentBackend))
 
-	for _, d := range []turdgl.Drawable{
-		s.logo2048,
-		s.guide,
-		s.opponentGuide,
-		s.menu,
-		s.score,
-		s.opponentScore,
-		s.newGame,
-		s.timer,
-		s.arena,
-		s.opponentArena,
-	} {
-		s.win.Draw(d)
+	// Check for win or lose
+	isLoss := s.backend.Grid.Outcome() == grid.Lose || s.opponentBackend.Grid.Outcome() == grid.Win
+	isWin := s.backend.Grid.Outcome() == grid.Win || s.opponentBackend.Grid.Outcome() == grid.Lose
+	switch {
+	case isLoss:
+		s.updateLose()
+	case isWin:
+		s.updateWin()
+	default:
+		s.updateNormal()
 	}
 
 	if config.Debug {
@@ -305,6 +294,88 @@ func (s *MultiplayerScreen) Update() {
 		s.opponentDebugGrid.SetText(s.opponentBackend.Grid.Debug())
 		s.win.Draw(s.debugGrid)
 		s.win.Draw(s.opponentDebugGrid)
+	}
+}
+
+// Update updates and draws the singleplayer screen in a normal state.
+func (s *MultiplayerScreen) updateNormal() {
+	s.newGame.Update(s.win)
+	s.menu.Update(s.win)
+	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))
+	s.timer.SetText(s.backend.Timer.Time.String())
+	s.opponentScore.SetBody(fmt.Sprint(s.opponentBackend.Score.CurrentScore()))
+
+	for _, d := range []turdgl.Drawable{
+		s.logo2048,
+		s.newGame,
+		s.menu,
+		s.score,
+		s.guide,
+		s.timer,
+		s.arena,
+		s.opponentScore,
+		s.opponentGuide,
+		s.opponentArena,
+	} {
+		s.win.Draw(d)
+	}
+}
+
+// updateWin updates and draws the singleplayer screen in a winning state.
+func (s *MultiplayerScreen) updateWin() {
+	s.arena.SetWin()
+	s.opponentArena.SetLose()
+
+	s.guide.SetText("You win!")
+	s.opponentGuide.SetText(fmt.Sprintf("%s loses!", s.opponentName))
+
+	s.menu.Update(s.win)
+	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))
+	s.timer.SetText(s.backend.Timer.Time.String())
+	s.backend.Timer.Pause()
+	s.opponentScore.SetBody(fmt.Sprint(s.opponentBackend.Score.CurrentScore()))
+
+	for _, d := range []turdgl.Drawable{
+		s.menu,
+		s.score,
+		s.guide,
+		s.timer,
+		s.arena,
+		s.endGameDialog,
+		s.opponentScore,
+		s.opponentGuide,
+		s.opponentArena,
+	} {
+		s.win.Draw(d)
+	}
+}
+
+// updateLose updates and draws the singleplayer screen in a losing state.
+func (s *MultiplayerScreen) updateLose() {
+	s.arena.SetLose()
+	s.opponentArena.SetWin()
+
+	s.guide.SetText("You lose!")
+	s.opponentGuide.SetText(fmt.Sprintf("%s wins!", s.opponentName))
+
+	s.menu.Update(s.win)
+	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))
+	s.timer.SetText(s.backend.Timer.Time.String())
+	s.backend.Timer.Pause()
+	s.opponentScore.SetBody(fmt.Sprint(s.opponentBackend.Score.CurrentScore()))
+
+	for _, d := range []turdgl.Drawable{
+		s.menu,
+		s.score,
+		s.guide,
+		s.timer,
+		s.arena,
+		s.endGameDialog,
+		s.opponentScore,
+		s.opponentGuide,
+		s.opponentArena,
+	} {
+		s.win.Draw(d)
 	}
 }
 

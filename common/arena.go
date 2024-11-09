@@ -189,6 +189,14 @@ func (a *Arena) SetLose() {
 	})
 }
 
+// SetWin makes the arena show its losing state.
+func (a *Arena) SetWin() {
+	a.background.SetStyle(turdgl.Style{
+		Colour: turdgl.LimeGreen,
+		Bloom:  15,
+	})
+}
+
 // Update animates the arena to match the given game state.
 func (a *Arena) Update(game backend.Game) {
 	defer func() {

@@ -8,7 +8,7 @@ import (
 	"github.com/z-riley/go-2048-battle/log"
 )
 
-// Game contains all reuquired data for a 2048 game.
+// Game contains all required data for a 2048 game.
 type Game struct {
 	Grid  *grid.Grid `json:"grid"`
 	Score *Score     `json:"currentScore"`
@@ -18,7 +18,7 @@ type Game struct {
 	opts  *Opts
 }
 
-// ops contains configuration for the game.
+// opts contains configuration for the game.
 type Opts struct {
 	SaveToDisk bool
 }
