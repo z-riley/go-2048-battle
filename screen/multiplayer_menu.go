@@ -61,14 +61,14 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			s.join.Label.SetColour(common.WhiteFontColour)
-			s.join.Shape.SetStyle(common.ButtonStyleHovering)
+			s.join.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
 			s.hint.SetText("Join a LAN game")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			s.join.Label.SetColour(common.WhiteFontColour)
-			s.join.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.join.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)
@@ -85,14 +85,14 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			s.host.Label.SetColour(common.WhiteFontColour)
-			s.host.Shape.SetStyle(common.ButtonStyleHovering)
+			s.host.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
 			s.hint.SetText("Host a LAN game")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			s.host.Label.SetColour(common.WhiteFontColour)
-			s.host.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.host.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)
@@ -109,14 +109,14 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			s.back.Label.SetColour(common.WhiteFontColour)
-			s.back.Shape.SetStyle(common.ButtonStyleHovering)
+			s.back.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
 			s.hint.SetText("Go back to main menu")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			s.back.Label.SetColour(common.WhiteFontColour)
-			s.back.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.back.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)

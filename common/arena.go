@@ -38,9 +38,10 @@ type tile struct {
 
 // newTile constructs a new tile with the correct style.
 func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
+	r := turdgl.NewCurvedRect(sizePx, sizePx, TileCornerRadius, pos)
 	tile := tile{
 		tb: turdgl.NewTextBox(
-			turdgl.NewCurvedRect(sizePx, sizePx, TileCornerRadius, pos),
+			r,
 			fmt.Sprint(val),
 			tileFont,
 		).
@@ -50,7 +51,7 @@ func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
 		pos: posIdx,
 	}
 	tile.tb.Text.SetOffset(turdgl.Vec{X: 0, Y: 15})
-	tile.tb.Shape.SetStyle(turdgl.Style{Colour: tileColour(val)})
+	r.SetStyle(turdgl.Style{Colour: tileColour(val)})
 
 	return &tile
 }
@@ -371,7 +372,7 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan error, wg *syn
 		steps    = 10
 		stepSize = growPx / steps
 	)
-	shape := newTile.tb.Shape
+	shape := newTile.tb.Shape.(*turdgl.CurvedRect)
 	originalPos := shape.GetPos() // position of shape before animation starts
 	for i := float64(0); i <= growPx; i += stepSize {
 		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
@@ -407,7 +408,7 @@ func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh c
 
 	// Animate tile growing and shrinking back to normal size
 	const expandPx = 5
-	shape := newTile.tb.Shape
+	shape := newTile.tb.Shape.(*turdgl.CurvedRect)
 	originalPos := shape.GetPos() // position of shape before animation starts
 	for i := float64(1); i <= expandPx; i++ {
 		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))

@@ -26,11 +26,8 @@ var (
 
 // NewMenuButton constructs a new menu button with sensible defaults.
 func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
-	b := turdgl.NewButton(
-		turdgl.NewCurvedRect(width, height, 6, pos.Round(),
-			turdgl.WithStyle(ButtonStyleUnpressed)),
-		FontPathMedium,
-	).
+	r := turdgl.NewCurvedRect(width, height, 6, pos.Round()).SetStyle(ButtonStyleUnpressed)
+	b := turdgl.NewButton(r, FontPathMedium).
 		SetLabelText("SET ME").
 		SetLabelSize(36).
 		SetLabelColour(WhiteFontColour).
@@ -41,19 +38,19 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			b.Label.SetColour(WhiteFontColour)
-			b.Shape.SetStyle(ButtonStyleHovering)
+			r.SetStyle(ButtonStyleHovering)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			b.Label.SetColour(WhiteFontColour)
-			b.Shape.SetStyle(ButtonStyleUnpressed)
+			r.SetStyle(ButtonStyleUnpressed)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnPress},
 		func() {
 			b.Label.SetColour(GreyTextColour)
-			b.Shape.SetStyle(ButtonStylePressed)
+			r.SetStyle(ButtonStylePressed)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
@@ -71,12 +68,9 @@ var gameButtonStyleHovering = turdgl.Style{
 
 // NewGameButton constructs a new game button with sensible defaults.
 func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
-	b := turdgl.NewButton(
-		turdgl.NewCurvedRect(
-			width, height, TileCornerRadius, pos.Round(),
-			turdgl.WithStyle(turdgl.Style{Colour: buttonOrangeColour})),
-		FontPathBold,
-	).
+	r := turdgl.NewCurvedRect(width, height, TileCornerRadius, pos.Round()).
+		SetStyle(turdgl.Style{Colour: buttonOrangeColour})
+	b := turdgl.NewButton(r, FontPathBold).
 		SetLabelText("BUTTON").
 		SetLabelSize(14).
 		SetLabelColour(WhiteFontColour).
@@ -87,19 +81,19 @@ func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			b.Label.SetColour(WhiteFontColour)
-			b.Shape.SetStyle(gameButtonStyleHovering)
+			r.SetStyle(gameButtonStyleHovering)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			b.Label.SetColour(WhiteFontColour)
-			b.Shape.SetStyle(ButtonStyleUnpressed)
+			r.SetStyle(ButtonStyleUnpressed)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnPress},
 		func() {
 			b.Label.SetColour(GreyTextColour)
-			b.Shape.SetStyle(ButtonStylePressed)
+			r.SetStyle(ButtonStylePressed)
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},

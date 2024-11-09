@@ -27,7 +27,7 @@ func NewEntryBox(width, height float64, pos turdgl.Vec, txt string) *EntryBox {
 		}
 	)
 
-	bloom := turdgl.NewCurvedRect(width, height, 6, pos, turdgl.WithStyle(styleUnselected))
+	bloom := turdgl.NewCurvedRect(width, height, 6, pos).SetStyle(styleUnselected)
 
 	tb := NewTextBox(width, height, pos, txt)
 	tb.SetSelectedCB(func() {
@@ -71,11 +71,8 @@ func (e *EntryBox) SetModifiedCB(callback func()) *EntryBox {
 }
 
 func NewTextBox(width, height float64, pos turdgl.Vec, txt string) *turdgl.TextBox {
-	r := turdgl.NewCurvedRect(
-		width, height, 6, pos,
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
-	)
-	r.SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
+	r := turdgl.NewCurvedRect(width, height, 6, pos).
+		SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
 
 	tb := turdgl.NewTextBox(r, txt, FontPathMedium).
 		SetTextOffset(turdgl.Vec{X: 0, Y: 15}).
@@ -105,8 +102,7 @@ func NewScoreBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *Scor
 	r := turdgl.NewCurvedRect(
 		width, height, 3,
 		pos,
-		turdgl.WithStyle(turdgl.Style{Colour: colour}),
-	)
+	).SetStyle(turdgl.Style{Colour: colour})
 
 	body := turdgl.NewTextBox(r, "", FontPathBold).
 		SetTextOffset(turdgl.Vec{X: 0, Y: 18}).
@@ -152,7 +148,7 @@ func NewLogoBox(size float64, pos turdgl.Vec) *turdgl.TextBox {
 		SetTextColour(WhiteFontColour)
 
 	logo.Text.SetAlignment(turdgl.AlignCustom).SetOffset(turdgl.Vec{Y: 15})
-	logo.Shape.SetStyle(turdgl.Style{Colour: Tile2048Colour})
+	logo.Shape.(*turdgl.CurvedRect).SetStyle(turdgl.Style{Colour: Tile2048Colour})
 
 	return logo
 }

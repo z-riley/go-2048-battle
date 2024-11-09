@@ -1,8 +1,11 @@
 package screen
 
 import (
+	"fmt"
 	"sync"
+	"time"
 
+	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/turdgl"
 )
 
@@ -81,7 +84,11 @@ func Update() {
 		CurrentScreen().Enter(screen.data)
 
 	default:
+		now := time.Now()
 		CurrentScreen().Update()
+		if config.Debug {
+			fmt.Println("Updated in", time.Since(now))
+		}
 	}
 }
 

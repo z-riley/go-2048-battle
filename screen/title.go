@@ -65,14 +65,14 @@ func (s *TitleScreen) Enter(_ InitData) {
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			s.singleplayer.Label.SetColour(common.WhiteFontColour)
-			s.singleplayer.Shape.SetStyle(common.ButtonStyleHovering)
+			s.singleplayer.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
 			s.hint.SetText("Play alone")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			s.singleplayer.Label.SetColour(common.WhiteFontColour)
-			s.singleplayer.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.singleplayer.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)
@@ -91,14 +91,14 @@ func (s *TitleScreen) Enter(_ InitData) {
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			s.multiplayer.Label.SetColour(common.WhiteFontColour)
-			s.multiplayer.Shape.SetStyle(common.ButtonStyleHovering)
+			s.multiplayer.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
 			s.hint.SetText("Play against a friend")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			s.multiplayer.Label.SetColour(common.WhiteFontColour)
-			s.multiplayer.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.multiplayer.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)
@@ -117,14 +117,14 @@ func (s *TitleScreen) Enter(_ InitData) {
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			s.quit.Label.SetColour(common.WhiteFontColour)
-			s.quit.Shape.SetStyle(common.ButtonStyleHovering)
+			s.quit.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
 			s.hint.SetText("Exit to desktop")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
 			s.quit.Label.SetColour(common.WhiteFontColour)
-			s.quit.Shape.SetStyle(common.ButtonStyleUnpressed)
+			s.quit.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)
