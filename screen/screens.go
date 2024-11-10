@@ -79,5 +79,10 @@ func CurrentScreen() Screen {
 
 // SetScreen changes the current screen to the given ID next time Update is called.
 func SetScreen(id ID, data InitData) {
-	screenChangeChan <- screenChange{id, data}
+	switch id {
+	case Title, Singleplayer, MultiplayerMenu, MultiplayerJoin, MultiplayerHost, Multiplayer:
+		screenChangeChan <- screenChange{id, data}
+	default:
+		panic("invalid screen: " + id)
+	}
 }

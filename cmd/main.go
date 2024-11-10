@@ -36,11 +36,10 @@ func main() {
 	// Parse starting screen arg
 	screenStr := flag.String("screen", string(screen.Title), "starting screen")
 	flag.Parse()
-	start := screen.ID(*screenStr)
 
 	// Create screens
 	screen.Init(win)
-	screen.SetScreen(start, nil)
+	screen.SetScreen(screen.ID(*screenStr), nil)
 
 	debugWidget := debug.NewDebugWidget(win)
 
