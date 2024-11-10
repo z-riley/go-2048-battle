@@ -24,8 +24,8 @@ var (
 	GreyTextColour      = turdgl.RGB(120, 110, 100) // official colour
 	WhiteFontColour     = turdgl.RGB(255, 255, 255) // official colour
 
-	buttonOrangeColour    = turdgl.RGB(235, 152, 91)  // official colour
-	tileBackgroundColour  = turdgl.RGB(204, 192, 180) // official colour
+	ButtonOrangeColour    = turdgl.RGB(235, 152, 91)  // official colour
+	TileBackgroundColour  = turdgl.RGB(204, 192, 180) // official colour
 	ArenaBackgroundColour = turdgl.RGB(187, 173, 160) // official colour
 
 )

@@ -22,6 +22,7 @@ type MultiplayerHostScreen struct {
 	win *turdgl.Window
 
 	title            *turdgl.Text
+	tooltip          *turdgl.TextBox
 	nameHeading      *turdgl.Text
 	nameEntry        *common.EntryBox
 	opponentName     string
@@ -41,14 +42,16 @@ func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
 
 // Enter initialises the screen.
 func (s *MultiplayerHostScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Host Game", turdgl.Vec{X: 600, Y: 150}, common.FontPathMedium).
+	s.title = turdgl.NewText("Host Game", turdgl.Vec{X: config.WinWidth / 2, Y: 150}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
 
+	s.tooltip = common.NewTooltip()
+
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: 600, Y: 290},
+		turdgl.Vec{X: config.WinWidth / 2, Y: 290},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -56,8 +59,8 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		SetSize(30)
 
 	s.nameEntry = common.NewEntryBox(
-		400, 60,
-		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 20},
+		440, 60,
+		turdgl.Vec{X: (config.WinWidth - 440) / 2, Y: s.nameHeading.Pos().Y + 20},
 		namesgenerator.GetRandomName(0),
 	).
 		SetModifiedCB(func() {
@@ -69,7 +72,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 	s.opponentStatus = turdgl.NewText(
 		fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()),
-		turdgl.Vec{X: 600, Y: 510},
+		turdgl.Vec{X: config.WinWidth / 2, Y: 510},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -87,7 +90,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 	const w = TileSizePx * (2 + 3*TileBoundryFactor)
 	s.buttonBackground = turdgl.NewCurvedRect(
 		w, TileSizePx*(1+2*TileBoundryFactor), TileCornerRadius,
-		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 560},
+		turdgl.Vec{X: (config.WinWidth - w) / 2, Y: 560},
 	)
 	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
@@ -189,6 +192,12 @@ func (s *MultiplayerHostScreen) Update() {
 
 	s.win.Draw(s.nameEntry)
 	s.nameEntry.Update(s.win)
+
+	mouseLoc := s.win.MouseLocation()
+	if s.nameEntry.TextBox.Shape.IsWithin(mouseLoc) && !s.nameEntry.TextBox.IsEditing() {
+		s.tooltip.SetPos(turdgl.Vec{X: mouseLoc.X, Y: mouseLoc.Y - s.tooltip.Shape.Height()})
+		s.win.Draw(s.tooltip)
+	}
 }
 
 // handleClientData handles all data received from a client.

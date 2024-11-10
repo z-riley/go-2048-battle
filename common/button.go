@@ -69,7 +69,7 @@ var gameButtonStyleHovering = turdgl.Style{
 // NewGameButton constructs a new game button with sensible defaults.
 func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
 	r := turdgl.NewCurvedRect(width, height, TileCornerRadius, pos.Round()).
-		SetStyle(turdgl.Style{Colour: buttonOrangeColour})
+		SetStyle(turdgl.Style{Colour: ButtonOrangeColour})
 	b := turdgl.NewButton(r, FontPathBold).
 		SetLabelText("BUTTON").
 		SetLabelSize(14).

@@ -63,10 +63,10 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 	// UI widgets
 	{
 		s.arena = common.NewArena(
-			turdgl.Vec{X: float64(s.win.Width())/3 - 249, Y: 300},
+			turdgl.Vec{X: config.WinWidth/3 - 249, Y: 300},
 		)
 		s.opponentArena = common.NewArena(
-			turdgl.Vec{X: float64(s.win.Width())*2/3 - 71, Y: 300},
+			turdgl.Vec{X: config.WinWidth*2/3 - 71, Y: 300},
 		)
 
 		// Everything is sized relative to the tile size and arena position
@@ -76,12 +76,12 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 		const logoSize = 1.36 * unit
 		s.logo2048 = common.NewLogoBox(
 			logoSize,
-			turdgl.Vec{X: (float64(s.win.Width()) - logoSize) / 2, Y: anchor.Y - 2.58*unit},
+			turdgl.Vec{X: (config.WinWidth - logoSize) / 2, Y: anchor.Y - 2.58*unit},
 		)
 
 		s.endGameDialog = common.NewGameText(
 			"Press MENU to\nplay again",
-			turdgl.Vec{X: float64(s.win.Width() / 2), Y: anchor.Y - 2.5*unit},
+			turdgl.Vec{X: config.WinWidth / 2, Y: anchor.Y - 2.5*unit},
 		).SetAlignment(turdgl.AlignTopCentre).SetSize(25)
 
 		// Player's grid
@@ -124,7 +124,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			s.arenaInputCh = make(chan func(), 100)
 
 			s.timer = common.NewGameText("",
-				turdgl.Vec{X: 600, Y: anchor.Y - 0.53*unit},
+				turdgl.Vec{X: config.WinWidth / 2, Y: anchor.Y - 0.53*unit},
 			).SetAlignment(turdgl.AlignTopCentre)
 
 		}

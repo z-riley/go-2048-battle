@@ -2,14 +2,14 @@ package screen
 
 import (
 	"github.com/z-riley/go-2048-battle/common"
+	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/turdgl"
 )
 
 type TitleScreen struct {
 	win *turdgl.Window
 
-	title *turdgl.Text
-
+	title            *turdgl.Text
 	hint             *turdgl.Text
 	buttonBackground *turdgl.CurvedRect
 	singleplayer     *turdgl.Button
@@ -24,12 +24,12 @@ func NewTitleScreen(win *turdgl.Window) *TitleScreen {
 
 // Enter initialises the screen.
 func (s *TitleScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: 600, Y: 260}, common.FontPathMedium).
+	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: config.WinWidth / 2, Y: 260}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
 
-	s.hint = turdgl.NewText("", turdgl.Vec{X: 600, Y: 375}, common.FontPathMedium).
+	s.hint = turdgl.NewText("", turdgl.Vec{X: config.WinWidth / 2, Y: 375}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignBottomCentre).
 		SetSize(20)
@@ -45,7 +45,7 @@ func (s *TitleScreen) Enter(_ InitData) {
 	const w = TileSizePx * (3 + 4*TileBoundryFactor)
 	s.buttonBackground = turdgl.NewCurvedRect(
 		w, TileSizePx*(1+2*TileBoundryFactor), TileCornerRadius,
-		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 400},
+		turdgl.Vec{X: (config.WinWidth - w) / 2, Y: 400},
 	)
 	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 

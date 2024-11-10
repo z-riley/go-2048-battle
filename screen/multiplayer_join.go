@@ -19,6 +19,7 @@ type MultiplayerJoinScreen struct {
 	win *turdgl.Window
 
 	title            *turdgl.Text
+	tooltip          *turdgl.TextBox
 	nameHeading      *turdgl.Text
 	nameEntry        *common.EntryBox
 	ipHeading        *turdgl.Text
@@ -41,14 +42,16 @@ func NewMultiplayerJoinScreen(win *turdgl.Window) *MultiplayerJoinScreen {
 
 // Enter initialises the screen.
 func (s *MultiplayerJoinScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Join game", turdgl.Vec{X: 600, Y: 120}, common.FontPathMedium).
+	s.title = turdgl.NewText("Join game", turdgl.Vec{X: config.WinWidth / 2, Y: 120}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
 
+	s.tooltip = common.NewTooltip()
+
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: 600, Y: 230},
+		turdgl.Vec{X: config.WinWidth / 2, Y: 230},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -56,8 +59,8 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 		SetSize(30)
 
 	s.nameEntry = common.NewEntryBox(
-		400, 60,
-		turdgl.Vec{X: 600 - 400/2, Y: s.nameHeading.Pos().Y + 15},
+		440, 60,
+		turdgl.Vec{X: config.WinWidth/2 - 440/2, Y: s.nameHeading.Pos().Y + 15},
 		namesgenerator.GetRandomName(0),
 	).
 		SetModifiedCB(func() {
@@ -71,7 +74,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.ipHeading = turdgl.NewText(
 		"Host IP:",
-		turdgl.Vec{X: 600, Y: 370},
+		turdgl.Vec{X: config.WinWidth / 2, Y: 370},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -86,8 +89,8 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	}
 
 	s.ipEntry = common.NewEntryBox(
-		400, 60,
-		turdgl.Vec{X: 600 - 400/2, Y: s.ipHeading.Pos().Y + 15},
+		440, 60,
+		turdgl.Vec{X: (config.WinWidth - 440) / 2, Y: s.ipHeading.Pos().Y + 15},
 		string(b),
 	).SetModifiedCB(func() {
 		if err := s.ipStore.SaveBytes([]byte(s.ipEntry.Text())); err != nil {
@@ -97,7 +100,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.opponentStatus = turdgl.NewText(
 		"",
-		turdgl.Vec{X: 600, Y: 530},
+		turdgl.Vec{X: config.WinWidth / 2, Y: 530},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -115,7 +118,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	const w = TileSizePx * (2 + 3*TileBoundryFactor)
 	s.buttonBackground = turdgl.NewCurvedRect(
 		w, TileSizePx*(1+2*TileBoundryFactor), TileCornerRadius,
-		turdgl.Vec{X: (float64(s.win.Width()) - w) / 2, Y: 560},
+		turdgl.Vec{X: (config.WinWidth - w) / 2, Y: 560},
 	)
 	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
@@ -178,6 +181,14 @@ func (s *MultiplayerJoinScreen) Update() {
 	} {
 		e.Update(s.win)
 		s.win.Draw(e)
+	}
+
+	mouseLoc := s.win.MouseLocation()
+	if (s.nameEntry.TextBox.Shape.IsWithin(mouseLoc) && !s.nameEntry.TextBox.IsEditing()) ||
+		(s.ipEntry.TextBox.Shape.IsWithin(mouseLoc) && !s.ipEntry.TextBox.IsEditing()) {
+
+		s.tooltip.SetPos(turdgl.Vec{X: mouseLoc.X, Y: mouseLoc.Y - s.tooltip.Shape.Height()})
+		s.win.Draw(s.tooltip)
 	}
 }
 

@@ -70,16 +70,15 @@ func (e *EntryBox) SetModifiedCB(callback func()) *EntryBox {
 	return e
 }
 
+// NewTextBox constructs a new text box.
 func NewTextBox(width, height float64, pos turdgl.Vec, txt string) *turdgl.TextBox {
 	r := turdgl.NewCurvedRect(width, height, 6, pos).
 		SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
 
-	tb := turdgl.NewTextBox(r, txt, FontPathMedium).
+	return turdgl.NewTextBox(r, txt, FontPathMedium).
 		SetTextOffset(turdgl.Vec{X: 0, Y: 15}).
 		SetTextSize(36).
 		SetTextColour(LightGreyTextColour)
-
-	return tb
 }
 
 // ScoreBox is a commonly used text box for displaying scores.
@@ -151,4 +150,15 @@ func NewLogoBox(size float64, pos turdgl.Vec) *turdgl.TextBox {
 	logo.Shape.(*turdgl.CurvedRect).SetStyle(turdgl.Style{Colour: Tile2048Colour})
 
 	return logo
+}
+
+// NewLogoBox returns a new tooltip text box.
+func NewTooltip() *turdgl.TextBox {
+	r := turdgl.NewCurvedRect(110, 23, 2, turdgl.Vec{}).
+		SetStyle(turdgl.Style{Colour: ArenaBackgroundColour})
+
+	return turdgl.NewTextBox(r, "Click to edit", FontPathMedium).
+		SetTextOffset(turdgl.Vec{Y: 4}).
+		SetTextSize(16).
+		SetTextColour(LightGreyTextColour)
 }

@@ -86,7 +86,7 @@ func NewArena(pos turdgl.Vec) *Arena {
 					Y: pos.Y + float64(i)*tileSpacingPx,
 				},
 			)
-			bgTiles[j][i].SetStyle(turdgl.Style{Colour: tileBackgroundColour})
+			bgTiles[j][i].SetStyle(turdgl.Style{Colour: TileBackgroundColour})
 		}
 	}
 
