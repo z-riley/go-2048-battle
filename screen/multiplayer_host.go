@@ -107,10 +107,8 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 				s.opponentStatus.SetColour(common.Tile64Colour)
 				go func() {
 					timer := time.NewTimer(200 * time.Millisecond)
-					select {
-					case <-timer.C:
-						s.opponentStatus.SetColour(common.GreyTextColour)
-					}
+					<-timer.C
+					s.opponentStatus.SetColour(common.GreyTextColour)
 				}()
 
 				return

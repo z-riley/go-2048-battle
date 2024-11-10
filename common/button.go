@@ -25,7 +25,7 @@ var (
 )
 
 // NewMenuButton constructs a new menu button with sensible defaults.
-func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
+func NewMenuButton(width, height float64, pos turdgl.Vec, callback func()) *turdgl.Button {
 	r := turdgl.NewCurvedRect(width, height, 6, pos.Round()).SetStyle(ButtonStyleUnpressed)
 	b := turdgl.NewButton(r, FontPathMedium).
 		SetLabelText("SET ME").
@@ -54,7 +54,7 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
-		cb,
+		callback,
 	)
 
 	return b
@@ -67,7 +67,7 @@ var gameButtonStyleHovering = turdgl.Style{
 }
 
 // NewGameButton constructs a new game button with sensible defaults.
-func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.Button {
+func NewGameButton(width, height float64, pos turdgl.Vec, callback func()) *turdgl.Button {
 	r := turdgl.NewCurvedRect(width, height, TileCornerRadius, pos.Round()).
 		SetStyle(turdgl.Style{Colour: ButtonOrangeColour})
 	b := turdgl.NewButton(r, FontPathBold).
@@ -97,7 +97,7 @@ func NewGameButton(width, height float64, pos turdgl.Vec, cb func()) *turdgl.But
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
-		cb,
+		callback,
 	)
 
 	return b

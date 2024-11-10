@@ -3,6 +3,7 @@ package screen
 import (
 	"fmt"
 	"image/color"
+	"strconv"
 
 	"github.com/brunoga/deep"
 	"github.com/z-riley/go-2048-battle/backend"
@@ -301,9 +302,9 @@ func (s *MultiplayerScreen) Update() {
 func (s *MultiplayerScreen) updateNormal() {
 	s.newGame.Update(s.win)
 	s.menu.Update(s.win)
-	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))
+	s.score.SetBody(strconv.Itoa(s.backend.Score.CurrentScore()))
 	s.timer.SetText(s.backend.Timer.Time.String())
-	s.opponentScore.SetBody(fmt.Sprint(s.opponentBackend.Score.CurrentScore()))
+	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.Score.CurrentScore()))
 
 	for _, d := range []turdgl.Drawable{
 		s.logo2048,
@@ -330,10 +331,10 @@ func (s *MultiplayerScreen) updateWin() {
 	s.opponentGuide.SetText(fmt.Sprintf("%s loses!", s.opponentName))
 
 	s.menu.Update(s.win)
-	s.score.SetBody(fmt.Sprint(s.backend.Score.CurrentScore()))
+	s.score.SetBody(strconv.Itoa(s.backend.Score.CurrentScore()))
 	s.timer.SetText(s.backend.Timer.Time.String())
 	s.backend.Timer.Pause()
-	s.opponentScore.SetBody(fmt.Sprint(s.opponentBackend.Score.CurrentScore()))
+	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.Score.CurrentScore()))
 
 	for _, d := range []turdgl.Drawable{
 		s.menu,

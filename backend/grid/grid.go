@@ -1,9 +1,9 @@
 package grid
 
 import (
-	"fmt"
 	"math/rand"
 	"reflect"
+	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
@@ -329,7 +329,7 @@ func NewTiles() [gridHeight][gridWidth]Tile {
 
 // paddedString generates a padded version of the tile's value.
 func (t *Tile) paddedString() string {
-	s := fmt.Sprintf("%d", t.Val)
+	s := strconv.Itoa(t.Val)
 	switch len(s) {
 	case 1:
 		return "   " + s + "   "
