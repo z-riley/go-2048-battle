@@ -2,6 +2,7 @@ package screen
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/brunoga/deep"
 	"github.com/z-riley/go-2048-battle/backend"
@@ -123,7 +124,7 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 		s.debugTime = turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
 			SetText(s.backend.Timer.Time.String())
 		s.debugScore = turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium).
-			SetText(fmt.Sprint(s.backend.Score.Current))
+			SetText(strconv.Itoa(s.backend.Score.Current))
 	}
 
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
@@ -229,9 +230,9 @@ func (s *SingleplayerScreen) Update() {
 func (s *SingleplayerScreen) updateNormal(game backend.Game) {
 	s.win.SetBackground(common.BackgroundColour)
 
-	s.score.SetBody(fmt.Sprint(game.Score.Current))
+	s.score.SetBody(strconv.Itoa(game.Score.Current))
 	s.menu.Update(s.win)
-	s.highScore.SetBody(fmt.Sprint(game.Score.High))
+	s.highScore.SetBody(strconv.Itoa(game.Score.High))
 	s.timer.SetText(game.Timer.Time.String())
 	s.newGame.Update(s.win)
 

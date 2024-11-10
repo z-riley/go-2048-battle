@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 
@@ -14,14 +15,14 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-// Adjustable settings
+// Adjustable settings.
 const (
 	TileSizePx        float64 = 72   // the width and height of a tile, in pixels
 	TileCornerRadius  float64 = 3    // the radius, in pixels, of the rounded corners of the tiles
 	TileBoundryFactor float64 = 0.15 // the gap between tiles as a proportion of the tile size
 )
 
-// Derived constants
+// Derived constants.
 const (
 	ArenaSizePx   = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
 	tileSpacingPx = TileSizePx * (1 + TileBoundryFactor)
@@ -40,11 +41,7 @@ type tile struct {
 func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
 	r := turdgl.NewCurvedRect(sizePx, sizePx, TileCornerRadius, pos)
 	tile := tile{
-		tb: turdgl.NewTextBox(
-			r,
-			fmt.Sprint(val),
-			tileFont,
-		).
+		tb: turdgl.NewTextBox(r, strconv.Itoa(val), tileFont).
 			SetTextSize(tileFontSize(val)).
 			SetTextAlignment(turdgl.AlignCustom).
 			SetTextColour(tileTextColour(val)),
@@ -223,7 +220,6 @@ func (a *Arena) Update(game backend.Game) {
 // handleAnimations executes animations from the animation channel.
 func (a *Arena) handleAnimations() {
 	for animationState := range a.animationCh {
-
 		// Listen to errors being produced by animations
 		errCh := make(chan error, numTiles*numTiles)
 
@@ -281,7 +277,6 @@ func (a *Arena) handleAnimations() {
 			log.Println("Found tile count mismatch. Reloading grid")
 			a.Load(animationState.gameState)
 		}
-
 	}
 }
 
@@ -300,7 +295,7 @@ func (a *Arena) animateMove(animation moveAnimation, errCh chan error, wg *sync.
 	moveVec := turdgl.Sub(a.tilePos(dest), a.tilePos(origin))
 	const steps = 20
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
-	for i := 0; i < steps; i++ {
+	for range steps {
 		tile.tb.Move(moveStep)
 		time.Sleep(5 * time.Millisecond)
 	}
@@ -326,12 +321,12 @@ func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh cha
 	moveVec := turdgl.Sub(a.tilePos(dest), a.tilePos(origin))
 	const steps = 20
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
-	for i := 0; i < steps; i++ {
+	for range steps {
 		originTile.tb.Move(moveStep)
 		time.Sleep(5 * time.Millisecond)
 	}
 
-	// Mark tiles for destruction. The combined tile will be newly spawned seperately
+	// Mark tiles for destruction. The combined tile will be newly spawned separately
 	destTile, err := a.tileAtIdx(dest)
 	if err == nil {
 		// Mark tile if it exists
@@ -457,7 +452,7 @@ func (a *Arena) trimTiles() {
 
 // tileFontSize returns the font size for a tile of a given value.
 func tileFontSize(val int) float64 {
-	chars := len(fmt.Sprint(val))
+	chars := len(strconv.Itoa(val))
 	switch {
 	case chars < 3:
 		return 36
@@ -478,7 +473,7 @@ func (c1 *coord) equals(c2 coord) bool {
 	return c1.x == c2.x && c1.y == c2.y
 }
 
-var errFieldDoesNotExist error = errors.New("field does not exist for this animation type")
+var errFieldDoesNotExist = errors.New("field does not exist for this animation type")
 
 // animation provides data needed for animating tiles.
 type animation interface {
@@ -589,7 +584,7 @@ func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Di
 
 	if dir == grid.DirLeft || dir == grid.DirRight {
 		// Horizontal move; evaluate row-by-row
-		for i := range len(before) {
+		for i := range before {
 			rowAnimations := generateRowAnimations(before[i], after[i], dir)
 
 			for _, rowAnimation := range rowAnimations {
@@ -619,7 +614,7 @@ func generateAnimations(before, after [numTiles][numTiles]grid.Tile, dir grid.Di
 		}
 	} else {
 		// Vertical move; evaluate column-by-column
-		for i := range len(before) {
+		for i := range before {
 			rowAnimations := generateRowAnimations(
 				[numTiles]grid.Tile{before[0][i], before[1][i], before[2][i], before[3][i]},
 				[numTiles]grid.Tile{after[0][i], after[1][i], after[2][i], after[3][i]},
@@ -763,12 +758,12 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 
 	// Index "before" tiles by UUID : position in row
 	beforeUUIDs := make(map[uuid.UUID]int, numTiles)
-	for x := 0; x < len(before); x++ {
+	for x := range before {
 		beforeUUIDs[before[x].UUID] = x
 	}
 
 	// Evaluate "after" tiles
-	for x := 0; x < len(after); x++ {
+	for x := range after {
 		// Tiles with the same UUIDs have moved
 		beforePos, ok := beforeUUIDs[after[x].UUID]
 		if ok && !(beforePos == x) {
@@ -887,7 +882,7 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 	}
 
 	// Non-combined tiles with unique UUIDs are newly spawned
-	for x := 0; x < len(after); x++ {
+	for x := range after {
 		_, ok := beforeUUIDs[after[x].UUID]
 		if !ok && after[x].Val != 0 && !after[x].Cmb {
 			rowAnimations = append(rowAnimations, spawnRowAnimation{

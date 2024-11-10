@@ -184,9 +184,9 @@ func (s *MultiplayerJoinScreen) Update() {
 	}
 
 	mouseLoc := s.win.MouseLocation()
-	if (s.nameEntry.TextBox.Shape.IsWithin(mouseLoc) && !s.nameEntry.TextBox.IsEditing()) ||
-		(s.ipEntry.TextBox.Shape.IsWithin(mouseLoc) && !s.ipEntry.TextBox.IsEditing()) {
-
+	isHoveringNameEntry := s.nameEntry.TextBox.Shape.IsWithin(mouseLoc) && !s.nameEntry.TextBox.IsEditing()
+	isHoveringIPEntry := s.ipEntry.TextBox.Shape.IsWithin(mouseLoc) && !s.ipEntry.TextBox.IsEditing()
+	if isHoveringNameEntry || isHoveringIPEntry {
 		s.tooltip.SetPos(turdgl.Vec{X: mouseLoc.X, Y: mouseLoc.Y - s.tooltip.Shape.Height()})
 		s.win.Draw(s.tooltip)
 	}
@@ -197,7 +197,6 @@ const clientKey = "client"
 
 // joinButtonHandler handles presses of the join button.
 func (s *MultiplayerJoinScreen) joinButtonHandler() {
-
 	// Handle asynchronous errors from client
 	errCh := make(chan error)
 	go func() {
@@ -218,7 +217,6 @@ func (s *MultiplayerJoinScreen) joinButtonHandler() {
 					<-timer.C
 					s.opponentStatus.SetText("")
 				}()
-
 			}
 		}
 	}()
@@ -254,7 +252,6 @@ func (s *MultiplayerJoinScreen) joinButtonHandler() {
 
 // joinGame attempts to join a multiplayer game.
 func (s *MultiplayerJoinScreen) joinGame(errCh chan error) error {
-
 	// Connect using the user-specified IP address
 	if err := s.client.Connect(context.Background(), s.ipEntry.Text(), serverPort, errCh); err != nil {
 		return fmt.Errorf("failed to connect to server: %w", err)

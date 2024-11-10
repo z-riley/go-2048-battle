@@ -72,7 +72,7 @@ func (g *Game) ExecuteMove(dir grid.Direction) {
 		g.Timer.Resume()
 	}
 
-	// Note: the game should save on exit anyway but save after after move just in case
+	// Note: The game should save on exit anyway but save after move just in case
 	if g.opts.SaveToDisk {
 		go func() {
 			if err := g.Save(); err != nil {

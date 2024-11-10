@@ -102,7 +102,6 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		},
 		func() {
 			if !s.opponentIsConnected {
-
 				// Make the opponent status text briefly change colour
 				s.opponentStatus.SetColour(common.Tile64Colour)
 				go func() {
@@ -253,7 +252,9 @@ func (s *MultiplayerHostScreen) handlePlayerData(data comms.PlayerData) error {
 	s.opponentIsConnected = true
 
 	// Send host player data to client
-	s.sendPlayerData()
+	if err := s.sendPlayerData(); err != nil {
+		return fmt.Errorf("failed to send player data to client: %w", err)
+	}
 
 	return nil
 }

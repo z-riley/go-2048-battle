@@ -1,21 +1,8 @@
 package screen
 
 import (
-	"sync"
-
 	"github.com/z-riley/turdgl"
 )
-
-type ScreenManager struct {
-	*sync.Mutex
-	// currentScreen holds the game's current screen.
-	currentScreen ID
-}
-
-var screen = &ScreenManager{
-	&sync.Mutex{},
-	Title,
-}
 
 // InitData can be passed to screens' Init function to share data between screens.
 type InitData map[string]any

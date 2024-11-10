@@ -13,6 +13,7 @@ func IsWSL() bool {
 	if err != nil {
 		return false // unable to read, assume not WSL
 	}
+
 	return strings.Contains(string(data), "microsoft")
 }
 
@@ -48,12 +49,13 @@ func LocalIP() (net.IP, error) {
 
 // isPrivate IP returns true if the given IP address is reserved (private).
 func isPrivateIP(ip net.IP) bool {
-	var privateIPBlocks []*net.IPNet
-	for _, cidr := range []string{
+	CIDRs := []string{
 		"10.0.0.0/8",     // RFC1918
 		"172.16.0.0/12",  // RFC1918
 		"192.168.0.0/16", // RFC1918
-	} {
+	}
+	privateIPBlocks := []*net.IPNet{}
+	for _, cidr := range CIDRs {
 		_, block, _ := net.ParseCIDR(cidr)
 		privateIPBlocks = append(privateIPBlocks, block)
 	}

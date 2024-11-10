@@ -58,7 +58,6 @@ func (s *TitleScreen) Enter(_ InitData) {
 		},
 		func() {
 			SetScreen(Singleplayer, nil)
-
 		},
 	).SetLabelText("Solo")
 	s.singleplayer.SetCallback(

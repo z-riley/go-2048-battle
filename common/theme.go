@@ -6,7 +6,7 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
-// Menu colours
+// Menu colours.
 var (
 	LighterFontColour = turdgl.RGB(251, 238, 231)
 
@@ -14,7 +14,7 @@ var (
 	buttonColourPressed   = turdgl.RGB(143+20, 122+20, 101+20)
 )
 
-// UI colours
+// UI colours.
 var (
 	BackgroundColour     = turdgl.RGB(248, 248, 237) // official colour
 	BackgroundColourWin  = turdgl.RGB(36, 59, 34)
@@ -30,7 +30,7 @@ var (
 
 )
 
-// Tile colours
+// Tile colours.
 var (
 	Tile2Colour    = turdgl.RGB(239, 229, 218) // official colour
 	Tile4Colour    = turdgl.RGB(236, 224, 198) // official colour

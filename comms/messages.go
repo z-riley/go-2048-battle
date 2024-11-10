@@ -25,9 +25,9 @@ type MessageType string
 
 const (
 	TypePlayerData  MessageType = "playerData"
-	TypeGameData                = "gameData"
-	TypeEventData               = "eventData"
-	TypeRequestData             = "request"
+	TypeGameData    MessageType = "gameData"
+	TypeEventData   MessageType = "eventData"
+	TypeRequestData MessageType = "request"
 )
 
 // PlayerData contains data about a player.
@@ -39,6 +39,7 @@ type PlayerData struct {
 // ParsePlayerData returns player data from a byte slice.
 func ParsePlayerData(b []byte) (d PlayerData, err error) {
 	err = json.Unmarshal(b, &d)
+
 	return d, err
 }
 
@@ -48,6 +49,7 @@ func (d PlayerData) Serialise() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return json.Marshal(Message{TypePlayerData, b})
 }
 

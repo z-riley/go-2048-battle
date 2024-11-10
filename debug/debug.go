@@ -8,7 +8,7 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
-type DebugWidget struct {
+type Widget struct {
 	win *turdgl.Window
 
 	location *turdgl.Text
@@ -17,7 +17,7 @@ type DebugWidget struct {
 	tick     <-chan time.Time // for measuring FPS
 }
 
-func NewDebugWidget(win *turdgl.Window) *DebugWidget {
+func NewDebugWidget(win *turdgl.Window) *Widget {
 	location := turdgl.NewText("Loc: ", turdgl.Vec{X: 1090, Y: 25}, common.FontPathMedium).
 		SetAlignment(turdgl.AlignBottomRight).
 		SetSize(12)
@@ -26,7 +26,7 @@ func NewDebugWidget(win *turdgl.Window) *DebugWidget {
 		SetAlignment(turdgl.AlignBottomRight).
 		SetSize(12)
 
-	return &DebugWidget{
+	return &Widget{
 		win:      win,
 		location: location,
 		fps:      fps,
@@ -36,7 +36,7 @@ func NewDebugWidget(win *turdgl.Window) *DebugWidget {
 }
 
 // Update updates and draws the debug widget.
-func (t *DebugWidget) Update() {
+func (t *Widget) Update() {
 	t.frames++
 	select {
 	case <-t.tick:

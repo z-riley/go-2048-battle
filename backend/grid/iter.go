@@ -7,41 +7,35 @@ type iter struct {
 	idx     int
 }
 
-// NewIter constructs a new iterator.
-func NewIter(length int, reverse bool) *iter {
+// newIter constructs a new iterator.
+func newIter(length int, reverse bool) *iter {
 	if reverse {
 		return &iter{length: length, reverse: true, idx: length - 1}
-	} else {
-		return &iter{length: length, reverse: false, idx: 0}
 	}
+	return &iter{length: length, reverse: false, idx: 0}
 }
 
-// HasNext returns true if another iteration is available.
-func (i *iter) HasNext() bool {
+// hasNext returns true if another iteration is available.
+func (i *iter) hasNext() bool {
 	if i.reverse {
 		return i.idx >= 0
-	} else {
-		return i.idx < i.length
 	}
+	return i.idx < i.length
 }
 
-// Next returns the index of the Next index.
-func (i *iter) Next() int {
-	if !i.HasNext() {
+// next returns the index of the next index.
+func (i *iter) next() int {
+	if !i.hasNext() {
 		panic("no more elements")
 	}
+
 	if i.reverse {
 		out := i.idx
 		i.idx--
 		return out
-	} else {
-		out := i.idx
-		i.idx++
-		return out
 	}
-}
 
-// Len returns the length of the iterator.
-func (i *iter) Len() int {
-	return i.length
+	out := i.idx
+	i.idx++
+	return out
 }

@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -47,7 +46,7 @@ func (t *Timer) Reset() *Timer {
 	return t
 }
 
-// Set sets the timer to the specified duration
+// Set sets the timer to the specified duration.
 func (t *Timer) Set(d time.Duration) *Timer {
 	t.Time = d
 	return t
@@ -56,12 +55,4 @@ func (t *Timer) Set(d time.Duration) *Timer {
 // Duration returns the current time in time.Duration format.
 func (t *Timer) Duration() time.Duration {
 	return t.Time
-}
-
-// format formats a duration into the format "HH:MM:SS".
-func format(t time.Duration) string {
-	hours := int(t.Hours())
-	minutes := int(t.Minutes()) % 60
-	seconds := int(t.Seconds()) % 60
-	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 }

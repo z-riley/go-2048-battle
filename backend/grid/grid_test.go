@@ -29,7 +29,6 @@ func TestMove(t *testing.T) {
 	if !gridsAreEqual(expected.Tiles, got.Tiles) {
 		t.Errorf("Expected:\n<%v>\nGot:\n<%v>", expected.Debug(), got.Debug())
 	}
-
 }
 
 func TestMoveStep(t *testing.T) {

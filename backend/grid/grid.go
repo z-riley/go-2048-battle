@@ -131,8 +131,8 @@ func (g *Grid) spawnTile() {
 // Returns true if any tiles were moved from the attempt, and the added score from any combinations.
 func (g *Grid) move(dir Direction) (bool, int) {
 	// Clear all of the "combined this turn" flags
-	for i := 0; i < gridWidth; i++ {
-		for j := 0; j < gridHeight; j++ {
+	for i := range gridWidth {
+		for j := range gridHeight {
 			g.Tiles[i][j].Cmb = false
 		}
 	}
@@ -143,7 +143,7 @@ func (g *Grid) move(dir Direction) (bool, int) {
 	// Execute moves until grid can no longer move
 	for {
 		movedThisTurn := false
-		for row := 0; row < gridHeight; row++ {
+		for row := range gridHeight {
 			var rowMoved bool
 			var points int
 
@@ -183,9 +183,9 @@ func moveStep(g [gridWidth]Tile, dir Direction) ([gridWidth]Tile, bool, int) {
 		reverse = true
 	}
 
-	iter := NewIter(len(g), reverse)
-	for iter.HasNext() {
-		i := iter.Next()
+	iter := newIter(len(g), reverse)
+	for iter.hasNext() {
+		i := iter.next()
 		// Calculate the hypothetical next position for the tile
 		newPos := i - 1
 		if reverse {
@@ -212,7 +212,6 @@ func moveStep(g [gridWidth]Tile, dir Direction) ([gridWidth]Tile, bool, int) {
 			g[i].Val = emptyTile // clear the old location
 			g[i].UUID = uuid.Must(uuid.NewV7())
 			return g, true, valAfterCombine
-
 		} else if g[newPos].Val != emptyTile {
 			// Move blocked by another tile
 			continue
@@ -232,8 +231,8 @@ func moveStep(g [gridWidth]Tile, dir Direction) ([gridWidth]Tile, bool, int) {
 // isLoss returns true if the grid is in a losing state (gridlocked).
 func (g *Grid) isLoss() bool {
 	// False if any empty spaces exist
-	for i := 0; i < gridHeight; i++ {
-		for j := 0; j < gridWidth; j++ {
+	for i := range gridHeight {
+		for j := range gridWidth {
 			if g.Tiles[i][j].Val == emptyTile {
 				return false
 			}
@@ -241,16 +240,16 @@ func (g *Grid) isLoss() bool {
 	}
 
 	// False if any similar tiles exist next to each other
-	for i := 0; i < gridHeight; i++ {
-		for j := 0; j < gridWidth-1; j++ {
+	for i := range gridHeight {
+		for j := range gridWidth - 1 {
 			if g.Tiles[i][j].Val == g.Tiles[i][j+1].Val {
 				return false
 			}
 		}
 	}
 	t := Transpose(g.Tiles)
-	for i := 0; i < gridHeight; i++ {
-		for j := 0; j < gridWidth-1; j++ {
+	for i := range gridHeight {
+		for j := range gridWidth - 1 {
 			if t[i][j].Val == t[i][j+1].Val {
 				return false
 			}
@@ -276,7 +275,7 @@ func (g *Grid) HighestTile() int {
 // Debug arranges the grid into a human readable Debug for debugging purposes.
 func (g *Grid) Debug() string {
 	var out string
-	for row := 0; row < gridHeight; row++ {
+	for row := range gridHeight {
 		for col := range gridWidth {
 			out += g.Tiles[row][col].paddedString() + "|"
 		}
@@ -288,8 +287,8 @@ func (g *Grid) Debug() string {
 // Transpose returns a transposed version of the grid.
 func Transpose(matrix [gridWidth][gridHeight]Tile) [gridHeight][gridWidth]Tile {
 	var transposed [gridHeight][gridWidth]Tile
-	for i := 0; i < gridWidth; i++ {
-		for j := 0; j < gridHeight; j++ {
+	for i := range gridWidth {
+		for j := range gridHeight {
 			transposed[j][i] = matrix[i][j]
 		}
 	}
@@ -348,17 +347,17 @@ func (t *Tile) paddedString() string {
 	}
 }
 
-// Equal returns whether tile t1 is equal to t2.
-func (t1 *Tile) Equal(t2 Tile) bool {
-	return t1.Val == t2.Val &&
-		t1.Cmb == t2.Cmb &&
-		t1.UUID == t2.UUID
+// Equal returns whether tile t is equal to t2.
+func (t *Tile) Equal(t2 Tile) bool {
+	return t.Val == t2.Val &&
+		t.Cmb == t2.Cmb &&
+		t.UUID == t2.UUID
 }
 
 // EqualGrid returns whether grid g1 is equal to g2.
 func EqualGrid(g1, g2 [gridWidth][gridHeight]Tile) bool {
-	for i := 0; i < gridWidth; i++ {
-		for j := 0; j < gridHeight; j++ {
+	for i := range gridWidth {
+		for j := range gridHeight {
 			if !g1[i][j].Equal(g2[i][j]) {
 				return false
 			}
@@ -371,7 +370,6 @@ func EqualGrid(g1, g2 [gridWidth][gridHeight]Tile) bool {
 func newTileVal() int {
 	if rand.Float64() >= 0.9 {
 		return 4
-	} else {
-		return 2
 	}
+	return 2
 }

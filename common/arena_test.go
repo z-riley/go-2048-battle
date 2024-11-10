@@ -167,7 +167,6 @@ func TestGenerateRowAnimations(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 // sliceToMap converts a slice into a map where each key is an element of the slice.

@@ -17,10 +17,15 @@ func TestSerialiseDeserialise(t *testing.T) {
 
 	// Create an empty game and set it to the previous game's state
 	g := Game{}
-	g.Deserialise(b)
+	if err := g.Deserialise(b); err != nil {
+		t.Error(err)
+	}
 
 	// Check that the two games are identical
 	expected, err := game.Serialise()
+	if err != nil {
+		t.Error(err)
+	}
 	got, err := g.Serialise()
 	if err != nil {
 		t.Error(err)
