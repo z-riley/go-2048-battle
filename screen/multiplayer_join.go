@@ -51,7 +51,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: config.WinWidth / 2, Y: 230},
+		turdgl.Vec{X: config.WinWidth / 2, Y: 250},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -60,7 +60,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.nameEntry = common.NewEntryBox(
 		440, 60,
-		turdgl.Vec{X: config.WinWidth/2 - 440/2, Y: s.nameHeading.Pos().Y + 15},
+		turdgl.Vec{X: config.WinWidth/2 - 440/2, Y: s.nameHeading.Pos().Y + 30},
 		namesgenerator.GetRandomName(0),
 	).
 		SetModifiedCB(func() {
@@ -74,7 +74,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.ipHeading = turdgl.NewText(
 		"Host IP:",
-		turdgl.Vec{X: config.WinWidth / 2, Y: 370},
+		turdgl.Vec{X: config.WinWidth / 2, Y: 380},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -90,7 +90,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 
 	s.ipEntry = common.NewEntryBox(
 		440, 60,
-		turdgl.Vec{X: (config.WinWidth - 440) / 2, Y: s.ipHeading.Pos().Y + 15},
+		turdgl.Vec{X: (config.WinWidth - 440) / 2, Y: s.ipHeading.Pos().Y + 30},
 		string(b),
 	).SetModifiedCB(func() {
 		if err := s.ipStore.SaveBytes([]byte(s.ipEntry.Text())); err != nil {

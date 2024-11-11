@@ -30,9 +30,7 @@ func NewMenuButton(width, height float64, pos turdgl.Vec, callback func()) *turd
 	b := turdgl.NewButton(r, FontPathMedium).
 		SetLabelText("SET ME").
 		SetLabelSize(36).
-		SetLabelColour(WhiteFontColour).
-		SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 15})
+		SetLabelColour(WhiteFontColour)
 
 	b.SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
@@ -73,9 +71,7 @@ func NewGameButton(width, height float64, pos turdgl.Vec, callback func()) *turd
 	b := turdgl.NewButton(r, FontPathBold).
 		SetLabelText("BUTTON").
 		SetLabelSize(14).
-		SetLabelColour(WhiteFontColour).
-		SetLabelAlignment(turdgl.AlignCustom).
-		SetLabelOffset(turdgl.Vec{X: 0, Y: 7})
+		SetLabelColour(WhiteFontColour)
 
 	b.SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},

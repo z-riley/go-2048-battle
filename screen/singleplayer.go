@@ -58,13 +58,13 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 
 		s.heading = turdgl.NewText(
 			"", // to be set and drawn when player loses
-			turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 2.3*unit},
+			turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 2.8*unit},
 			common.FontPathBold,
 		).SetSize(40).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
 
 		s.loseDialog = turdgl.NewText(
 			"", // to be set and drawn when player loses
-			turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 1.7*unit},
+			turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 1.9*unit},
 			common.FontPathBold,
 		).SetSize(20).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
 
@@ -108,7 +108,7 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 
 		s.guide = turdgl.NewText(
 			"Join the numbers and get to the 2048 tile!",
-			turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.53*unit},
+			turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.60*unit},
 			common.FontPathBold,
 		).SetSize(16).SetColour(common.GreyTextColour)
 

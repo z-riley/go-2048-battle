@@ -18,11 +18,11 @@ type Widget struct {
 }
 
 func NewDebugWidget(win *turdgl.Window) *Widget {
-	location := turdgl.NewText("Loc: ", turdgl.Vec{X: 1090, Y: 25}, common.FontPathMedium).
+	location := turdgl.NewText("Loc: ", turdgl.Vec{X: 1120, Y: 25}, common.FontPathMedium).
 		SetAlignment(turdgl.AlignBottomRight).
 		SetSize(12)
 
-	fps := turdgl.NewText("FPS: -", turdgl.Vec{X: 1150, Y: 25}, common.FontPathMedium).
+	fps := turdgl.NewText("FPS: -", turdgl.Vec{X: 1180, Y: 25}, common.FontPathMedium).
 		SetAlignment(turdgl.AlignBottomRight).
 		SetSize(12)
 

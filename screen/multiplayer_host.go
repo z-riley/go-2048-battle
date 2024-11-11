@@ -51,7 +51,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 	s.nameHeading = turdgl.NewText(
 		"Your name:",
-		turdgl.Vec{X: config.WinWidth / 2, Y: 290},
+		turdgl.Vec{X: config.WinWidth / 2, Y: 300},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
@@ -60,7 +60,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 	s.nameEntry = common.NewEntryBox(
 		440, 60,
-		turdgl.Vec{X: (config.WinWidth - 440) / 2, Y: s.nameHeading.Pos().Y + 20},
+		turdgl.Vec{X: (config.WinWidth - 440) / 2, Y: s.nameHeading.Pos().Y + 30},
 		namesgenerator.GetRandomName(0),
 	).
 		SetModifiedCB(func() {

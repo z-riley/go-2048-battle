@@ -116,7 +116,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 
 			s.guide = common.NewGameText(
 				"Your grid",
-				turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.53*unit},
+				turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.67*unit},
 			).SetAlignment(turdgl.AlignTopRight)
 
 			s.backend = backend.NewGame(&backend.Opts{
@@ -125,7 +125,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			s.arenaInputCh = make(chan func(), 100)
 
 			s.timer = common.NewGameText("",
-				turdgl.Vec{X: config.WinWidth / 2, Y: anchor.Y - 0.53*unit},
+				turdgl.Vec{X: config.WinWidth / 2, Y: anchor.Y - 0.67*unit},
 			).SetAlignment(turdgl.AlignTopCentre)
 		}
 
@@ -143,7 +143,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			s.opponentName = initData[opponentUsernameKey].(string)
 			s.opponentGuide = common.NewGameText(
 				s.opponentName+"'s grid",
-				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.53*unit},
+				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.67*unit},
 			)
 
 			s.opponentBackend = backend.NewGame(&backend.Opts{

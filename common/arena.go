@@ -39,18 +39,14 @@ type tile struct {
 
 // newTile constructs a new tile with the correct style.
 func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
-	r := turdgl.NewCurvedRect(sizePx, sizePx, TileCornerRadius, pos)
-	tile := tile{
-		tb: turdgl.NewTextBox(r, strconv.Itoa(val), tileFont).
+	return &tile{
+		tb: turdgl.NewTextBox(turdgl.NewCurvedRect(
+			sizePx, sizePx, TileCornerRadius, pos,
+		).SetStyle(turdgl.Style{Colour: tileColour(val)}), strconv.Itoa(val), tileFont).
 			SetTextSize(tileFontSize(val)).
-			SetTextAlignment(turdgl.AlignCustom).
 			SetTextColour(tileTextColour(val)),
 		pos: posIdx,
 	}
-	tile.tb.Text.SetOffset(turdgl.Vec{X: 0, Y: 15})
-	r.SetStyle(turdgl.Style{Colour: tileColour(val)})
-
-	return &tile
 }
 
 // animationData contains animations and the current game state.
