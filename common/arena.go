@@ -748,19 +748,18 @@ func (a newFromCombineRowAnimation) String() string {
 	return fmt.Sprint("new-from-combine at ", a.dest)
 }
 
-// generateAnimations generates animation data a row of tiles.
+// generateAnimations generates animation data for a row of tiles.
 func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction) []rowAnimation {
 	var rowAnimations []rowAnimation
 
-	// Index "before" tiles by UUID : position in row
+	// Build a map of each tile's "before" position, indexed by their UUID
 	beforeUUIDs := make(map[uuid.UUID]int, numTiles)
 	for x := range before {
 		beforeUUIDs[before[x].UUID] = x
 	}
 
-	// Evaluate "after" tiles
 	for x := range after {
-		// Tiles with the same UUIDs have moved
+		// Like UUIDs indicates that a tile has moved
 		beforePos, ok := beforeUUIDs[after[x].UUID]
 		if ok && !(beforePos == x) {
 			rowAnimations = append(rowAnimations, moveRowAnimation{
@@ -769,7 +768,7 @@ func generateRowAnimations(before, after [numTiles]grid.Tile, dir grid.Direction
 			})
 		}
 
-		// Tiles with the Cmb set are from combinations
+		// Tiles with the Cmb flag set are from combinations
 		if after[x].Cmb {
 			// Newly formed tile from combination
 			rowAnimations = append(rowAnimations, newFromCombineRowAnimation{

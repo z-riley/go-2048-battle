@@ -11,6 +11,7 @@ linters:
     - inamedparam
     - ireturn
     - mnd
+    - musttag
     - nlreturn
     - nonamedreturns
     - paralleltest

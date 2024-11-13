@@ -40,7 +40,7 @@ func (t *Timer) Pause() *Timer {
 	return t
 }
 
-// Reset starts the timer from zero.
+// Reset sets the timer to zero.
 func (t *Timer) Reset() *Timer {
 	t.Time = 0
 	return t
@@ -52,7 +52,7 @@ func (t *Timer) Set(d time.Duration) *Timer {
 	return t
 }
 
-// Duration returns the current time in time.Duration format.
+// Duration returns the current time.
 func (t *Timer) Duration() time.Duration {
 	return t.Time
 }
