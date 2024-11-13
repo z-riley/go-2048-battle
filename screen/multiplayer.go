@@ -152,19 +152,17 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 		}
 
 		// Debug widgets
-		if config.Debug {
-			s.debugGrid = turdgl.NewText(
-				s.backend.Grid.Debug(),
-				turdgl.Vec{X: 100, Y: 50},
-				common.FontPathMedium,
-			)
+		s.debugGrid = turdgl.NewText(
+			s.backend.Grid.Debug(),
+			turdgl.Vec{X: 100, Y: 50},
+			common.FontPathMedium,
+		)
 
-			s.opponentDebugGrid = turdgl.NewText(
-				s.opponentBackend.Grid.Debug(),
-				turdgl.Vec{X: 850, Y: 50},
-				common.FontPathMedium,
-			)
-		}
+		s.opponentDebugGrid = turdgl.NewText(
+			s.opponentBackend.Grid.Debug(),
+			turdgl.Vec{X: 850, Y: 50},
+			common.FontPathMedium,
+		)
 	}
 
 	// Initialise server/client

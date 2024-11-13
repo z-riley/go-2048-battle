@@ -118,14 +118,12 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 	}
 
 	// Debug UI
-	if config.Debug {
-		s.debugGrid = turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium).
-			SetText(s.backend.Grid.Debug())
-		s.debugTime = turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
-			SetText(s.backend.Timer.Time.String())
-		s.debugScore = turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium).
-			SetText(strconv.Itoa(s.backend.Score.Current))
-	}
+	s.debugGrid = turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium).
+		SetText(s.backend.Grid.Debug())
+	s.debugTime = turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
+		SetText(s.backend.Timer.Time.String())
+	s.debugScore = turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium).
+		SetText(strconv.Itoa(s.backend.Score.Current))
 
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
@@ -186,15 +184,6 @@ func (s *SingleplayerScreen) Exit() {
 
 // Update updates and draws the singleplayer screen.
 func (s *SingleplayerScreen) Update() {
-	// Temporary debug text
-	if config.Debug {
-		s.debugGrid.SetText(s.backend.Grid.Debug())
-		s.debugTime.SetText(s.backend.Timer.Time.String())
-		s.debugScore.SetText(
-			fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
-		)
-	}
-
 	// Handle user inputs from user. Only 1 input must be sent per update cycle,
 	// because the frontend can only animate one move at a time.
 	select {
@@ -218,8 +207,14 @@ func (s *SingleplayerScreen) Update() {
 		s.updateNormal(game)
 	}
 
-	// Draw temporary debug grid
+	// Draw debug grid
 	if config.Debug {
+		s.debugGrid.SetText(s.backend.Grid.Debug())
+		s.debugTime.SetText(s.backend.Timer.Time.String())
+		s.debugScore.SetText(
+			fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
+		)
+
 		s.win.Draw(s.debugGrid)
 		s.win.Draw(s.debugTime)
 		s.win.Draw(s.debugScore)
