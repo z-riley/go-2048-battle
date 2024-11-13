@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	GridLen    = 4
-	gridWidth  = GridLen
-	gridHeight = GridLen
+	GridSize   = 4
+	gridWidth  = GridSize
+	gridHeight = GridSize
 )
 
 // Grid contains the tiles for the game. Position {0,0} is the top left square.
@@ -20,7 +20,7 @@ type Grid struct {
 	mu    sync.Mutex
 	Tiles [gridWidth][gridHeight]Tile `json:"tiles"`
 
-	LastMove Direction `json:"lastMove"`
+	LastMove Direction
 }
 
 // NewGrid constructs a new grid.
@@ -71,15 +71,6 @@ func (g *Grid) Reset() {
 	g.Tiles[tile2.x][tile2.y].Val = newTileVal()
 }
 
-// ClearCmbFlags clears the Cmb flag of every tile.
-func (g *Grid) ClearCmbFlags() {
-	for i := range g.Tiles {
-		for j := range g.Tiles[i] {
-			g.Tiles[i][j].Cmb = false
-		}
-	}
-}
-
 // NumTiles returns the number of non zero tiles on the grid.
 func (g *Grid) NumTiles() int {
 	n := 0
@@ -91,6 +82,15 @@ func (g *Grid) NumTiles() int {
 		}
 	}
 	return n
+}
+
+// ClearCmbFlags clears the Cmb flag of every tile.
+func (g *Grid) ClearCmbFlags() {
+	for i := range g.Tiles {
+		for j := range g.Tiles[i] {
+			g.Tiles[i][j].Cmb = false
+		}
+	}
 }
 
 // Outcome represents the outcome of a game.
@@ -150,14 +150,14 @@ func (g *Grid) move(dir Direction) (bool, int) {
 			// The moveStep function only operates on a row, so to move vertically
 			// we must transpose the grid before and after the move operation.
 			if dir == DirUp || dir == DirDown {
-				g.Tiles = Transpose(g.Tiles)
+				g.Tiles = transpose(g.Tiles)
 			}
 			g.Tiles[row], rowMoved, points = moveStep(g.Tiles[row], dir)
 			if points > 0 {
 				pointsGained = points
 			}
 			if dir == DirUp || dir == DirDown {
-				g.Tiles = Transpose(g.Tiles)
+				g.Tiles = transpose(g.Tiles)
 			}
 
 			if rowMoved {
@@ -247,7 +247,7 @@ func (g *Grid) isLoss() bool {
 			}
 		}
 	}
-	t := Transpose(g.Tiles)
+	t := transpose(g.Tiles)
 	for i := range gridHeight {
 		for j := range gridWidth - 1 {
 			if t[i][j].Val == t[i][j+1].Val {
@@ -284,17 +284,6 @@ func (g *Grid) Debug() string {
 	return out
 }
 
-// Transpose returns a transposed version of the grid.
-func Transpose(matrix [gridWidth][gridHeight]Tile) [gridHeight][gridWidth]Tile {
-	var transposed [gridHeight][gridWidth]Tile
-	for i := range gridWidth {
-		for j := range gridHeight {
-			transposed[j][i] = matrix[i][j]
-		}
-	}
-	return transposed
-}
-
 // clone returns a deep copy for debugging purposes.
 func (g *Grid) clone() *Grid {
 	newGrid := &Grid{}
@@ -306,9 +295,20 @@ func (g *Grid) clone() *Grid {
 	return newGrid
 }
 
+// transpose returns a transposed version of the grid.
+func transpose(matrix [gridWidth][gridHeight]Tile) [gridHeight][gridWidth]Tile {
+	var transposed [gridHeight][gridWidth]Tile
+	for i := range gridWidth {
+		for j := range gridHeight {
+			transposed[j][i] = matrix[i][j]
+		}
+	}
+	return transposed
+}
+
 const emptyTile = 0
 
-// Tile represents a single Tile on the grid.
+// Tile represents a single tile on the grid.
 type Tile struct {
 	Val  int       `json:"val"`  // the value of the number on the tile
 	Cmb  bool      `json:"cmb"`  // flag for whether tile was combined in the current turn

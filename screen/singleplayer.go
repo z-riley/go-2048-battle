@@ -123,7 +123,7 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 	s.debugTime = turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
 		SetText(s.backend.Timer.Time.String())
 	s.debugScore = turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium).
-		SetText(strconv.Itoa(s.backend.Score.Current))
+		SetText(strconv.Itoa(s.backend.Score))
 
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
@@ -212,7 +212,7 @@ func (s *SingleplayerScreen) Update() {
 		s.debugGrid.SetText(s.backend.Grid.Debug())
 		s.debugTime.SetText(s.backend.Timer.Time.String())
 		s.debugScore.SetText(
-			fmt.Sprint(s.backend.Score.Current, "|", s.backend.Score.High),
+			fmt.Sprint(s.backend.Score, "|", s.backend.HighScore),
 		)
 
 		s.win.Draw(s.debugGrid)
@@ -225,9 +225,9 @@ func (s *SingleplayerScreen) Update() {
 func (s *SingleplayerScreen) updateNormal(game backend.Game) {
 	s.win.SetBackground(common.BackgroundColour)
 
-	s.score.SetBody(strconv.Itoa(game.Score.Current))
+	s.score.SetBody(strconv.Itoa(game.Score))
 	s.menu.Update(s.win)
-	s.highScore.SetBody(strconv.Itoa(game.Score.High))
+	s.highScore.SetBody(strconv.Itoa(game.HighScore))
 	s.timer.SetText(game.Timer.Time.String())
 	s.newGame.Update(s.win)
 
@@ -263,7 +263,7 @@ func (s *SingleplayerScreen) updateLose(game backend.Game) {
 
 	s.heading.SetText("Game over!")
 	s.loseDialog.SetText(fmt.Sprintf(
-		"You earned %d points in %v.", game.Score.Current, game.Timer.Duration(),
+		"You earned %d points in %v.", game.Score, game.Timer.Duration(),
 	))
 
 	s.menu.Update(s.win)

@@ -10,15 +10,16 @@ import (
 
 // Game contains all required data for a 2048 game.
 type Game struct {
-	Grid  *grid.Grid `json:"grid"`
-	Score *Score     `json:"currentScore"`
-	Timer *Timer     `json:"time"`
+	Grid      *grid.Grid `json:"grid"`
+	Score     int        `json:"score"`
+	HighScore int        `json:"highScore"`
+	Timer     *Timer     `json:"time"`
 
 	store *store.Store
 	opts  *Opts
 }
 
-// opts contains configuration for the game.
+// Opts contains the configuration for the backend game.
 type Opts struct {
 	SaveToDisk bool
 }
@@ -34,7 +35,7 @@ func NewGame(opts *Opts) *Game {
 
 	g := &Game{
 		Grid:  grid.NewGrid(),
-		Score: NewScore(),
+		Score: 0,
 		Timer: NewTimer(),
 		store: store.NewStore(".save.bruh"),
 		opts:  opts,
@@ -56,7 +57,7 @@ func NewGame(opts *Opts) *Game {
 // Reset resets the game.
 func (g *Game) Reset() *Game {
 	g.Grid.Reset()
-	g.Score.Reset()
+	g.Score = 0
 	g.Timer.Reset().Pause()
 	return g
 }
@@ -64,7 +65,12 @@ func (g *Game) Reset() *Game {
 // ExecuteMove carries out a move in the given direction.
 func (g *Game) ExecuteMove(dir grid.Direction) {
 	pointsGained := g.Grid.Move(dir)
-	g.Score.AddToCurrent(pointsGained)
+
+	// Update score
+	g.Score += pointsGained
+	if g.Score > g.HighScore {
+		g.HighScore = g.Score
+	}
 
 	if g.Grid.Outcome() == grid.Lose {
 		g.Timer.Pause()

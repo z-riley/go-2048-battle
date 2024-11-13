@@ -27,7 +27,7 @@ const (
 	ArenaSizePx   = tileSpacingPx*4 + TileSizePx*TileBoundryFactor // the width and height of arena, in pixels
 	tileSpacingPx = TileSizePx * (1 + TileBoundryFactor)
 	tileFont      = FontPathBold
-	numTiles      = grid.GridLen
+	numTiles      = grid.GridSize
 )
 
 // tile is a visual representation of a game tile.

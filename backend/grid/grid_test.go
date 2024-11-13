@@ -158,7 +158,7 @@ func TestTranspose(t *testing.T) {
 		{{Val: 3}, {Val: 0}, {Val: 0}, {Val: 0}},
 		{{Val: 4}, {Val: 0}, {Val: 0}, {Val: 5}},
 	}
-	got := Transpose(input)
+	got := transpose(input)
 	if !reflect.DeepEqual(expected, got) {
 		t.Errorf("\nExpected:\n<%v>\nGot:\n<%v>", expected, got)
 	}

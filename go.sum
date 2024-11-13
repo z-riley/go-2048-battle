@@ -36,6 +36,8 @@ github.com/z-riley/turdgl v0.0.0-20241111211940-c3cd8a2a4483 h1:70BLpyLJWGuxgRDW
 github.com/z-riley/turdgl v0.0.0-20241111211940-c3cd8a2a4483/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
 github.com/z-riley/turdgl v0.0.0-20241111212625-8502d81bbf4b h1:Vf/FWjMHQAcLWjDGTGmhs52EoNHK+ojtG722IWdyduw=
 github.com/z-riley/turdgl v0.0.0-20241111212625-8502d81bbf4b/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241113204523-7589c7e2d94c h1:rY4cuGYihAkPwxwA79jHFhpOfMAyds33epNsxl45zwM=
+github.com/z-riley/turdgl v0.0.0-20241113204523-7589c7e2d94c/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
 github.com/z-riley/turdserve v0.0.0-20241103172943-200ed8c9c094 h1:9ldkpBMZ5+BV8GOGH+4QhrBgevotAprFgMVCasm+td0=
 github.com/z-riley/turdserve v0.0.0-20241103172943-200ed8c9c094/go.mod h1:D5VroZVlQvt0vUtZ2xHL8aQOlCumE/9LFEH1BBLE468=
 github.com/z-riley/turdserve v0.0.0-20241109095301-66eab11d38af h1:X0XCfUgoGvZaOZtSRcB6UkuEkP4B6EzwvDUkkZkA7p0=

@@ -1,6 +1,6 @@
 package grid
 
-// iter is a genetic iterator which can iterate forwards or backwards.
+// iter is a generic iterator which can iterate forwards or backwards.
 type iter struct {
 	length  int
 	reverse bool

@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-// Store can store bytes to the disk with gob encoding.
+// Store can store bytes to the disk.
 type Store struct {
 	mu       *sync.Mutex
 	filename string

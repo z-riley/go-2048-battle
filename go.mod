@@ -6,7 +6,7 @@ require (
 	github.com/brunoga/deep v1.2.4
 	github.com/google/uuid v1.6.0
 	github.com/moby/moby v27.3.1+incompatible
-	github.com/z-riley/turdgl v0.0.0-20241111212625-8502d81bbf4b
+	github.com/z-riley/turdgl v0.0.0-20241113204523-7589c7e2d94c
 	github.com/z-riley/turdserve v0.0.0-20241109095301-66eab11d38af
 	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa
 )

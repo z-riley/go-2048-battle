@@ -299,9 +299,9 @@ func (s *MultiplayerScreen) Update() {
 func (s *MultiplayerScreen) updateNormal() {
 	s.newGame.Update(s.win)
 	s.menu.Update(s.win)
-	s.score.SetBody(strconv.Itoa(s.backend.Score.CurrentScore()))
+	s.score.SetBody(strconv.Itoa(s.backend.Score))
 	s.timer.SetText(s.backend.Timer.Time.String())
-	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.Score.CurrentScore()))
+	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.HighScore))
 
 	for _, d := range []turdgl.Drawable{
 		s.logo2048,
@@ -343,10 +343,10 @@ func (s *MultiplayerScreen) updateLose() {
 
 func (s *MultiplayerScreen) updateGameEnd() {
 	s.menu.Update(s.win)
-	s.score.SetBody(strconv.Itoa(s.backend.Score.CurrentScore()))
+	s.score.SetBody(strconv.Itoa(s.backend.Score))
 	s.timer.SetText(s.backend.Timer.Time.String())
 	s.backend.Timer.Pause()
-	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.Score.CurrentScore()))
+	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.Score))
 
 	for _, d := range []turdgl.Drawable{
 		s.menu,
