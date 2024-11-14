@@ -490,18 +490,22 @@ type moveAnimation struct {
 	dest   coord // tile index
 }
 
+// Origin satisfies the animation interface.
 func (a moveAnimation) Origin() (coord, error) {
 	return a.origin, nil
 }
 
+// Dest satisfies the animation interface.
 func (a moveAnimation) Dest() coord {
 	return a.dest
 }
 
+// NewVal satisfies the animation interface.
 func (a moveAnimation) NewVal() (int, error) {
 	return 0, errFieldDoesNotExist
 }
 
+// String satisfies the animation interface.
 func (a moveAnimation) String() string {
 	return fmt.Sprint("move from ", a.origin, " to ", a.dest)
 }
@@ -512,18 +516,22 @@ type spawnAnimation struct {
 	newVal int   // value of a newly spawned tile. 0 if N/A
 }
 
+// Origin satisfies the animation interface.
 func (a spawnAnimation) Origin() (coord, error) {
 	return coord{-1, -1}, errFieldDoesNotExist
 }
 
+// Dest satisfies the animation interface.
 func (a spawnAnimation) Dest() coord {
 	return a.dest
 }
 
+// NewVal satisfies the animation interface.
 func (a spawnAnimation) NewVal() (int, error) {
 	return a.newVal, nil
 }
 
+// String satisfies the animation interface.
 func (a spawnAnimation) String() string {
 	return fmt.Sprint("spawn at ", a.dest)
 }
@@ -535,18 +543,22 @@ type moveToCombineAnimation struct {
 	dest   coord // tile index
 }
 
+// Origin satisfies the animation interface.
 func (a moveToCombineAnimation) Origin() (coord, error) {
 	return a.origin, nil
 }
 
+// Dest satisfies the animation interface.
 func (a moveToCombineAnimation) Dest() coord {
 	return a.dest
 }
 
+// NewVal satisfies the animation interface.
 func (a moveToCombineAnimation) NewVal() (int, error) {
 	return -1, errFieldDoesNotExist
 }
 
+// String satisfies the animation interface.
 func (a moveToCombineAnimation) String() string {
 	return fmt.Sprint("move-to-combine from ", a.origin, " to ", a.dest)
 }
@@ -558,18 +570,22 @@ type newFromCombineAnimation struct {
 	newVal int   // the value of the newly made tile
 }
 
+// Origin satisfies the animation interface.
 func (a newFromCombineAnimation) Origin() (coord, error) {
 	return coord{-1, -1}, errFieldDoesNotExist
 }
 
+// Dest satisfies the animation interface.
 func (a newFromCombineAnimation) Dest() coord {
 	return a.dest
 }
 
+// NewVal satisfies the animation interface.
 func (a newFromCombineAnimation) NewVal() (int, error) {
 	return a.newVal, nil
 }
 
+// String satisfies the animation interface.
 func (a newFromCombineAnimation) String() string {
 	return fmt.Sprint("new-from-combine at ", a.dest)
 }
@@ -664,18 +680,22 @@ type moveRowAnimation struct {
 	dest   int // tile index
 }
 
+// Origin satisfies rowAnimation.
 func (a moveRowAnimation) Origin() (int, error) {
 	return a.origin, nil
 }
 
+// Dest satisfies rowAnimation.
 func (a moveRowAnimation) Dest() int {
 	return a.dest
 }
 
+// NewVal satisfies rowAnimation.
 func (a moveRowAnimation) NewVal() (int, error) {
 	return 0, errFieldDoesNotExist
 }
 
+// String satisfies rowAnimation.
 func (a moveRowAnimation) String() string {
 	return fmt.Sprint("move from ", a.origin, " to ", a.dest)
 }
@@ -686,18 +706,22 @@ type spawnRowAnimation struct {
 	newVal int // value of a newly spawned tile. 0 if N/A
 }
 
+// Origin satisfies rowAnimation.
 func (a spawnRowAnimation) Origin() (int, error) {
 	return -1, errFieldDoesNotExist
 }
 
+// Dest satisfies rowAnimation.
 func (a spawnRowAnimation) Dest() int {
 	return a.dest
 }
 
+// NewVal satisfies rowAnimation.
 func (a spawnRowAnimation) NewVal() (int, error) {
 	return a.newVal, nil
 }
 
+// String satisfies rowAnimation.
 func (a spawnRowAnimation) String() string {
 	return fmt.Sprint("spawn at ", a.dest)
 }
@@ -709,18 +733,22 @@ type moveToCombineRowAnimation struct {
 	dest   int // tile index
 }
 
+// Origin satisfies rowAnimation.
 func (a moveToCombineRowAnimation) Origin() (int, error) {
 	return a.origin, nil
 }
 
+// Dest satisfies rowAnimation.
 func (a moveToCombineRowAnimation) Dest() int {
 	return a.dest
 }
 
+// NewVal satisfies rowAnimation.
 func (a moveToCombineRowAnimation) NewVal() (int, error) {
 	return -1, errFieldDoesNotExist
 }
 
+// String satisfies rowAnimation.
 func (a moveToCombineRowAnimation) String() string {
 	return fmt.Sprint("move-to-combine from ", a.origin, " to ", a.dest)
 }
@@ -732,18 +760,22 @@ type newFromCombineRowAnimation struct {
 	newVal int // the value of the newly made tile
 }
 
+// Origin satisfies rowAnimation.
 func (a newFromCombineRowAnimation) Origin() (int, error) {
 	return -1, errFieldDoesNotExist
 }
 
+// Dest satisfies rowAnimation.
 func (a newFromCombineRowAnimation) Dest() int {
 	return a.dest
 }
 
+// NewVal satisfies rowAnimation.
 func (a newFromCombineRowAnimation) NewVal() (int, error) {
 	return a.newVal, nil
 }
 
+// String satisfies rowAnimation.
 func (a newFromCombineRowAnimation) String() string {
 	return fmt.Sprint("new-from-combine at ", a.dest)
 }

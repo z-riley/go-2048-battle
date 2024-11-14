@@ -341,6 +341,7 @@ func (s *MultiplayerScreen) updateLose() {
 	s.updateGameEnd()
 }
 
+// updateGameEnd draws the appropriate game widgets for when the game has ended.
 func (s *MultiplayerScreen) updateGameEnd() {
 	s.menu.Update(s.win)
 	s.score.SetBody(strconv.Itoa(s.backend.Score))

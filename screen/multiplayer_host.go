@@ -259,6 +259,7 @@ func (s *MultiplayerHostScreen) handlePlayerData(data comms.PlayerData) error {
 	return nil
 }
 
+// handleOpponentDisconnect handles the opponent disconnecting from the server.
 func (s *MultiplayerHostScreen) handleOpponentDisconnect() {
 	s.opponentStatus.SetText(fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()))
 	s.opponentIsConnected = false

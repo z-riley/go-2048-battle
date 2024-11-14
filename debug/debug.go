@@ -8,6 +8,7 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
+// Widget displays diagnostic information about the current window.
 type Widget struct {
 	win *turdgl.Window
 
@@ -17,6 +18,7 @@ type Widget struct {
 	tick     <-chan time.Time // for measuring FPS
 }
 
+// NewDebugWidget constructs a new debug widget.
 func NewDebugWidget(win *turdgl.Window) *Widget {
 	location := turdgl.NewText("Loc: ", turdgl.Vec{X: 1120, Y: 25}, common.FontPathMedium).
 		SetAlignment(turdgl.AlignBottomRight).
