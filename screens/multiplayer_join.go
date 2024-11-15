@@ -3,6 +3,7 @@ package screens
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/moby/moby/pkg/namesgenerator"
@@ -33,6 +34,7 @@ type MultiplayerJoinScreen struct {
 
 	client      *turdserve.Client
 	hostIsReady chan bool
+	done        chan struct{}
 }
 
 // NewTitle Screen constructs an uninitialised multiplayer join screen.
@@ -151,11 +153,14 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
 		SetScreen(MultiplayerMenu, nil)
 	})
+
+	s.done = make(chan struct{})
 }
 
 // Exit deinitialises the screen.
 func (s *MultiplayerJoinScreen) Exit() {
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
+	s.done <- struct{}{}
 }
 
 // Update updates and draws multiplayer join screen.
@@ -327,8 +332,26 @@ func (s *MultiplayerJoinScreen) handlePlayerData(data comms.PlayerData) error {
 		return fmt.Errorf("incompatible versions (peer %s, local %s)", data.Version, config.Version)
 	}
 
+	// Animate status message
 	s.opponentName = data.Username
-	s.opponentStatus.SetText(fmt.Sprintf("Waiting for \"%s\" to start the game", s.opponentName))
+	msg := fmt.Sprintf("Waiting for \"%s\" to start the game", s.opponentName)
+	s.opponentStatus.SetText(msg)
+	go func() {
+		n := 0
+		for {
+			select {
+			case <-s.done:
+				return
+			default:
+				s.opponentStatus.SetText(msg + strings.Repeat(".", n))
+				time.Sleep(time.Second)
+				n++
+				if n > 3 {
+					n = 0
+				}
+			}
+		}
+	}()
 
 	return nil
 }
