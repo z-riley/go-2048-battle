@@ -31,8 +31,8 @@ type MultiplayerHostScreen struct {
 	back             *turdgl.Button
 	buttonBackground *turdgl.CurvedRect
 
-	server              *turdserve.Server
-	opponentIsConnected bool
+	server            *turdserve.Server
+	opponentIsInLobby bool
 }
 
 // NewMultiplayerHostScreen constructs an uninitialised multiplayer host screen.
@@ -101,7 +101,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
 		},
 		func() {
-			if !s.opponentIsConnected {
+			if !s.opponentIsInLobby {
 				// Make the opponent status text briefly change colour
 				s.opponentStatus.SetColour(common.Tile64Colour)
 				go func() {
@@ -163,6 +163,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 // Exit deinitialises the screen.
 func (s *MultiplayerHostScreen) Exit() {
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
+	s.opponentIsInLobby = false
 }
 
 // Update updates and draws multiplayer host screen.
@@ -249,7 +250,7 @@ func (s *MultiplayerHostScreen) handlePlayerData(data comms.PlayerData) error {
 	s.opponentStatus.SetText(
 		fmt.Sprintf("\"%s\" has joined the game. Press Start to begin", s.opponentName),
 	)
-	s.opponentIsConnected = true
+	s.opponentIsInLobby = true
 
 	// Send host player data to client
 	if err := s.sendPlayerData(); err != nil {
@@ -262,7 +263,7 @@ func (s *MultiplayerHostScreen) handlePlayerData(data comms.PlayerData) error {
 // handleOpponentDisconnect handles the opponent disconnecting from the server.
 func (s *MultiplayerHostScreen) handleOpponentDisconnect() {
 	s.opponentStatus.SetText(fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()))
-	s.opponentIsConnected = false
+	s.opponentIsInLobby = false
 }
 
 // getIPAddr returns the IP address of the host.
@@ -284,7 +285,7 @@ const serverKey = "server"
 // startGame attempts to start a multiplayer game.
 func (s *MultiplayerHostScreen) startGame() error {
 	// Check opponent is connected
-	if !s.opponentIsConnected {
+	if !s.opponentIsInLobby {
 		return errors.New("opponent is not connected")
 	}
 
