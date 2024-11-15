@@ -1,4 +1,4 @@
-package screen
+package screens
 
 import (
 	"github.com/z-riley/turdgl"

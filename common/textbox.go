@@ -158,7 +158,6 @@ func NewTooltip() *turdgl.TextBox {
 		SetStyle(turdgl.Style{Colour: ArenaBackgroundColour})
 
 	return turdgl.NewTextBox(r, "Click to edit", FontPathMedium).
-		SetTextOffset(turdgl.Vec{Y: 4}).
 		SetTextSize(16).
 		SetTextColour(LightGreyTextColour)
 }

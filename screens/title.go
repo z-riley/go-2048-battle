@@ -1,4 +1,4 @@
-package screen
+package screens
 
 import (
 	"github.com/z-riley/go-2048-battle/common"
@@ -6,26 +6,25 @@ import (
 	"github.com/z-riley/turdgl"
 )
 
-type MultiplayerMenuScreen struct {
+type TitleScreen struct {
 	win *turdgl.Window
 
-	title *turdgl.Text
-
+	title            *turdgl.Text
 	hint             *turdgl.Text
 	buttonBackground *turdgl.CurvedRect
-	join             *turdgl.Button
-	host             *turdgl.Button
-	back             *turdgl.Button
+	singleplayer     *turdgl.Button
+	multiplayer      *turdgl.Button
+	quit             *turdgl.Button
 }
 
-// NewTitle Screen constructs a new multiplayer menu screen for the given window.
-func NewMultiplayerMenuScreen(win *turdgl.Window) *MultiplayerMenuScreen {
-	return &MultiplayerMenuScreen{win: win}
+// NewTitle Screen constructs a new title screen for the given window.
+func NewTitleScreen(win *turdgl.Window) *TitleScreen {
+	return &TitleScreen{win: win}
 }
 
 // Enter initialises the screen.
-func (s *MultiplayerMenuScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Versus", turdgl.Vec{X: config.WinWidth / 2, Y: 260}, common.FontPathMedium).
+func (s *TitleScreen) Enter(_ InitData) {
+	s.title = turdgl.NewText("2048 Battle", turdgl.Vec{X: config.WinWidth / 2, Y: 260}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(100)
@@ -50,102 +49,106 @@ func (s *MultiplayerMenuScreen) Enter(_ InitData) {
 	)
 	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
-	s.join = common.NewMenuButton(
+	// Menu buttons
+	s.singleplayer = common.NewMenuButton(
 		TileSizePx, TileSizePx,
 		turdgl.Vec{
 			X: s.buttonBackground.Pos.X + TileSizePx*TileBoundryFactor,
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
-		}.Round(),
-		func() { SetScreen(MultiplayerJoin, nil) },
-	).SetLabelText("Join")
-	s.join.SetCallback(
+		},
+		func() {
+			SetScreen(Singleplayer, nil)
+		},
+	).SetLabelText("Solo")
+	s.singleplayer.SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
-			s.join.Label.SetColour(common.WhiteFontColour)
-			s.join.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
-			s.hint.SetText("Join a LAN game")
+			s.singleplayer.Label.SetColour(common.WhiteFontColour)
+			s.singleplayer.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
+			s.hint.SetText("Play alone")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
-			s.join.Label.SetColour(common.WhiteFontColour)
-			s.join.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
+			s.singleplayer.Label.SetColour(common.WhiteFontColour)
+			s.singleplayer.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)
 
-	s.host = common.NewMenuButton(
+	s.multiplayer = common.NewMenuButton(
 		TileSizePx, TileSizePx,
 		turdgl.Vec{
 			X: s.buttonBackground.Pos.X + TileSizePx*(1+2*TileBoundryFactor),
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
-		}.Round(),
-		func() { SetScreen(MultiplayerHost, nil) },
-	).SetLabelText("Host")
-	s.host.SetCallback(
+		},
+		func() {
+			SetScreen(MultiplayerMenu, nil)
+		},
+	).SetLabelText("Versus")
+	s.multiplayer.SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
-			s.host.Label.SetColour(common.WhiteFontColour)
-			s.host.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
-			s.hint.SetText("Host a LAN game")
+			s.multiplayer.Label.SetColour(common.WhiteFontColour)
+			s.multiplayer.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
+			s.hint.SetText("Play against a friend")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
-			s.host.Label.SetColour(common.WhiteFontColour)
-			s.host.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
+			s.multiplayer.Label.SetColour(common.WhiteFontColour)
+			s.multiplayer.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)
 
-	s.back = common.NewMenuButton(
+	s.quit = common.NewMenuButton(
 		TileSizePx, TileSizePx,
 		turdgl.Vec{
 			X: s.buttonBackground.Pos.X + TileSizePx*(2+3*TileBoundryFactor),
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
-		}.Round(),
-		func() { SetScreen(Title, nil) },
-	).SetLabelText("Back")
-	s.back.SetCallback(
+		},
+		func() {
+			s.win.Quit()
+		},
+	).SetLabelText("Quit")
+	s.quit.SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
-			s.back.Label.SetColour(common.WhiteFontColour)
-			s.back.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
-			s.hint.SetText("Go back to main menu")
+			s.quit.Label.SetColour(common.WhiteFontColour)
+			s.quit.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleHovering)
+			s.hint.SetText("Exit to desktop")
 		},
 	).SetCallback(
 		turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 		func() {
-			s.back.Label.SetColour(common.WhiteFontColour)
-			s.back.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
+			s.quit.Label.SetColour(common.WhiteFontColour)
+			s.quit.Shape.(*turdgl.CurvedRect).SetStyle(common.ButtonStyleUnpressed)
 			s.hint.SetText("")
 		},
 	)
 
+	// Keybinds
 	s.win.RegisterKeybind(turdgl.Key1, turdgl.KeyRelease, func() {
-		SetScreen(MultiplayerJoin, nil)
+		SetScreen(Singleplayer, nil)
 	})
 	s.win.RegisterKeybind(turdgl.Key2, turdgl.KeyRelease, func() {
-		SetScreen(MultiplayerHost, nil)
+		SetScreen(MultiplayerMenu, nil)
 	})
-	s.win.RegisterKeybind(turdgl.Key3, turdgl.KeyRelease, func() {
-		SetScreen(Title, nil)
-	})
-	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
-		SetScreen(Title, nil)
-	})
+	s.win.RegisterKeybind(turdgl.Key3, turdgl.KeyRelease, s.win.Quit)
+	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, s.win.Quit)
 }
 
 // Exit deinitialises the screen.
-func (s *MultiplayerMenuScreen) Exit() {
+func (s *TitleScreen) Exit() {
 	s.win.UnregisterKeybind(turdgl.Key1, turdgl.KeyRelease)
 	s.win.UnregisterKeybind(turdgl.Key2, turdgl.KeyRelease)
 	s.win.UnregisterKeybind(turdgl.Key3, turdgl.KeyRelease)
 	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
 }
 
-// Update updates and draws multiplayer menu screen.
-func (s *MultiplayerMenuScreen) Update() {
+// Update draws the title screen and updates its components.
+func (s *TitleScreen) Update() {
 	s.win.SetBackground(common.BackgroundColour)
 
 	s.win.Draw(s.title)
@@ -153,9 +156,9 @@ func (s *MultiplayerMenuScreen) Update() {
 	s.win.Draw(s.buttonBackground)
 
 	for _, b := range []*turdgl.Button{
-		s.join,
-		s.host,
-		s.back,
+		s.singleplayer,
+		s.multiplayer,
+		s.quit,
 	} {
 		b.Update(s.win)
 		s.win.Draw(b)
