@@ -91,14 +91,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			s.newGame = common.NewGameButton(
 				widgetWidth, 0.4*unit,
 				turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
-				func() {
-					s.backend.Score = 0
-
-					s.arenaInputCh <- func() {
-						s.backend.Reset()
-						s.arena.Reset()
-					}
-				},
+				func() { s.Reset() },
 			).SetLabelText("NEW")
 
 			s.menu = common.NewGameButton(
@@ -222,15 +215,22 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			}
 		})
 		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyRelease, func() {
-			s.arenaInputCh <- func() {
-				s.backend.Reset()
-				s.arena.Reset()
-			}
+			s.Reset()
 		})
 		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
 			SetScreen(Title, nil)
 		})
 	}
+
+	// Start the game timer immediately, rather than wait for the first move like
+	// in singleplayer mode
+	s.backend.Timer.Resume()
+}
+
+// Reset resets the multiplayer screen.
+func (s *MultiplayerScreen) Reset() {
+	s.backend.ResetKeepTimer()
+	s.arena.Reset()
 }
 
 // Exit deinitialises the screen.

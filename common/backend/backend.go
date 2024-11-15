@@ -62,6 +62,13 @@ func (g *Game) Reset() *Game {
 	return g
 }
 
+// Reset resets the game whilst preserving the current timer state.
+func (g *Game) ResetKeepTimer() *Game {
+	g.Grid.Reset()
+	g.Score = 0
+	return g
+}
+
 // ExecuteMove carries out a move in the given direction.
 func (g *Game) ExecuteMove(dir grid.Direction) {
 	pointsGained := g.Grid.Move(dir)
