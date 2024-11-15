@@ -136,6 +136,7 @@ func (s *TitleScreen) Enter(_ InitData) {
 		SetScreen(MultiplayerMenu, nil)
 	})
 	s.win.RegisterKeybind(turdgl.Key3, turdgl.KeyRelease, s.win.Quit)
+	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, s.win.Quit)
 }
 
 // Exit deinitialises the screen.

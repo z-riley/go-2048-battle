@@ -159,7 +159,7 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 				s.arena.Reset()
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
 			SetScreen(Title, nil)
 		})
 	}
@@ -177,7 +177,7 @@ func (s *SingleplayerScreen) Exit() {
 	s.win.UnregisterKeybind(turdgl.KeyDown, turdgl.KeyPress)
 	s.win.UnregisterKeybind(turdgl.KeyLeft, turdgl.KeyPress)
 	s.win.UnregisterKeybind(turdgl.KeyRight, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyPress)
+	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
 
 	s.arena.Destroy()
 }
