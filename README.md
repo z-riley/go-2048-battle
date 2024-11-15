@@ -2,6 +2,8 @@
 
 [2048](https://en.wikipedia.org/wiki/2048_(video_game)) sliding puzzle game featuring singleplayer and head-to-head multiplayer modes. Built using [turdgl](https://github.com/z-riley/turdgl/).
 
+![Multiplayer demo](./docs/versus-demo.gif)
+
 ## Dependencies
 
 ### SDL2 - DirectMedia Layer
