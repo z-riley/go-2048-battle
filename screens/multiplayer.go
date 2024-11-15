@@ -92,6 +92,8 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				widgetWidth, 0.4*unit,
 				turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
 				func() {
+					s.backend.Score = 0
+
 					s.arenaInputCh <- func() {
 						s.backend.Reset()
 						s.arena.Reset()
@@ -301,7 +303,7 @@ func (s *MultiplayerScreen) updateNormal() {
 	s.menu.Update(s.win)
 	s.score.SetBody(strconv.Itoa(s.backend.Score))
 	s.timer.SetText(s.backend.Timer.Time.String())
-	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.HighScore))
+	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.Score))
 
 	for _, d := range []turdgl.Drawable{
 		s.logo2048,

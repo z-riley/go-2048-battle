@@ -122,7 +122,6 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 	)
 	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
 
-	// Set up client
 	s.hostIsReady = make(chan bool)
 	s.join = common.NewMenuButton(
 		TileSizePx, TileSizePx,
@@ -145,7 +144,9 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 			SetScreen(MultiplayerMenu, nil)
 		}).SetLabelText("Back")
 
+	// Set up client
 	s.client = turdserve.NewClient()
+	s.client.ConnectTimeout = 200 * time.Millisecond
 
 	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
 		SetScreen(MultiplayerMenu, nil)

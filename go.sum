@@ -40,10 +40,14 @@ github.com/z-riley/turdgl v0.0.0-20241113204523-7589c7e2d94c h1:rY4cuGYihAkPwxwA
 github.com/z-riley/turdgl v0.0.0-20241113204523-7589c7e2d94c/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
 github.com/z-riley/turdgl v0.0.0-20241113214650-431600106ef0 h1:rfBZyL0+kOYmTta4OqjBKVxPW1YC96y1VR5YIpWlW2c=
 github.com/z-riley/turdgl v0.0.0-20241113214650-431600106ef0/go.mod h1:PUy0rnENvtQrZRghi9dYinsUUE7gvC9wOz8C/gcwJ8A=
+github.com/z-riley/turdgl v0.0.0-20241115181038-2b4731ca4a98 h1:IuvZ8H2BbcR5FJ5jhzfg/wTioZIb+DAk/lIYNEzjfyo=
+github.com/z-riley/turdgl v0.0.0-20241115181038-2b4731ca4a98/go.mod h1:XQ9VIpbqjnlig4qgiACNc/OjbuUMhAzDjhKoIb+LdFM=
 github.com/z-riley/turdserve v0.0.0-20241103172943-200ed8c9c094 h1:9ldkpBMZ5+BV8GOGH+4QhrBgevotAprFgMVCasm+td0=
 github.com/z-riley/turdserve v0.0.0-20241103172943-200ed8c9c094/go.mod h1:D5VroZVlQvt0vUtZ2xHL8aQOlCumE/9LFEH1BBLE468=
 github.com/z-riley/turdserve v0.0.0-20241109095301-66eab11d38af h1:X0XCfUgoGvZaOZtSRcB6UkuEkP4B6EzwvDUkkZkA7p0=
 github.com/z-riley/turdserve v0.0.0-20241109095301-66eab11d38af/go.mod h1:D5VroZVlQvt0vUtZ2xHL8aQOlCumE/9LFEH1BBLE468=
+github.com/z-riley/turdserve v0.0.0-20241115214711-e365855221e2 h1:yMyJzTiEz9Ef5RguUAjxN1xhImJESSWwKGz5wqey5ro=
+github.com/z-riley/turdserve v0.0.0-20241115214711-e365855221e2/go.mod h1:D5VroZVlQvt0vUtZ2xHL8aQOlCumE/9LFEH1BBLE468=
 golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa h1:ELnwvuAXPNtPk1TJRuGkI9fDTwym6AYBu0qzT8AcHdI=
 golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa/go.mod h1:akd2r19cwCdwSwWeIdzYQGa/EZZyqcOdwWiwj5L5eKQ=
 golang.org/x/image v0.19.0 h1:D9FX4QWkLfkeqaC62SonffIIuYdOk/UE2XKUBgRIBIQ=
