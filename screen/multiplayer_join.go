@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/moby/moby/pkg/namesgenerator"
-	"github.com/z-riley/go-2048-battle/backend/store"
 	"github.com/z-riley/go-2048-battle/common"
-	"github.com/z-riley/go-2048-battle/comms"
+	"github.com/z-riley/go-2048-battle/common/backend/store"
+	"github.com/z-riley/go-2048-battle/common/comms"
 	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/go-2048-battle/log"
 	"github.com/z-riley/turdgl"

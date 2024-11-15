@@ -30,8 +30,9 @@ func main() {
 	}
 	defer win.Destroy()
 
-	// Register window-level keybinds (for development only)
-	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
+	if config.Debug {
+		win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
+	}
 
 	// Parse starting screen arg
 	screenStr := flag.String("screen", string(screen.Title), "starting screen")

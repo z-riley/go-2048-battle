@@ -3,7 +3,7 @@ package comms
 import (
 	"encoding/json"
 
-	"github.com/z-riley/go-2048-battle/backend"
+	"github.com/z-riley/go-2048-battle/common/backend"
 )
 
 // Message contains data for multiplayer mode communication. The Type field

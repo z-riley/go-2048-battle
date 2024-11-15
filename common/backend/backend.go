@@ -3,8 +3,8 @@ package backend
 import (
 	"encoding/json"
 
-	"github.com/z-riley/go-2048-battle/backend/grid"
-	"github.com/z-riley/go-2048-battle/backend/store"
+	"github.com/z-riley/go-2048-battle/common/backend/grid"
+	"github.com/z-riley/go-2048-battle/common/backend/store"
 	"github.com/z-riley/go-2048-battle/log"
 )
 

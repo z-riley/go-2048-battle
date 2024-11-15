@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/z-riley/go-2048-battle/backend"
-	"github.com/z-riley/go-2048-battle/backend/grid"
+	"github.com/z-riley/go-2048-battle/common/backend"
+	"github.com/z-riley/go-2048-battle/common/backend/grid"
 	"github.com/z-riley/go-2048-battle/log"
 	"github.com/z-riley/turdgl"
 	"golang.org/x/exp/constraints"

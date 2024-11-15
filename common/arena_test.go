@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/z-riley/go-2048-battle/backend/grid"
+	"github.com/z-riley/go-2048-battle/common/backend/grid"
 )
 
 func TestGenerateRowAnimations(t *testing.T) {

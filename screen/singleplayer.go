@@ -5,9 +5,9 @@ import (
 	"strconv"
 
 	"github.com/brunoga/deep"
-	"github.com/z-riley/go-2048-battle/backend"
-	"github.com/z-riley/go-2048-battle/backend/grid"
 	"github.com/z-riley/go-2048-battle/common"
+	"github.com/z-riley/go-2048-battle/common/backend"
+	"github.com/z-riley/go-2048-battle/common/backend/grid"
 	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/turdgl"
 )
