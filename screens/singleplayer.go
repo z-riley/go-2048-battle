@@ -153,7 +153,7 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyRelease, func() {
 			s.arenaInputCh <- func() {
 				s.backend.Reset()
 				s.arena.Reset()

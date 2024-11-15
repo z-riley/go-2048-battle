@@ -219,13 +219,13 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 				s.backend.ExecuteMove(grid.DirRight)
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyRelease, func() {
 			s.arenaInputCh <- func() {
 				s.backend.Reset()
 				s.arena.Reset()
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
 			SetScreen(Title, nil)
 		})
 	}
@@ -243,7 +243,7 @@ func (s *MultiplayerScreen) Exit() {
 	s.win.UnregisterKeybind(turdgl.KeyDown, turdgl.KeyPress)
 	s.win.UnregisterKeybind(turdgl.KeyLeft, turdgl.KeyPress)
 	s.win.UnregisterKeybind(turdgl.KeyRight, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyPress)
+	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
 
 	if s.server != nil {
 		s.server.Destroy()
