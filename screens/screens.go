@@ -1,7 +1,7 @@
 package screens
 
 import (
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 // InitData can be passed to screens' Init function to share data between screens.
@@ -36,7 +36,7 @@ func (id ID) String() string {
 var screens map[ID]Screen
 
 // Init populates the internal screens variable.
-func Init(win *turdgl.Window) {
+func Init(win *gogl.Window) {
 	screens = map[ID]Screen{
 		Title:           NewTitleScreen(win),
 		Singleplayer:    NewSingleplayerScreen(win),

@@ -1,14 +1,17 @@
 #!/bin/bash
 # Script for updating dependencies to the latest commit
 
-cd ~/r/turdgl
+cd ~/r/gogl
 latest_commit=$(git rev-parse HEAD)
 cd -
-echo "Getting turdgl"
-go get "github.com/z-riley/turdgl"@$latest_commit
+echo "Getting gogl"
+echo $latest_commit
+go get "github.com/z-riley/gogl"@$latest_commit
 
-cd ~/r/turdserve
+exit 1
+
+cd ~/r/servesyouright
 latest_commit=$(git rev-parse HEAD)
 cd -
-echo "Getting turdserve"
-go get "github.com/z-riley/turdserve"@$latest_commit
+echo "Getting servesyouright"
+go get "github.com/z-riley/servesyouright"@$latest_commit

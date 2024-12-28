@@ -3,35 +3,35 @@ package common
 import (
 	"image/color"
 
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 // Entrybox is an interactive text box for data entry.
 type EntryBox struct {
-	TextBox *turdgl.TextBox
-	bloom   *turdgl.CurvedRect
+	TextBox *gogl.TextBox
+	bloom   *gogl.CurvedRect
 }
 
 // NewEntryBox constructs a new text box with suitable defaults.
-func NewEntryBox(width, height float64, pos turdgl.Vec, txt string) *EntryBox {
+func NewEntryBox(width, height float64, pos gogl.Vec, txt string) *EntryBox {
 	var (
-		styleUnselected = turdgl.Style{
-			Colour:    turdgl.LightGrey,
+		styleUnselected = gogl.Style{
+			Colour:    gogl.LightGrey,
 			Thickness: 1,
 			Bloom:     0,
 		}
-		styleSelected = turdgl.Style{
-			Colour:    turdgl.LightGrey,
+		styleSelected = gogl.Style{
+			Colour:    gogl.LightGrey,
 			Thickness: 1,
 			Bloom:     10,
 		}
 	)
 
-	bloom := turdgl.NewCurvedRect(width, height, 6, pos).SetStyle(styleUnselected)
+	bloom := gogl.NewCurvedRect(width, height, 6, pos).SetStyle(styleUnselected)
 
-	tb := NewTextBox(width, height, pos, txt).SetTextAlignment(turdgl.AlignCentre)
+	tb := NewTextBox(width, height, pos, txt).SetTextAlignment(gogl.AlignCentre)
 	tb.SetSelectedCB(func() {
-		tb.SetTextColour(turdgl.White)
+		tb.SetTextColour(gogl.White)
 		bloom.SetStyle(styleSelected)
 	}).SetDeselectedCB(func() {
 		tb.SetTextColour(LightGreyTextColour)
@@ -42,13 +42,13 @@ func NewEntryBox(width, height float64, pos turdgl.Vec, txt string) *EntryBox {
 }
 
 // Draw draws an entry box to the frame buffer.
-func (e *EntryBox) Draw(buf *turdgl.FrameBuffer) {
+func (e *EntryBox) Draw(buf *gogl.FrameBuffer) {
 	e.bloom.Draw(buf)
 	e.TextBox.Draw(buf)
 }
 
 // Update updates the entry box so it's interactive.
-func (e *EntryBox) Update(win *turdgl.Window) {
+func (e *EntryBox) Update(win *gogl.Window) {
 	e.TextBox.Update(win)
 }
 
@@ -71,40 +71,40 @@ func (e *EntryBox) SetModifiedCB(callback func()) *EntryBox {
 }
 
 // NewTextBox constructs a new text box.
-func NewTextBox(width, height float64, pos turdgl.Vec, txt string) *turdgl.TextBox {
-	r := turdgl.NewCurvedRect(width, height, 6, pos).
-		SetStyle(turdgl.Style{Colour: buttonColourUnpressed})
+func NewTextBox(width, height float64, pos gogl.Vec, txt string) *gogl.TextBox {
+	r := gogl.NewCurvedRect(width, height, 6, pos).
+		SetStyle(gogl.Style{Colour: buttonColourUnpressed})
 
-	return turdgl.NewTextBox(r, txt, FontPathMedium).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 15}).
+	return gogl.NewTextBox(r, txt, FontPathMedium).
+		SetTextOffset(gogl.Vec{X: 0, Y: 15}).
 		SetTextSize(36).
 		SetTextColour(LightGreyTextColour)
 }
 
 // ScoreBox is a commonly used text box for displaying scores.
 type ScoreBox struct {
-	heading *turdgl.Text
-	body    *turdgl.TextBox
+	heading *gogl.Text
+	body    *gogl.TextBox
 }
 
 // NewScoreBox constructs a new text box for displaying a score.
-func NewScoreBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *ScoreBox {
-	headingPos := turdgl.Vec{
+func NewScoreBox(width, height float64, pos gogl.Vec, colour color.RGBA) *ScoreBox {
+	headingPos := gogl.Vec{
 		X: pos.X + width/2,
 		Y: pos.Y + 15,
 	}
-	heading := turdgl.NewText("Heading", headingPos, FontPathBold).
+	heading := gogl.NewText("Heading", headingPos, FontPathBold).
 		SetColour(LightGreyTextColour).
 		SetSize(16).
-		SetOffset(turdgl.Vec{Y: 3})
+		SetOffset(gogl.Vec{Y: 3})
 
-	r := turdgl.NewCurvedRect(
+	r := gogl.NewCurvedRect(
 		width, height, 3,
 		pos,
-	).SetStyle(turdgl.Style{Colour: colour})
+	).SetStyle(gogl.Style{Colour: colour})
 
-	body := turdgl.NewTextBox(r, "", FontPathBold).
-		SetTextOffset(turdgl.Vec{X: 0, Y: 10}).
+	body := gogl.NewTextBox(r, "", FontPathBold).
+		SetTextOffset(gogl.Vec{X: 0, Y: 10}).
 		SetTextSize(26).
 		SetTextColour(WhiteFontColour)
 
@@ -112,7 +112,7 @@ func NewScoreBox(width, height float64, pos turdgl.Vec, colour color.RGBA) *Scor
 }
 
 // Draw draws the UI box to the window.
-func (g *ScoreBox) Draw(buf *turdgl.FrameBuffer) {
+func (g *ScoreBox) Draw(buf *gogl.FrameBuffer) {
 	g.body.Draw(buf)
 	g.heading.Draw(buf)
 }
@@ -130,34 +130,34 @@ func (g *ScoreBox) SetBody(s string) *ScoreBox {
 }
 
 // NewGameText constructs text with sensible defaults.
-func NewGameText(body string, pos turdgl.Vec) *turdgl.Text {
-	return turdgl.NewText(body, pos, FontPathBold).
+func NewGameText(body string, pos gogl.Vec) *gogl.Text {
+	return gogl.NewText(body, pos, FontPathBold).
 		SetColour(GreyTextColour).
 		SetSize(17)
 }
 
 // NewLogoBox constructs a "2048" tile logo.
-func NewLogoBox(size float64, pos turdgl.Vec) *turdgl.TextBox {
-	logo := turdgl.NewTextBox(
-		turdgl.NewCurvedRect(size, size, 3, pos),
+func NewLogoBox(size float64, pos gogl.Vec) *gogl.TextBox {
+	logo := gogl.NewTextBox(
+		gogl.NewCurvedRect(size, size, 3, pos),
 		"2048",
 		FontPathBold,
 	).
 		SetTextSize(32).
 		SetTextColour(WhiteFontColour)
 
-	logo.Text.SetAlignment(turdgl.AlignCustom)
-	logo.Shape.(*turdgl.CurvedRect).SetStyle(turdgl.Style{Colour: Tile2048Colour})
+	logo.Text.SetAlignment(gogl.AlignCustom)
+	logo.Shape.(*gogl.CurvedRect).SetStyle(gogl.Style{Colour: Tile2048Colour})
 
 	return logo
 }
 
 // NewLogoBox returns a new tooltip text box.
-func NewTooltip() *turdgl.TextBox {
-	r := turdgl.NewCurvedRect(110, 23, 2, turdgl.Vec{}).
-		SetStyle(turdgl.Style{Colour: ArenaBackgroundColour})
+func NewTooltip() *gogl.TextBox {
+	r := gogl.NewCurvedRect(110, 23, 2, gogl.Vec{}).
+		SetStyle(gogl.Style{Colour: ArenaBackgroundColour})
 
-	return turdgl.NewTextBox(r, "Click to edit", FontPathMedium).
+	return gogl.NewTextBox(r, "Click to edit", FontPathMedium).
 		SetTextSize(16).
 		SetTextColour(LightGreyTextColour)
 }

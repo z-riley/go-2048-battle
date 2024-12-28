@@ -12,40 +12,40 @@ import (
 	"github.com/z-riley/go-2048-battle/common/comms"
 	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/go-2048-battle/log"
-	"github.com/z-riley/turdgl"
-	"github.com/z-riley/turdserve"
+	"github.com/z-riley/gogl"
+	"github.com/z-riley/servesyouright"
 )
 
 type MultiplayerScreen struct {
-	win              *turdgl.Window
+	win              *gogl.Window
 	backgroundColour color.RGBA
-	logo2048         *turdgl.TextBox
+	logo2048         *gogl.TextBox
 
-	newGame       *turdgl.Button
-	menu          *turdgl.Button
+	newGame       *gogl.Button
+	menu          *gogl.Button
 	score         *common.ScoreBox
-	guide         *turdgl.Text
-	timer         *turdgl.Text
+	guide         *gogl.Text
+	timer         *gogl.Text
 	backend       *backend.Game
 	arena         *common.Arena
 	arenaInputCh  chan func()
-	endGameDialog *turdgl.Text
-	debugGrid     *turdgl.Text
+	endGameDialog *gogl.Text
+	debugGrid     *gogl.Text
 
 	opponentScore     *common.ScoreBox
 	opponentName      string
-	opponentGuide     *turdgl.Text
+	opponentGuide     *gogl.Text
 	opponentArena     *common.Arena
 	opponentBackend   *backend.Game
-	opponentDebugGrid *turdgl.Text
+	opponentDebugGrid *gogl.Text
 
 	// EITHER server or client will exist
-	server *turdserve.Server
-	client *turdserve.Client
+	server *servesyouright.Server
+	client *servesyouright.Client
 }
 
 // NewMultiplayerScreen constructs a new singleplayer menu screen.
-func NewMultiplayerScreen(win *turdgl.Window) *MultiplayerScreen {
+func NewMultiplayerScreen(win *gogl.Window) *MultiplayerScreen {
 	return &MultiplayerScreen{
 		win:              win,
 		backgroundColour: common.BackgroundColour,
@@ -64,10 +64,10 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 	// UI widgets
 	{
 		s.arena = common.NewArena(
-			turdgl.Vec{X: config.WinWidth/3 - 249, Y: 300},
+			gogl.Vec{X: config.WinWidth/3 - 249, Y: 300},
 		)
 		s.opponentArena = common.NewArena(
-			turdgl.Vec{X: config.WinWidth*2/3 - 71, Y: 300},
+			gogl.Vec{X: config.WinWidth*2/3 - 71, Y: 300},
 		)
 
 		// Everything is sized relative to the tile size and arena position
@@ -77,26 +77,26 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 		const logoSize = 1.36 * unit
 		s.logo2048 = common.NewLogoBox(
 			logoSize,
-			turdgl.Vec{X: (config.WinWidth - logoSize) / 2, Y: anchor.Y - 2.58*unit},
+			gogl.Vec{X: (config.WinWidth - logoSize) / 2, Y: anchor.Y - 2.58*unit},
 		)
 
 		s.endGameDialog = common.NewGameText(
 			"Press MENU to\nplay again",
-			turdgl.Vec{X: config.WinWidth / 2, Y: anchor.Y - 2.5*unit},
-		).SetAlignment(turdgl.AlignTopCentre).SetSize(25)
+			gogl.Vec{X: config.WinWidth / 2, Y: anchor.Y - 2.5*unit},
+		).SetAlignment(gogl.AlignTopCentre).SetSize(25)
 
 		// Player's grid
 		{
 			const widgetWidth = unit * 1.27
 			s.newGame = common.NewGameButton(
 				widgetWidth, 0.4*unit,
-				turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
+				gogl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
 				func() { s.Reset() },
 			).SetLabelText("NEW")
 
 			s.menu = common.NewGameButton(
 				widgetWidth, 0.4*unit,
-				turdgl.Vec{X: anchor.X + s.arena.Width() - widgetWidth, Y: anchor.Y - 1.21*unit},
+				gogl.Vec{X: anchor.X + s.arena.Width() - widgetWidth, Y: anchor.Y - 1.21*unit},
 				func() {
 					SetScreen(MultiplayerMenu, nil)
 				},
@@ -105,14 +105,14 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			const wScore = 90
 			s.score = common.NewScoreBox(
 				90, 90,
-				turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
+				gogl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
 				common.ArenaBackgroundColour,
 			).SetHeading("SCORE")
 
 			s.guide = common.NewGameText(
 				"Your grid",
-				turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.67*unit},
-			).SetAlignment(turdgl.AlignTopRight)
+				gogl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y - 0.67*unit},
+			).SetAlignment(gogl.AlignTopRight)
 
 			s.backend = backend.NewGame(&backend.Opts{
 				SaveToDisk: false,
@@ -120,8 +120,8 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			s.arenaInputCh = make(chan func(), 100)
 
 			s.timer = common.NewGameText("",
-				turdgl.Vec{X: config.WinWidth / 2, Y: anchor.Y - 0.67*unit},
-			).SetAlignment(turdgl.AlignTopCentre)
+				gogl.Vec{X: config.WinWidth / 2, Y: anchor.Y - 0.67*unit},
+			).SetAlignment(gogl.AlignTopCentre)
 		}
 
 		// Opponent's grid
@@ -131,14 +131,14 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 
 			s.opponentScore = common.NewScoreBox(
 				90, 90,
-				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 2.58*unit},
+				gogl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 2.58*unit},
 				common.ArenaBackgroundColour,
 			).SetHeading("SCORE")
 
 			s.opponentName = initData[opponentUsernameKey].(string)
 			s.opponentGuide = common.NewGameText(
 				s.opponentName+"'s grid",
-				turdgl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.67*unit},
+				gogl.Vec{X: opponentAnchor.X, Y: opponentAnchor.Y - 0.67*unit},
 			)
 
 			s.opponentBackend = backend.NewGame(&backend.Opts{
@@ -147,15 +147,15 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 		}
 
 		// Debug widgets
-		s.debugGrid = turdgl.NewText(
+		s.debugGrid = gogl.NewText(
 			s.backend.Grid.Debug(),
-			turdgl.Vec{X: 100, Y: 50},
+			gogl.Vec{X: 100, Y: 50},
 			common.FontPathMedium,
 		)
 
-		s.opponentDebugGrid = turdgl.NewText(
+		s.opponentDebugGrid = gogl.NewText(
 			s.opponentBackend.Grid.Debug(),
-			turdgl.Vec{X: 850, Y: 50},
+			gogl.Vec{X: 850, Y: 50},
 			common.FontPathMedium,
 		)
 	}
@@ -164,7 +164,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 	{
 		if server, ok := initData[serverKey]; ok {
 			// Host mode - initialise server
-			s.server = server.(*turdserve.Server)
+			s.server = server.(*servesyouright.Server)
 			s.server.SetCallback(func(_ int, b []byte) {
 				if err := s.handleOpponentData(b); err != nil {
 					log.Println("Failed to handle opponent data as server", err)
@@ -174,7 +174,7 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 			})
 		} else if client, ok := initData[clientKey]; ok {
 			// Guest mode - initialise client
-			s.client = client.(*turdserve.Client)
+			s.client = client.(*servesyouright.Client)
 			s.client.SetCallback(func(b []byte) {
 				if err := s.handleOpponentData(b); err != nil {
 					log.Println("Failed to handle opponent data as client", err)
@@ -194,30 +194,30 @@ func (s *MultiplayerScreen) Enter(initData InitData) {
 	// so the backend game cannot execute multiple moves before the frontend has
 	// finished animating the first one
 	{
-		s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(gogl.KeyUp, gogl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirUp)
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(gogl.KeyDown, gogl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirDown)
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(gogl.KeyLeft, gogl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirLeft)
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(gogl.KeyRight, gogl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirRight)
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyRelease, func() {
+		s.win.RegisterKeybind(gogl.KeyR, gogl.KeyRelease, func() {
 			s.Reset()
 		})
-		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+		s.win.RegisterKeybind(gogl.KeyEscape, gogl.KeyRelease, func() {
 			SetScreen(Title, nil)
 		})
 	}
@@ -241,11 +241,11 @@ func (s *MultiplayerScreen) Exit() {
 		panic(err)
 	}
 
-	s.win.UnregisterKeybind(turdgl.KeyUp, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyDown, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyLeft, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyRight, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(gogl.KeyUp, gogl.KeyPress)
+	s.win.UnregisterKeybind(gogl.KeyDown, gogl.KeyPress)
+	s.win.UnregisterKeybind(gogl.KeyLeft, gogl.KeyPress)
+	s.win.UnregisterKeybind(gogl.KeyRight, gogl.KeyPress)
+	s.win.UnregisterKeybind(gogl.KeyEscape, gogl.KeyRelease)
 
 	if s.server != nil {
 		s.server.Destroy()
@@ -305,7 +305,7 @@ func (s *MultiplayerScreen) updateNormal() {
 	s.timer.SetText(s.backend.Timer.Time.String())
 	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.Score))
 
-	for _, d := range []turdgl.Drawable{
+	for _, d := range []gogl.Drawable{
 		s.logo2048,
 		s.newGame,
 		s.menu,
@@ -351,7 +351,7 @@ func (s *MultiplayerScreen) updateGameEnd() {
 	s.backend.Timer.Pause()
 	s.opponentScore.SetBody(strconv.Itoa(s.opponentBackend.Score))
 
-	for _, d := range []turdgl.Drawable{
+	for _, d := range []gogl.Drawable{
 		s.menu,
 		s.score,
 		s.guide,

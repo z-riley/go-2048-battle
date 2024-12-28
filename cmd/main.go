@@ -8,7 +8,7 @@ import (
 	"github.com/z-riley/go-2048-battle/debug"
 	"github.com/z-riley/go-2048-battle/log"
 	"github.com/z-riley/go-2048-battle/screens"
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	}
 
 	// Create window
-	win, err := turdgl.NewWindow(turdgl.WindowCfg{
+	win, err := gogl.NewWindow(gogl.WindowCfg{
 		Title:  "2048 Battle",
 		Width:  config.WinWidth,
 		Height: config.WinHeight,
@@ -31,7 +31,7 @@ func main() {
 	defer win.Destroy()
 
 	if config.Debug {
-		win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
+		win.RegisterKeybind(gogl.KeyLCtrl, gogl.KeyPress, func() { win.Quit() })
 	}
 
 	// Parse starting screen arg

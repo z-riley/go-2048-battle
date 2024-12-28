@@ -10,8 +10,8 @@ import (
 	"github.com/z-riley/go-2048-battle/common/comms"
 	"github.com/z-riley/go-2048-battle/config"
 	"github.com/z-riley/go-2048-battle/log"
-	"github.com/z-riley/turdgl"
-	"github.com/z-riley/turdserve"
+	"github.com/z-riley/gogl"
+	"github.com/z-riley/servesyouright"
 )
 
 const (
@@ -19,48 +19,48 @@ const (
 )
 
 type MultiplayerHostScreen struct {
-	win *turdgl.Window
+	win *gogl.Window
 
-	title            *turdgl.Text
-	tooltip          *turdgl.TextBox
-	nameHeading      *turdgl.Text
+	title            *gogl.Text
+	tooltip          *gogl.TextBox
+	nameHeading      *gogl.Text
 	nameEntry        *common.EntryBox
 	opponentName     string
-	opponentStatus   *turdgl.Text
-	start            *turdgl.Button
-	back             *turdgl.Button
-	buttonBackground *turdgl.CurvedRect
+	opponentStatus   *gogl.Text
+	start            *gogl.Button
+	back             *gogl.Button
+	buttonBackground *gogl.CurvedRect
 
-	server            *turdserve.Server
+	server            *servesyouright.Server
 	opponentIsInLobby bool
 }
 
 // NewMultiplayerHostScreen constructs an uninitialised multiplayer host screen.
-func NewMultiplayerHostScreen(win *turdgl.Window) *MultiplayerHostScreen {
+func NewMultiplayerHostScreen(win *gogl.Window) *MultiplayerHostScreen {
 	return &MultiplayerHostScreen{win: win}
 }
 
 // Enter initialises the screen.
 func (s *MultiplayerHostScreen) Enter(_ InitData) {
-	s.title = turdgl.NewText("Host Game", turdgl.Vec{X: config.WinWidth / 2, Y: 150}, common.FontPathMedium).
+	s.title = gogl.NewText("Host Game", gogl.Vec{X: config.WinWidth / 2, Y: 150}, common.FontPathMedium).
 		SetColour(common.GreyTextColour).
-		SetAlignment(turdgl.AlignCentre).
+		SetAlignment(gogl.AlignCentre).
 		SetSize(100)
 
 	s.tooltip = common.NewTooltip()
 
-	s.nameHeading = turdgl.NewText(
+	s.nameHeading = gogl.NewText(
 		"Your name:",
-		turdgl.Vec{X: config.WinWidth / 2, Y: 300},
+		gogl.Vec{X: config.WinWidth / 2, Y: 300},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
-		SetAlignment(turdgl.AlignCentre).
+		SetAlignment(gogl.AlignCentre).
 		SetSize(30)
 
 	s.nameEntry = common.NewEntryBox(
 		440, 60,
-		turdgl.Vec{X: (config.WinWidth - 440) / 2, Y: s.nameHeading.Pos().Y + 30},
+		gogl.Vec{X: (config.WinWidth - 440) / 2, Y: s.nameHeading.Pos().Y + 30},
 		namesgenerator.GetRandomName(0),
 	).
 		SetModifiedCB(func() {
@@ -70,13 +70,13 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 			}
 		})
 
-	s.opponentStatus = turdgl.NewText(
+	s.opponentStatus = gogl.NewText(
 		fmt.Sprintf("Waiting for opponent to join \"%s\"", getIPAddr()),
-		turdgl.Vec{X: config.WinWidth / 2, Y: 510},
+		gogl.Vec{X: config.WinWidth / 2, Y: 510},
 		common.FontPathMedium,
 	).
 		SetColour(common.GreyTextColour).
-		SetAlignment(turdgl.AlignCentre).
+		SetAlignment(gogl.AlignCentre).
 		SetSize(24)
 
 	// Adjustable settings for buttons
@@ -88,15 +88,15 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 	// Background for buttons
 	const w = TileSizePx * (2 + 3*TileBoundryFactor)
-	s.buttonBackground = turdgl.NewCurvedRect(
+	s.buttonBackground = gogl.NewCurvedRect(
 		w, TileSizePx*(1+2*TileBoundryFactor), TileCornerRadius,
-		turdgl.Vec{X: (config.WinWidth - w) / 2, Y: 560},
+		gogl.Vec{X: (config.WinWidth - w) / 2, Y: 560},
 	)
-	s.buttonBackground.SetStyle(turdgl.Style{Colour: common.ArenaBackgroundColour})
+	s.buttonBackground.SetStyle(gogl.Style{Colour: common.ArenaBackgroundColour})
 
 	s.start = common.NewMenuButton(
 		TileSizePx, TileSizePx,
-		turdgl.Vec{
+		gogl.Vec{
 			X: s.buttonBackground.Pos.X + TileSizePx*TileBoundryFactor,
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
 		},
@@ -121,7 +121,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 	s.back = common.NewMenuButton(
 		TileSizePx, TileSizePx,
-		turdgl.Vec{
+		gogl.Vec{
 			X: s.buttonBackground.Pos.X + TileSizePx*(1+2*TileBoundryFactor),
 			Y: s.buttonBackground.Pos.Y + TileSizePx*TileBoundryFactor,
 		},
@@ -131,14 +131,14 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 		},
 	).SetLabelText("Back")
 
-	s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+	s.win.RegisterKeybind(gogl.KeyEscape, gogl.KeyRelease, func() {
 		s.server.Destroy()
 		SetScreen(MultiplayerMenu, nil)
 	})
 
 	// Set up server
 	const maxClients = 1
-	s.server = turdserve.NewServer(maxClients).
+	s.server = servesyouright.NewServer(maxClients).
 		SetCallback(func(_ int, b []byte) {
 			if err := s.handleClientData(b); err != nil {
 				log.Println("Host screen failed to handle data from client:", err)
@@ -162,7 +162,7 @@ func (s *MultiplayerHostScreen) Enter(_ InitData) {
 
 // Exit deinitialises the screen.
 func (s *MultiplayerHostScreen) Exit() {
-	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(gogl.KeyEscape, gogl.KeyRelease)
 	s.opponentIsInLobby = false
 }
 
@@ -173,14 +173,14 @@ func (s *MultiplayerHostScreen) Update() {
 	s.win.Draw(s.title)
 	s.win.Draw(s.buttonBackground)
 
-	for _, l := range []*turdgl.Text{
+	for _, l := range []*gogl.Text{
 		s.opponentStatus,
 		s.nameHeading,
 	} {
 		s.win.Draw(l)
 	}
 
-	for _, b := range []*turdgl.Button{
+	for _, b := range []*gogl.Button{
 		s.start,
 		s.back,
 	} {
@@ -193,7 +193,7 @@ func (s *MultiplayerHostScreen) Update() {
 
 	mouseLoc := s.win.MouseLocation()
 	if s.nameEntry.TextBox.Shape.IsWithin(mouseLoc) && !s.nameEntry.TextBox.IsEditing() {
-		s.tooltip.SetPos(turdgl.Vec{X: mouseLoc.X, Y: mouseLoc.Y - s.tooltip.Shape.Height()})
+		s.tooltip.SetPos(gogl.Vec{X: mouseLoc.X, Y: mouseLoc.Y - s.tooltip.Shape.Height()})
 		s.win.Draw(s.tooltip)
 	}
 }

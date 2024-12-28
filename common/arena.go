@@ -11,7 +11,7 @@ import (
 	"github.com/z-riley/go-2048-battle/common/backend"
 	"github.com/z-riley/go-2048-battle/common/backend/grid"
 	"github.com/z-riley/go-2048-battle/log"
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 	"golang.org/x/exp/constraints"
 )
 
@@ -32,17 +32,17 @@ const (
 
 // tile is a visual representation of a game tile.
 type tile struct {
-	tb      *turdgl.TextBox
+	tb      *gogl.TextBox
 	pos     coord // index of tile on the grid
 	destroy bool  // flag for self-destruction
 }
 
 // newTile constructs a new tile with the correct style.
-func newTile(sizePx float64, pos turdgl.Vec, val int, posIdx coord) *tile {
+func newTile(sizePx float64, pos gogl.Vec, val int, posIdx coord) *tile {
 	return &tile{
-		tb: turdgl.NewTextBox(turdgl.NewCurvedRect(
+		tb: gogl.NewTextBox(gogl.NewCurvedRect(
 			sizePx, sizePx, TileCornerRadius, pos,
-		).SetStyle(turdgl.Style{Colour: tileColour(val)}), strconv.Itoa(val), tileFont).
+		).SetStyle(gogl.Style{Colour: tileColour(val)}), strconv.Itoa(val), tileFont).
 			SetTextSize(tileFontSize(val)).
 			SetTextColour(tileTextColour(val)),
 		pos: posIdx,
@@ -57,41 +57,41 @@ type animationState struct {
 
 // Arena displays the grid of a game.
 type Arena struct {
-	pos         turdgl.Vec                             // pixel position of the arena anchor
-	tiles       []*tile                                // every non-zero tile
-	bgTiles     [numTiles][numTiles]*turdgl.CurvedRect // every grid space
-	background  *turdgl.CurvedRect                     // the background of the arena
-	latestState backend.Game                           // used to detect changes in game state (for animations etc...)
-	animationCh chan animationState                    // for sending animations to animator goroutine
+	pos         gogl.Vec                             // pixel position of the arena anchor
+	tiles       []*tile                              // every non-zero tile
+	bgTiles     [numTiles][numTiles]*gogl.CurvedRect // every grid space
+	background  *gogl.CurvedRect                     // the background of the arena
+	latestState backend.Game                         // used to detect changes in game state (for animations etc...)
+	animationCh chan animationState                  // for sending animations to animator goroutine
 }
 
 // NewArena constructs a new arena widget. pos is the top-left pixel of the
 // top-left tile (excluding the arena background).
-func NewArena(pos turdgl.Vec) *Arena {
+func NewArena(pos gogl.Vec) *Arena {
 	// Generate background tiles
-	bgTiles := [numTiles][numTiles]*turdgl.CurvedRect{}
+	bgTiles := [numTiles][numTiles]*gogl.CurvedRect{}
 	for i := range numTiles {
 		for j := range numTiles {
-			bgTiles[j][i] = turdgl.NewCurvedRect(
+			bgTiles[j][i] = gogl.NewCurvedRect(
 				TileSizePx, TileSizePx, TileCornerRadius,
-				turdgl.Vec{
+				gogl.Vec{
 					X: pos.X + float64(j)*tileSpacingPx,
 					Y: pos.Y + float64(i)*tileSpacingPx,
 				},
 			)
-			bgTiles[j][i].SetStyle(turdgl.Style{Colour: TileBackgroundColour})
+			bgTiles[j][i].SetStyle(gogl.Style{Colour: TileBackgroundColour})
 		}
 	}
 
-	arenaBG := turdgl.NewCurvedRect(
+	arenaBG := gogl.NewCurvedRect(
 		ArenaSizePx, ArenaSizePx,
 		TileCornerRadius,
-		turdgl.Vec{
+		gogl.Vec{
 			X: pos.X - TileSizePx*TileBoundryFactor,
 			Y: pos.Y - TileSizePx*TileBoundryFactor,
 		},
 	)
-	arenaBG.SetStyle(turdgl.Style{Colour: ArenaBackgroundColour})
+	arenaBG.SetStyle(gogl.Style{Colour: ArenaBackgroundColour})
 
 	a := Arena{
 		pos:         pos,
@@ -112,7 +112,7 @@ func NewArena(pos turdgl.Vec) *Arena {
 func (a *Arena) Destroy() {}
 
 // Draw draws the arena.
-func (a *Arena) Draw(buf *turdgl.FrameBuffer) {
+func (a *Arena) Draw(buf *gogl.FrameBuffer) {
 	a.background.Draw(buf)
 
 	for i := range numTiles {
@@ -127,7 +127,7 @@ func (a *Arena) Draw(buf *turdgl.FrameBuffer) {
 }
 
 // Pos returns the top left pixel coordinate of the whole arena.
-func (a *Arena) Pos() turdgl.Vec {
+func (a *Arena) Pos() gogl.Vec {
 	return a.background.GetPos()
 }
 
@@ -151,7 +151,7 @@ func (a *Arena) Load(g backend.Game) {
 				newTiles = append(newTiles,
 					newTile(
 						TileSizePx,
-						turdgl.Vec{
+						gogl.Vec{
 							X: a.pos.X + float64(j)*tileSpacingPx,
 							Y: a.pos.Y + float64(i)*tileSpacingPx,
 						},
@@ -172,21 +172,21 @@ func (a *Arena) Reset() {
 
 // SetNormal makes the arena show its losing state.
 func (a *Arena) SetNormal() {
-	a.background.SetStyle(turdgl.Style{Colour: ArenaBackgroundColour})
+	a.background.SetStyle(gogl.Style{Colour: ArenaBackgroundColour})
 }
 
 // SetLose makes the arena show its losing state.
 func (a *Arena) SetLose() {
-	a.background.SetStyle(turdgl.Style{
-		Colour: turdgl.DarkRed,
+	a.background.SetStyle(gogl.Style{
+		Colour: gogl.DarkRed,
 		Bloom:  15,
 	})
 }
 
 // SetWin makes the arena show its losing state.
 func (a *Arena) SetWin() {
-	a.background.SetStyle(turdgl.Style{
-		Colour: turdgl.LimeGreen,
+	a.background.SetStyle(gogl.Style{
+		Colour: gogl.LimeGreen,
 		Bloom:  15,
 	})
 }
@@ -288,7 +288,7 @@ func (a *Arena) animateMove(animation moveAnimation, errCh chan error, wg *sync.
 		errCh <- fmt.Errorf("animateMove could not find origin tile at %v", origin)
 		return
 	}
-	moveVec := turdgl.Sub(a.tilePos(dest), a.tilePos(origin))
+	moveVec := gogl.Sub(a.tilePos(dest), a.tilePos(origin))
 	const steps = 20
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
 	for range steps {
@@ -314,7 +314,7 @@ func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh cha
 		return
 	}
 
-	moveVec := turdgl.Sub(a.tilePos(dest), a.tilePos(origin))
+	moveVec := gogl.Sub(a.tilePos(dest), a.tilePos(origin))
 	const steps = 20
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
 	for range steps {
@@ -348,7 +348,7 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan error, wg *syn
 	const originalSize = TileSizePx / 6
 	newTile := newTile(
 		originalSize,
-		turdgl.Vec{
+		gogl.Vec{
 			X: a.pos.X + float64(dest.x)*tileSpacingPx + (TileSizePx-originalSize)/2,
 			Y: a.pos.Y + float64(dest.y)*tileSpacingPx + (TileSizePx-originalSize)/2,
 		},
@@ -363,10 +363,10 @@ func (a *Arena) animateSpawn(animation spawnAnimation, errCh chan error, wg *syn
 		steps    = 10
 		stepSize = growPx / steps
 	)
-	shape := newTile.tb.Shape.(*turdgl.CurvedRect)
+	shape := newTile.tb.Shape.(*gogl.CurvedRect)
 	originalPos := shape.GetPos() // position of shape before animation starts
 	for i := float64(0); i <= growPx; i += stepSize {
-		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
+		shape.SetPos(gogl.Sub(originalPos, gogl.Vec{X: i, Y: i}))
 		shape.SetHeight(originalSize + i*2)
 		shape.SetWidth(originalSize + i*2)
 		time.Sleep(10 * time.Millisecond)
@@ -388,7 +388,7 @@ func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh c
 	// Make a new tile
 	newTile := newTile(
 		TileSizePx,
-		turdgl.Vec{
+		gogl.Vec{
 			X: a.pos.X + float64(dest.x)*tileSpacingPx,
 			Y: a.pos.Y + float64(dest.y)*tileSpacingPx,
 		},
@@ -399,17 +399,17 @@ func (a *Arena) animateNewFromCombine(animation newFromCombineAnimation, errCh c
 
 	// Animate tile growing and shrinking back to normal size
 	const expandPx = 5
-	shape := newTile.tb.Shape.(*turdgl.CurvedRect)
+	shape := newTile.tb.Shape.(*gogl.CurvedRect)
 	originalPos := shape.GetPos() // position of shape before animation starts
 	for i := float64(1); i <= expandPx; i++ {
-		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
+		shape.SetPos(gogl.Sub(originalPos, gogl.Vec{X: i, Y: i}))
 		shape.SetHeight(TileSizePx + i*2)
 		shape.SetWidth(TileSizePx + i*2)
 		time.Sleep(10 * time.Millisecond)
 	}
 	time.Sleep(30 * time.Millisecond)
 	for i := float64(expandPx) - 1; i > 0; i-- {
-		shape.SetPos(turdgl.Sub(originalPos, turdgl.Vec{X: i, Y: i}))
+		shape.SetPos(gogl.Sub(originalPos, gogl.Vec{X: i, Y: i}))
 		shape.SetHeight(TileSizePx + i*2)
 		shape.SetWidth(TileSizePx + i*2)
 		time.Sleep(10 * time.Millisecond)
@@ -428,8 +428,8 @@ func (a *Arena) tileAtIdx(pos coord) (*tile, error) {
 }
 
 // tilePos generates the pixel position of a tile on the grid based on its x and y index.
-func (a *Arena) tilePos(pos coord) turdgl.Vec {
-	return turdgl.Vec{
+func (a *Arena) tilePos(pos coord) gogl.Vec {
+	return gogl.Vec{
 		X: a.pos.X + float64(pos.x)*tileSpacingPx,
 		Y: a.pos.Y + float64(pos.y)*tileSpacingPx,
 	}

@@ -9,33 +9,33 @@ import (
 	"github.com/z-riley/go-2048-battle/common/backend"
 	"github.com/z-riley/go-2048-battle/common/backend/grid"
 	"github.com/z-riley/go-2048-battle/config"
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 type SingleplayerScreen struct {
-	win *turdgl.Window
+	win *gogl.Window
 
 	backend      *backend.Game
 	arena        *common.Arena
 	arenaInputCh chan func()
 
-	heading    *turdgl.Text
-	loseDialog *turdgl.Text
-	logo2048   *turdgl.TextBox
+	heading    *gogl.Text
+	loseDialog *gogl.Text
+	logo2048   *gogl.TextBox
 	score      *common.ScoreBox
 	highScore  *common.ScoreBox
-	menu       *turdgl.Button
-	newGame    *turdgl.Button
-	guide      *turdgl.Text
-	timer      *turdgl.Text
+	menu       *gogl.Button
+	newGame    *gogl.Button
+	guide      *gogl.Text
+	timer      *gogl.Text
 
-	debugGrid  *turdgl.Text
-	debugTime  *turdgl.Text
-	debugScore *turdgl.Text
+	debugGrid  *gogl.Text
+	debugTime  *gogl.Text
+	debugScore *gogl.Text
 }
 
 // NewSingleplayerScreen constructs an uninitialised new singleplayer menu screen.
-func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
+func NewSingleplayerScreen(win *gogl.Window) *SingleplayerScreen {
 	return &SingleplayerScreen{win: win}
 }
 
@@ -43,7 +43,7 @@ func NewSingleplayerScreen(win *turdgl.Window) *SingleplayerScreen {
 func (s *SingleplayerScreen) Enter(_ InitData) {
 	// Arena and supporting data structures
 	{
-		s.arena = common.NewArena(turdgl.Vec{X: 440, Y: 300})
+		s.arena = common.NewArena(gogl.Vec{X: 440, Y: 300})
 		s.backend = backend.NewGame(nil)
 		s.arenaInputCh = make(chan func(), 100)
 	}
@@ -56,40 +56,40 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 		// Everything is positioned relative to the arena grid
 		anchor := s.arena.Pos()
 
-		s.heading = turdgl.NewText(
+		s.heading = gogl.NewText(
 			"", // to be set and drawn when player loses
-			turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 2.8*unit},
+			gogl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 2.8*unit},
 			common.FontPathBold,
-		).SetSize(40).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
+		).SetSize(40).SetColour(common.GreyTextColour).SetAlignment(gogl.AlignTopCentre)
 
-		s.loseDialog = turdgl.NewText(
+		s.loseDialog = gogl.NewText(
 			"", // to be set and drawn when player loses
-			turdgl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 1.9*unit},
+			gogl.Vec{X: anchor.X + s.arena.Width()/2, Y: anchor.Y - 1.9*unit},
 			common.FontPathBold,
-		).SetSize(20).SetColour(common.GreyTextColour).SetAlignment(turdgl.AlignTopCentre)
+		).SetSize(20).SetColour(common.GreyTextColour).SetAlignment(gogl.AlignTopCentre)
 
 		s.logo2048 = common.NewLogoBox(
 			1.36*unit,
-			turdgl.Vec{X: anchor.X, Y: anchor.Y - 2.58*unit},
+			gogl.Vec{X: anchor.X, Y: anchor.Y - 2.58*unit},
 		)
 
 		const wScore = 90
 		s.score = common.NewScoreBox(
 			wScore, wScore,
-			turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 2.58*unit},
+			gogl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 2.58*unit},
 			common.ArenaBackgroundColour,
 		).SetHeading("SCORE")
 
 		s.highScore = common.NewScoreBox(
 			wScore, wScore,
-			turdgl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
+			gogl.Vec{X: anchor.X + s.arena.Width() - wScore, Y: anchor.Y - 2.58*unit},
 			common.ArenaBackgroundColour,
 		).SetHeading("BEST")
 
 		const buttonWidth = unit * 1.27
 		s.menu = common.NewGameButton(
 			buttonWidth, 0.4*unit,
-			turdgl.Vec{X: anchor.X + s.arena.Width() - buttonWidth, Y: anchor.Y - 1.21*unit},
+			gogl.Vec{X: anchor.X + s.arena.Width() - buttonWidth, Y: anchor.Y - 1.21*unit},
 			func() {
 				SetScreen(Title, nil)
 			},
@@ -97,7 +97,7 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 
 		s.newGame = common.NewGameButton(
 			buttonWidth, 0.4*unit,
-			turdgl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
+			gogl.Vec{X: anchor.X + s.arena.Width() - 2.74*unit, Y: anchor.Y - 1.21*unit},
 			func() {
 				s.arenaInputCh <- func() {
 					s.backend.Reset()
@@ -106,60 +106,60 @@ func (s *SingleplayerScreen) Enter(_ InitData) {
 			},
 		).SetLabelText("NEW")
 
-		s.guide = turdgl.NewText(
+		s.guide = gogl.NewText(
 			"Join the numbers and get to the 2048 tile!",
-			turdgl.Vec{X: anchor.X, Y: anchor.Y - 0.60*unit},
+			gogl.Vec{X: anchor.X, Y: anchor.Y - 0.60*unit},
 			common.FontPathBold,
 		).SetSize(16).SetColour(common.GreyTextColour)
 
 		s.timer = common.NewGameText("",
-			turdgl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.1},
-		).SetSize(16).SetAlignment(turdgl.AlignBottomRight)
+			gogl.Vec{X: anchor.X + s.arena.Width(), Y: anchor.Y + s.arena.Height()*1.1},
+		).SetSize(16).SetAlignment(gogl.AlignBottomRight)
 	}
 
 	// Debug UI
-	s.debugGrid = turdgl.NewText("grid", turdgl.Vec{X: 930, Y: 600}, common.FontPathMedium).
+	s.debugGrid = gogl.NewText("grid", gogl.Vec{X: 930, Y: 600}, common.FontPathMedium).
 		SetText(s.backend.Grid.Debug())
-	s.debugTime = turdgl.NewText("time", turdgl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
+	s.debugTime = gogl.NewText("time", gogl.Vec{X: 1100, Y: 550}, common.FontPathMedium).
 		SetText(s.backend.Timer.Time.String())
-	s.debugScore = turdgl.NewText("score", turdgl.Vec{X: 950, Y: 550}, common.FontPathMedium).
+	s.debugScore = gogl.NewText("score", gogl.Vec{X: 950, Y: 550}, common.FontPathMedium).
 		SetText(strconv.Itoa(s.backend.Score))
 
 	// Set keybinds. User inputs are sent to the backend via a buffered channel
 	// so the backend game cannot execute multiple moves before the frontend has
 	// finished animating the first one
 	{
-		s.win.RegisterKeybind(turdgl.KeyUp, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(gogl.KeyUp, gogl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirUp)
 				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyDown, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(gogl.KeyDown, gogl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirDown)
 				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyLeft, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(gogl.KeyLeft, gogl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirLeft)
 				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyRight, turdgl.KeyPress, func() {
+		s.win.RegisterKeybind(gogl.KeyRight, gogl.KeyPress, func() {
 			s.arenaInputCh <- func() {
 				s.backend.ExecuteMove(grid.DirRight)
 				s.debugGrid.SetText(s.backend.Grid.Debug())
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyR, turdgl.KeyRelease, func() {
+		s.win.RegisterKeybind(gogl.KeyR, gogl.KeyRelease, func() {
 			s.arenaInputCh <- func() {
 				s.backend.Reset()
 				s.arena.Reset()
 			}
 		})
-		s.win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease, func() {
+		s.win.RegisterKeybind(gogl.KeyEscape, gogl.KeyRelease, func() {
 			SetScreen(Title, nil)
 		})
 	}
@@ -173,11 +173,11 @@ func (s *SingleplayerScreen) Exit() {
 		panic(err)
 	}
 
-	s.win.UnregisterKeybind(turdgl.KeyUp, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyDown, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyLeft, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyRight, turdgl.KeyPress)
-	s.win.UnregisterKeybind(turdgl.KeyEscape, turdgl.KeyRelease)
+	s.win.UnregisterKeybind(gogl.KeyUp, gogl.KeyPress)
+	s.win.UnregisterKeybind(gogl.KeyDown, gogl.KeyPress)
+	s.win.UnregisterKeybind(gogl.KeyLeft, gogl.KeyPress)
+	s.win.UnregisterKeybind(gogl.KeyRight, gogl.KeyPress)
+	s.win.UnregisterKeybind(gogl.KeyEscape, gogl.KeyRelease)
 
 	s.arena.Destroy()
 }
@@ -234,7 +234,7 @@ func (s *SingleplayerScreen) updateNormal(game backend.Game) {
 	s.arena.SetNormal()
 	s.arena.Update(game)
 
-	for _, d := range []turdgl.Drawable{
+	for _, d := range []gogl.Drawable{
 		s.logo2048,
 		s.score,
 		s.highScore,
@@ -270,7 +270,7 @@ func (s *SingleplayerScreen) updateLose(game backend.Game) {
 	s.newGame.Update(s.win)
 	s.arena.Update(game)
 
-	for _, d := range []turdgl.Drawable{
+	for _, d := range []gogl.Drawable{
 		s.heading,
 		s.loseDialog,
 		s.menu,
