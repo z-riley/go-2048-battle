@@ -154,7 +154,7 @@ func (s *MultiplayerJoinScreen) Enter(_ InitData) {
 		SetScreen(MultiplayerMenu, nil)
 	})
 
-	s.done = make(chan struct{})
+	s.done = make(chan struct{}, 1)
 }
 
 // Exit deinitialises the screen.
