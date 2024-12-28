@@ -4,7 +4,7 @@ package config
 const (
 	// Version is used to check compatibility with other go-2048-battle clients when
 	// in versus mode.
-	Version = "0.1.0"
+	Version = "1.0"
 
 	// Debug enables debugging and diagnostics features which are useful for development.
 	Debug = false
