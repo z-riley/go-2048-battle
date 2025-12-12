@@ -1,6 +1,6 @@
 module github.com/z-riley/go-2048-battle
 
-go 1.23.0
+go 1.25
 
 require (
 	github.com/brunoga/deep v1.2.4

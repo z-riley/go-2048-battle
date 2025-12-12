@@ -10,8 +10,6 @@ github.com/moby/moby v27.3.1+incompatible h1:KQbXBjo7PavKpzIl7UkHT31y9lw/e71Uvrq
 github.com/moby/moby v27.3.1+incompatible/go.mod h1:fDXVQ6+S340veQPv35CzDahGBmHsiclFwfEygB/TWMc=
 github.com/netgusto/poly2tri-go v0.0.0-20170716161910-d102ad91854f h1:FZS+KQHU5M3Yz8vfb63b1/mI1/J7auutcFDSWx6l8Vg=
 github.com/netgusto/poly2tri-go v0.0.0-20170716161910-d102ad91854f/go.mod h1:8LfVyyP2+2/DB4O1uPRecaaumn7HaYB9zA1LLkcdq9E=
-github.com/z-riley/gogl v0.1.1-0.20251212171849-5b43968fe328 h1:4NBp2zuWlxUWt3ltnjilnFX2+dxhW+uEVre0gg6U8iA=
-github.com/z-riley/gogl v0.1.1-0.20251212171849-5b43968fe328/go.mod h1:bPwojf7bRNYrUDv5cihsYYJcJkSMboawibbSnXOeCNY=
 github.com/z-riley/gogl v0.1.1-0.20251212173100-1eaf28c969ce h1:RJAmURQCPBrXaM1rbpx/v9MO9+HYuPWwJeu1EUAnRJg=
 github.com/z-riley/gogl v0.1.1-0.20251212173100-1eaf28c969ce/go.mod h1:bPwojf7bRNYrUDv5cihsYYJcJkSMboawibbSnXOeCNY=
 github.com/z-riley/servesyouright v1.0.0 h1:HMXNhKVSChWiLTXm2XTpVByJwtqtk6T3GZGtbD//8Xw=

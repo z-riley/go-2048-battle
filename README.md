@@ -6,17 +6,7 @@
 
 ## Dependencies
 
-### SDL2 - DirectMedia Layer
-
-Advanced Packaging Tool (Ubuntu):
-```sh
-sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-image-dev
-```
-
-Homebrew (MacOS):
-```sh
-brew install sdl2_image
-```
+[GoGL](https://github.com/z-riley/gogl) - see installation steps
 
 ## How to run
 
