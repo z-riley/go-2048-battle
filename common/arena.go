@@ -289,7 +289,7 @@ func (a *Arena) animateMove(animation moveAnimation, errCh chan error, wg *sync.
 		return
 	}
 	moveVec := gogl.Sub(a.tilePos(dest), a.tilePos(origin))
-	const steps = 20
+	const steps = 10
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
 	for range steps {
 		tile.tb.Move(moveStep)
@@ -315,7 +315,7 @@ func (a *Arena) animateMoveToCombine(animation moveToCombineAnimation, errCh cha
 	}
 
 	moveVec := gogl.Sub(a.tilePos(dest), a.tilePos(origin))
-	const steps = 20
+	const steps = 10
 	moveStep := moveVec.SetMag(moveVec.Mag() / steps)
 	for range steps {
 		originTile.tb.Move(moveStep)
