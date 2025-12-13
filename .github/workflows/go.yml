@@ -19,15 +19,27 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y git cmake ninja-build build-essential \
-            libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev \
-            libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev libxinerama-dev \
-            libwayland-dev wayland-protocols libdrm-dev libgbm-dev libxss-dev libxtst-dev
+            libasound2-dev libpulse-dev libaudio-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
+            libxi-dev libxinerama-dev libxss-dev libxtst-dev \
+            libwayland-dev wayland-protocols libdrm-dev libgbm-dev \
+            libpng-dev libjpeg-dev libtiff-dev libwebp-dev
 
           git clone https://github.com/libsdl-org/SDL.git
           cd SDL
           cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DSDL_STATIC=OFF
           cmake --build build
           sudo cmake --install build
+          cd ..
+
+          git clone https://github.com/libsdl-org/SDL_image.git
+          cd SDL_image
+          cmake -S . -B build -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSDLIMAGE_SAMPLES=OFF
+          cmake --build build
+          sudo cmake --install build
+          cd ..
 
           sudo ldconfig
 
